@@ -48,3 +48,12 @@ $gray2: #e7e9eb;
     }
   }
 }
+
+.ant-tooltip-inner {
+  background-color: white !important; /* Color de fondo */
+  color: black !important; /* Color del texto */
+}
+
+.ant-tooltip-arrow {
+  border-color: white !important; /* Color de la flecha */
+}

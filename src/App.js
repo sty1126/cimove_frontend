@@ -9,10 +9,10 @@ import Prueba from "./pages/Prueba";
 function App() {
   return (
     <Router>
-      <Navbar />
       <div className="flex">
         <Sidebar />
         <div className="content">
+          <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/inventario" element={<Inventario />} />
