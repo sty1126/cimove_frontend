@@ -2,6 +2,7 @@
 
 * {
   margin: 0;
+  font-family: "Nunito", serif;
   padding: 0;
 }
 
@@ -12,6 +13,7 @@ body {
 
 $light: #ffffff;
 $gray: #c4ccde;
+$gray2: #e7e9eb;
 
 .flex {
   display: flex;
@@ -39,6 +41,9 @@ $gray: #c4ccde;
       margin-bottom: 1rem;
       a {
         text-decoration: none;
+        &.active {
+          background-color: $gray2;
+        }
       }
     }
   }
