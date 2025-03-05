@@ -63,6 +63,16 @@ const Sidebar = () => {
               </NavLink>
             ),
           },
+
+          {
+            key: "4",
+            icon: <FaIcons.FaProductHunt />,
+            label: (
+              <NavLink to="/productos-vendidos" style={{ color: "black" }}>
+                Productos
+              </NavLink>
+            ),
+          },
         ]}
       />
     </Sider>
