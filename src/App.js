@@ -5,6 +5,7 @@ import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import Inventario from "./pages/Inventario";
 import Prueba from "./pages/Prueba";
+import ConsultaProducto from "./pages/ConsultaProducto";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/inventario" element={<Inventario />} />
             <Route path="/prueba" element={<Prueba />} />
+            <Route path="/productos-vendidos" element={<ConsultaProducto />} />
           </Routes>
         </div>
       </div>
