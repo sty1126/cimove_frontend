@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Input, Select } from "antd";
+import axios from "axios";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -10,130 +11,113 @@ const columns = [
     dataIndex: "id_producto",
     sorter: (a, b) => a.id_producto - b.id_producto,
   },
-  {
-    title: "Categoría",
-    dataIndex: "categoria",
-  },
+  { title: "Categoría", dataIndex: "nombre_categoria" },
   {
     title: "Nombre",
-    dataIndex: "nombre",
-    sorter: (a, b) => a.nombre.localeCompare(b.nombre),
+    dataIndex: "nombre_producto",
+    sorter: (a, b) => a.nombre_producto.localeCompare(b.nombre_producto),
   },
-  {
-    title: "Descripción",
-    dataIndex: "descripcion",
-  },
+  { title: "Descripción", dataIndex: "descripcion_producto" },
   {
     title: "Precio",
-    dataIndex: "precio",
-    sorter: (a, b) => a.precio - b.precio,
+    dataIndex: "precioventaact_producto",
+    sorter: (a, b) => a.precioventaact_producto - b.precioventaact_producto,
   },
   {
     title: "Costo Venta",
-    dataIndex: "costo_venta",
-    sorter: (a, b) => a.costo_venta - b.costo_venta,
+    dataIndex: "costoventa_producto",
+    sorter: (a, b) => a.costoventa_producto - b.costoventa_producto,
   },
   {
     title: "IVA",
-    dataIndex: "iva",
-    sorter: (a, b) => a.iva - b.iva,
-  },
-  {
-    title: "Existencia",
-    dataIndex: "existencia",
-    sorter: (a, b) => a.existencia - b.existencia,
-  },
-];
-
-const data = [
-  {
-    key: "1",
-    id_producto: 1,
-    categoria: "1",
-    nombre: "Producto Prueba A",
-    descripcion: "Descripción A",
-    precio: 10000,
-    costo_venta: 8000,
-    iva: 0.19,
-    existencia: 10,
-  },
-  {
-    key: "2",
-    id_producto: 2,
-    categoria: "1",
-    nombre: "Producto Prueba B",
-    descripcion: "Descripción B",
-    precio: 11000,
-    costo_venta: 8500,
-    iva: 0.19,
-    existencia: 15,
-  },
-  {
-    key: "3",
-    id_producto: 3,
-    categoria: "2",
-    nombre: "Producto Prueba C",
-    descripcion: "Descripción C",
-    precio: 12000,
-    costo_venta: 9000,
-    iva: 0.19,
-    existencia: 20,
-  },
-  {
-    key: "4",
-    id_producto: 4,
-    categoria: "2",
-    nombre: "Producto Prueba D",
-    descripcion: "Descripción D",
-    precio: 13000,
-    costo_venta: 9500,
-    iva: 0.19,
-    existencia: 25,
-  },
-  {
-    key: "5",
-    id_producto: 5,
-    categoria: "3",
-    nombre: "Producto Prueba E",
-    descripcion: "Descripción E",
-    precio: 14000,
-    costo_venta: 10000,
-    iva: 0.19,
-    existencia: 30,
+    dataIndex: "valoriva_producto",
+    sorter: (a, b) => a.valoriva_producto - b.valoriva_producto,
   },
 ];
 
 const Inventario = () => {
-  const [filteredData, setFilteredData] = useState(data);
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [categories, setCategories] = useState([]);
 
+  useEffect(() => {
+    // Obtener categorías y productos
+    const fetchData = async () => {
+      try {
+        const categoriesRes = await axios.get(
+          "http://localhost:4000/api/categorias"
+        );
+        const productsRes = await axios.get(
+          "http://localhost:4000/api/productos"
+        );
+
+        setCategories(categoriesRes.data);
+
+        const formattedData = productsRes.data.map((item) => {
+          const categoria = categoriesRes.data.find(
+            (cat) => cat.id_categoria === item.id_categoria_producto
+          );
+
+          return {
+            key: item.id_producto,
+            id_producto: item.id_producto,
+            nombre_categoria: categoria
+              ? categoria.descripcion_categoria.trim()
+              : "Sin categoría",
+            nombre_producto: item.nombre_producto,
+            descripcion_producto: item.descripcion_producto,
+            precioventaact_producto: item.precioventaact_producto,
+            costoventa_producto: item.costoventa_producto,
+            valoriva_producto: item.valoriva_producto,
+          };
+        });
+
+        setData(formattedData);
+        setFilteredData(formattedData);
+      } catch (error) {
+        console.error("Error al obtener los datos", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Función de filtrado
+  const filterData = (search, category) => {
+    let filtered = data;
+
+    if (category) {
+      filtered = filtered.filter(
+        (item) => item.nombre_categoria.toLowerCase() === category.toLowerCase()
+      );
+    }
+
+    if (search) {
+      filtered = filtered.filter((item) =>
+        item.nombre_producto.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    setFilteredData(filtered);
+  };
+
+  // Manejo de búsqueda por nombre
   const handleSearch = (value) => {
     setSearchText(value);
     filterData(value, selectedCategory);
   };
 
+  // Manejo de cambio en la categoría
   const handleCategoryChange = (value) => {
-    setSelectedCategory(value);
-    filterData(searchText, value);
-  };
-
-  const filterData = (search, category) => {
-    let filtered = data;
-    if (category) {
-      filtered = filtered.filter((item) => item.categoria === category);
-    }
-    if (search) {
-      filtered = filtered.filter((item) =>
-        item.nombre.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-    setFilteredData(filtered);
+    setSelectedCategory(value || ""); // Evita undefined
+    filterData(searchText, value || "");
   };
 
   return (
     <div>
-      <h1>Inventario</h1>
+      <br></br>
       <div style={{ marginBottom: 16, display: "flex", gap: "10px" }}>
         <Search
           placeholder="Buscar por nombre"
@@ -147,9 +131,11 @@ const Inventario = () => {
           style={{ width: 200 }}
           allowClear
         >
-          <Option value="1">Categoría 1</Option>
-          <Option value="2">Categoría 2</Option>
-          <Option value="3">Categoría 3</Option>
+          {categories.map((cat) => (
+            <Option key={cat.id_categoria} value={cat.descripcion_categoria}>
+              {cat.descripcion_categoria}
+            </Option>
+          ))}
         </Select>
       </div>
       <Table

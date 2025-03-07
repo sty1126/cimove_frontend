@@ -57,3 +57,9 @@ $gray2: #e7e9eb;
 .ant-tooltip-arrow {
   border-color: white !important; /* Color de la flecha */
 }
+
+.ant-menu-item-selected {
+  background-color: #4d7952d3 !important; // Azul más intenso
+  color: white !important;
+  font-weight: bold;
+}
