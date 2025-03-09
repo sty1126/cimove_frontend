@@ -19,6 +19,8 @@ function App() {
             <Route path="/inventario" element={<Inventario />} />
             <Route path="/prueba" element={<Prueba />} />
             <Route path="/productos-vendidos" element={<ConsultaProducto />} />
+            <Route path="/registro-producto" element={<RegistroProducto />} />
+            <Route path="/lista-productos" element={<ListaProducto />} />
           </Routes>
         </div>
       </div>
