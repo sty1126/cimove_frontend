@@ -73,6 +73,26 @@ const Sidebar = () => {
               </NavLink>
             ),
           },
+
+           {
+            key: "5",
+            icon: <FaIcons.FaPlusSquare />,
+            label: (
+              <NavLink to="/registro-producto" style={{ color: "black" }}>
+                Registrar Producto
+              </NavLink>
+            ),
+          },
+
+          {
+            key: "6",
+            icon: <FaIcons.FaListAlt />,
+            label: (
+              <NavLink to="/lista-productos" style={{ color: "black" }}>
+                Lista de Productos
+              </NavLink>
+            ),
+          },
         ]}
       />
     </Sider>
