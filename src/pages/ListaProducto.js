@@ -5,6 +5,7 @@ import axios from "axios";
 const { Search } = Input;
 const { Option } = Select;
 
+// Definir las columnas de la tabla
 const columns = [
   {
     title: "ID Producto",
@@ -30,8 +31,8 @@ const columns = [
   },
   {
     title: "Existencia",
-    dataIndex: "existencia_producto",
-    sorter: (a, b) => a.existencia_producto - b.existencia_producto,
+    dataIndex: "existencia_inventario",
+    sorter: (a, b) => a.existencia_inventario - b.existencia_inventario,
   },
 ];
 
@@ -50,29 +51,25 @@ const Inventario = () => {
           "http://localhost:4000/api/categorias"
         );
         const productsRes = await axios.get(
-          "http://localhost:4000/api/productos/detalles"
+          "http://localhost:4000/api/productos"
         );
 
         setCategories(categoriesRes.data);
 
-        const formattedData = productsRes.data.map((item) => {
-          const categoria = categoriesRes.data.find(
-            (cat) => cat.id_categoria === item.id_categoria_producto
-          );
-
-          return {
-            key: item.id_producto,
-            id_producto: item.id_producto,
-            nombre_categoria: categoria
-              ? categoria.descripcion_categoria.trim()
-              : "Sin categoría",
-            nombre_producto: item.nombre_producto,
-            descripcion_producto: item.descripcion_producto,
-            precioventaact_producto: item.precioventaact_producto,
-            costoventa_producto: item.costoventa_producto,
-            existencia_producto: item.existencia_producto, // Se agrega la existencia
-          };
-        });
+        // Formatear datos para la tabla
+        const formattedData = productsRes.data.map((item) => ({
+          key: item.id_producto,
+          id_producto: item.id_producto,
+          nombre_categoria:
+            categoriesRes.data
+              .find((cat) => cat.id_categoria === item.id_categoria_producto)
+              ?.descripcion_categoria.trim() || "Sin categoría",
+          nombre_producto: item.nombre_producto,
+          descripcion_producto: item.descripcion_producto,
+          precioventaact_producto: item.precioventaact_producto,
+          costoventa_producto: item.costoventa_producto,
+          existencia_inventario: item.existencia_inventario ?? 0, // Asegura que no sea undefined
+        }));
 
         setData(formattedData);
         setFilteredData(formattedData);

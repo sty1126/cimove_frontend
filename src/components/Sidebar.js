@@ -12,7 +12,7 @@ const Sidebar = () => {
     <Sider
       collapsible
       collapsed={collapsed}
-      width={200}
+      width={220}
       style={{ height: "100vh", backgroundColor: "#f0f2f5" }}
       trigger={null}
     >
@@ -35,66 +35,83 @@ const Sidebar = () => {
       <Menu
         mode="inline"
         style={{ backgroundColor: "#f0f2f5", fontSize: "16px" }}
-        items={[
-          {
-            key: "1",
-            icon: <FaIcons.FaHouseUser />,
-            label: (
-              <NavLink to="/" style={{ color: "black" }}>
-                Inicio
-              </NavLink>
-            ),
-          },
-          {
-            key: "2",
-            icon: <FaIcons.FaArchive />,
-            label: (
-              <NavLink to="/inventario" style={{ color: "black" }}>
-                Inventario
-              </NavLink>
-            ),
-          },
-          {
-            key: "3",
-            icon: <FaIcons.FaCashRegister />,
-            label: (
-              <NavLink to="/prueba" style={{ color: "black" }}>
-                Prueba
-              </NavLink>
-            ),
-          },
+      >
+        <Menu.Item key="1" icon={<FaIcons.FaHome />}>
+          <NavLink to="/" style={{ color: "black", fontWeight: "bold" }}>
+            Inicio
+          </NavLink>
+        </Menu.Item>
 
-          {
-            key: "4",
-            icon: <FaIcons.FaProductHunt />,
-            label: (
-              <NavLink to="/productos-vendidos" style={{ color: "black" }}>
-                Productos
-              </NavLink>
-            ),
-          },
+        <Menu.ItemGroup
+          title={<span style={{ fontWeight: "bold" }}>Ventas</span>}
+        >
+          <Menu.Item key="2" icon={<FaIcons.FaFileInvoiceDollar />}>
+            <NavLink to="/" style={{ color: "black" }}>
+              Facturación
+            </NavLink>
+          </Menu.Item>
+          <Menu.Item key="3" icon={<FaIcons.FaMoneyBillWave />}>
+            <NavLink to="/" style={{ color: "black" }}>
+              Pagos
+            </NavLink>
+          </Menu.Item>
+          <Menu.Item key="4" icon={<FaIcons.FaUsers />}>
+            <NavLink to="/" style={{ color: "black" }}>
+              Clientes
+            </NavLink>
+          </Menu.Item>
+        </Menu.ItemGroup>
 
-           {
-            key: "5",
-            icon: <FaIcons.FaPlusSquare />,
-            label: (
-              <NavLink to="/registro-producto" style={{ color: "black" }}>
-                Registrar Producto
-              </NavLink>
-            ),
-          },
+        <Menu.ItemGroup
+          title={<span style={{ fontWeight: "bold" }}>Compras</span>}
+        >
+          <Menu.Item key="5" icon={<FaIcons.FaFileInvoice />}>
+            <NavLink to="/" style={{ color: "black" }}>
+              Facturación
+            </NavLink>
+          </Menu.Item>
+          <Menu.Item key="6" icon={<FaIcons.FaMoneyCheckAlt />}>
+            <NavLink to="/" style={{ color: "black" }}>
+              Pagos
+            </NavLink>
+          </Menu.Item>
+          <Menu.Item key="7" icon={<FaIcons.FaTruck />}>
+            <NavLink to="/" style={{ color: "black" }}>
+              Proveedores
+            </NavLink>
+          </Menu.Item>
+          <Menu.Item key="8" icon={<FaIcons.FaBoxOpen />}>
+            <NavLink to="/" style={{ color: "black" }}>
+              Catálogo
+            </NavLink>
+          </Menu.Item>
+          <Menu.Item key="9" icon={<FaIcons.FaWarehouse />}>
+            <NavLink to="/inventario" style={{ color: "black" }}>
+              Inventario
+            </NavLink>
+          </Menu.Item>
+        </Menu.ItemGroup>
 
-          {
-            key: "6",
-            icon: <FaIcons.FaListAlt />,
-            label: (
-              <NavLink to="/lista-productos" style={{ color: "black" }}>
-                Lista de Productos
-              </NavLink>
-            ),
-          },
-        ]}
-      />
+        <Menu.ItemGroup
+          title={<span style={{ fontWeight: "bold" }}>Monitoreo</span>}
+        >
+          <Menu.Item key="10" icon={<FaIcons.FaClipboardList />}>
+            <NavLink to="/productos-vendidos" style={{ color: "black" }}>
+              Productos vendidos
+            </NavLink>
+          </Menu.Item>
+          <Menu.Item key="11" icon={<FaIcons.FaCalendarAlt />}>
+            <NavLink to="/" style={{ color: "black" }}>
+              Calendario
+            </NavLink>
+          </Menu.Item>
+          <Menu.Item key="12" icon={<FaIcons.FaChartBar />}>
+            <NavLink to="/" style={{ color: "black" }}>
+              Estadísticas
+            </NavLink>
+          </Menu.Item>
+        </Menu.ItemGroup>
+      </Menu>
     </Sider>
   );
 };

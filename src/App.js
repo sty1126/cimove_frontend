@@ -4,8 +4,9 @@ import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import Inventario from "./pages/Inventario";
-import Prueba from "./pages/Prueba";
 import ConsultaProducto from "./pages/ConsultaProducto";
+import RegistroProducto from "./pages/RegistroProducto";
+import ListaProducto from "./pages/ListaProducto";
 
 function App() {
   return (
@@ -17,7 +18,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/inventario" element={<Inventario />} />
-            <Route path="/prueba" element={<Prueba />} />
             <Route path="/productos-vendidos" element={<ConsultaProducto />} />
             <Route path="/registro-producto" element={<RegistroProducto />} />
             <Route path="/lista-productos" element={<ListaProducto />} />
