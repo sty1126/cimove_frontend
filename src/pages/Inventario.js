@@ -48,21 +48,13 @@ const Inventario = () => {
         <div style={{ display: "flex", gap: "10px" }}>
           <a
             href={`/actualizar-producto/${record.id_producto}`}
-            style={{
-              color: "#1890ff",
-              textDecoration: "underline",
-              cursor: "pointer",
-            }}
+            style={{ color: "#1890ff", textDecoration: "underline" }}
           >
             Actualizar
           </a>
           <a
             href={`/detalles-producto/${record.id_producto}`}
-            style={{
-              color: "#1890ff",
-              textDecoration: "underline",
-              cursor: "pointer",
-            }}
+            style={{ color: "#1890ff", textDecoration: "underline" }}
           >
             Detalles
           </a>
@@ -80,81 +72,90 @@ const Inventario = () => {
   const [selectedSede, setSelectedSede] = useState("general");
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchSedesYCategorias = async () => {
       try {
-        const categoriesRes = await axios.get(
-          "http://localhost:4000/api/categorias"
-        );
-        const productsRes = await axios.get(
-          "http://localhost:4000/api/productos/detalles"
-        );
-        const sedesRes = await axios.get("http://localhost:4000/api/sedes");
-
+        const [categoriesRes, sedesRes] = await Promise.all([
+          axios.get("http://localhost:4000/api/categorias"),
+          axios.get("http://localhost:4000/api/sedes"),
+        ]);
         setCategories(categoriesRes.data);
         setSedes(sedesRes.data);
+      } catch (error) {
+        console.error("Error al obtener las sedes y categorías", error);
+      }
+    };
 
-        const formattedData = productsRes.data.map((item) => {
-          const categoria = categoriesRes.data.find(
-            (cat) => cat.id_categoria === item.id_categoria_producto
+    fetchSedesYCategorias();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (selectedSede === "general") {
+          const productsRes = await axios.get(
+            "http://localhost:4000/api/productos/detalles"
           );
-          return {
-            key: item.id_producto,
-            id_producto: item.id_producto,
-            nombre_categoria: categoria
-              ? categoria.descripcion_categoria.trim()
-              : "Sin categoría",
-            nombre_producto: item.nombre_producto,
-            descripcion_producto: item.descripcion_producto,
-            precioventaact_producto: item.precioventaact_producto,
-            costoventa_producto: item.costoventa_producto,
-            existencia_producto: item.existencia_producto,
-            sede: item.sede || "general",
-          };
-        });
+          console.log("Inventario General:", productsRes.data); // Imprimir datos recibidos
+          setData(formatData(productsRes.data));
+          setFilteredData(formatData(productsRes.data));
+        } else {
+          const sedeEncontrada = sedes.find(
+            (sede) => sede.nombre_sede === selectedSede
+          );
 
-        setData(formattedData);
-        setFilteredData(formattedData);
+          if (!sedeEncontrada) return;
+
+          const productsRes = await axios.get(
+            `http://localhost:4000/api/inventariolocal/sede/${sedeEncontrada.id_sede}`
+          );
+          console.log(`Inventario de ${selectedSede}:`, productsRes.data); // Imprimir datos recibidos
+          setData(formatData(productsRes.data));
+          setFilteredData(formatData(productsRes.data));
+        }
       } catch (error) {
         console.error("Error al obtener los datos", error);
       }
     };
 
-    fetchData();
-  }, []);
+    if (sedes.length > 0) {
+      fetchData();
+    }
+  }, [selectedSede, sedes]);
 
-  const filterData = (search, category, sede) => {
-    let filtered = data.filter(
-      (item) => sede === "general" || item.sede === sede
-    );
+  const formatData = (products) => {
+    return products.map((item) => ({
+      key: item.id_producto,
+      id_producto: item.id_producto,
+      nombre_categoria:
+        categories
+          .find((cat) => cat.id_categoria === item.id_categoria_producto)
+          ?.descripcion_categoria.trim() || "Sin categoría",
+      nombre_producto: item.nombre_producto,
+      descripcion_producto: item.descripcion_producto,
+      precioventaact_producto: item.precioventaact_producto,
+      costoventa_producto: item.costoventa_producto,
+      existencia_producto: item.existencia_producto,
+    }));
+  };
 
-    if (category) {
+  useEffect(() => {
+    let filtered = [...data];
+
+    if (selectedCategory) {
       filtered = filtered.filter(
-        (item) => item.nombre_categoria.toLowerCase() === category.toLowerCase()
+        (item) =>
+          item.nombre_categoria.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
-    if (search) {
+    if (searchText) {
       filtered = filtered.filter((item) =>
-        item.nombre_producto.toLowerCase().includes(search.toLowerCase())
+        item.nombre_producto.toLowerCase().includes(searchText.toLowerCase())
       );
     }
 
     setFilteredData(filtered);
-  };
-
-  useEffect(() => {
-    filterData(searchText, selectedCategory, selectedSede);
-  }, [selectedSede]);
-
-  const handleSearch = (value) => {
-    setSearchText(value);
-    filterData(value, selectedCategory, selectedSede);
-  };
-
-  const handleCategoryChange = (value) => {
-    setSelectedCategory(value || "");
-    filterData(searchText, value || "", selectedSede);
-  };
+  }, [searchText, selectedCategory, data]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -181,10 +182,9 @@ const Inventario = () => {
       >
         <div style={{ display: "flex", gap: "10px" }}>
           <Select
-            placeholder="Seleccionar sede"
-            onChange={setSelectedSede}
-            style={{ width: 200 }}
             defaultValue="general"
+            style={{ width: 200 }}
+            onChange={setSelectedSede}
           >
             <Option value="general">Inventario General</Option>
             {sedes.map((sede) => (
@@ -195,13 +195,12 @@ const Inventario = () => {
           </Select>
           <Search
             placeholder="Buscar por nombre"
-            onSearch={handleSearch}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(e) => setSearchText(e.target.value)}
             style={{ width: 200 }}
           />
           <Select
             placeholder="Filtrar por categoría"
-            onChange={handleCategoryChange}
+            onChange={setSelectedCategory}
             style={{ width: 200 }}
             allowClear
           >
@@ -269,7 +268,6 @@ const Inventario = () => {
       <Table
         columns={columns}
         dataSource={filteredData}
-        showSorterTooltip={{ target: "sorter-icon" }}
         expandable={{
           expandedRowRender: (record) => (
             <p style={{ margin: 0 }}>{record.descripcion_producto}</p>
