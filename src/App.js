@@ -7,6 +7,7 @@ import Inventario from "./pages/Inventario";
 import ConsultaProducto from "./pages/ConsultaProducto";
 import RegistroProducto from "./pages/RegistroProducto";
 import ListaProducto from "./pages/ListaProducto";
+import ActualizarProducto from "./pages/ActualizarProducto";
 
 function App() {
   return (
@@ -20,7 +21,14 @@ function App() {
             <Route path="/inventario" element={<Inventario />} />
             <Route path="/productos-vendidos" element={<ConsultaProducto />} />
             <Route path="/registro-producto" element={<RegistroProducto />} />
-            <Route path="/lista-productos" element={<ListaProducto />} />
+            <Route
+              path="/actualizar-producto/:id"
+              element={<ActualizarProducto />}
+            />
+            <Route
+              path="/actualizar-producto"
+              element={<ActualizarProducto />}
+            />
           </Routes>
         </div>
       </div>

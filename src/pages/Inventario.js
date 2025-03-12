@@ -8,6 +8,7 @@ import {
   TagsOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
+import { Modal, message } from "antd";
 
 const Inventario = () => {
   const { Search } = Input;
@@ -70,6 +71,35 @@ const Inventario = () => {
   const [categories, setCategories] = useState([]);
   const [sedes, setSedes] = useState([]);
   const [selectedSede, setSelectedSede] = useState("general");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+
+  const handleCreateCategory = async () => {
+    if (!newCategory.trim()) {
+      message.error("El nombre de la categoría no puede estar vacío");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:4000/api/categorias", {
+        descripcion_categoria: newCategory,
+      });
+
+      message.success("Categoría creada exitosamente");
+
+      setIsModalVisible(false);
+      setNewCategory("");
+
+      // Recargar las categorías después de crear una nueva
+      const categoriesRes = await axios.get(
+        "http://localhost:4000/api/categorias"
+      );
+      setCategories(categoriesRes.data);
+    } catch (error) {
+      message.error("Error al crear la categoría");
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     const fetchSedesYCategorias = async () => {
@@ -246,7 +276,7 @@ const Inventario = () => {
               color: "white",
             }}
             icon={<TagsOutlined />}
-            onClick={() => navigate("/crear-categoria")}
+            onClick={() => setIsModalVisible(true)} // Abre el modal
           >
             Crear Categoría
           </Button>
@@ -274,6 +304,21 @@ const Inventario = () => {
           ),
         }}
       />
+
+      <Modal
+        title="Crear Nueva Categoría"
+        open={isModalVisible}
+        onOk={handleCreateCategory}
+        onCancel={() => setIsModalVisible(false)}
+        okText="Crear"
+        cancelText="Cancelar"
+      >
+        <Input
+          placeholder="Nombre de la nueva categoría"
+          value={newCategory}
+          onChange={(e) => setNewCategory(e.target.value)}
+        />
+      </Modal>
     </div>
   );
 };
