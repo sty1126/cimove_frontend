@@ -3,8 +3,10 @@ import { Form, Button, Container } from "react-bootstrap";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 const RegistrarProducto = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     id_producto: "",
     nombre_producto: "",
@@ -12,8 +14,8 @@ const RegistrarProducto = () => {
     id_categoria_producto: "",
     precioventaact_producto: "",
     costoventa_producto: "",
-    margenutilidad_producto: "", // Se calcula automáticamente
-    valoriva_producto: "", // Se almacena como decimal
+    margenutilidad_producto: "",
+    valoriva_producto: "",
   });
 
   const [categorias, setCategorias] = useState([]);
@@ -37,10 +39,9 @@ const RegistrarProducto = () => {
         precioVenta - costoVenta
       );
     } else if (name === "valoriva_producto") {
-      // Convertir el IVA ingresado en porcentaje a decimal
       let iva = parseFloat(value) / 100;
-      if (iva > 1) iva = 1; // Máximo 100%
-      if (iva < 0) iva = 0; // No negativos
+      if (iva > 1) iva = 1;
+      if (iva < 0) iva = 0;
       updatedFormData.valoriva_producto = iva.toFixed(2);
     } else {
       updatedFormData[name] = value;
@@ -69,8 +70,8 @@ const RegistrarProducto = () => {
   };
 
   return (
-    <Container className="mt-4">
-      <h2>Registrar Producto</h2>
+    <Container className="mt-4 pb-5">
+      <h2 className="text-center mb-4">📦 Registrar Producto</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group>
           <Form.Label>ID Producto</Form.Label>
@@ -164,7 +165,7 @@ const RegistrarProducto = () => {
           <Form.Control
             type="number"
             name="valoriva_producto"
-            value={formData.valoriva_producto * 100} // Se muestra como porcentaje
+            value={formData.valoriva_producto * 100}
             onChange={handleChange}
             min="0"
             max="100"
@@ -172,9 +173,14 @@ const RegistrarProducto = () => {
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit" className="mt-3">
-          Registrar Producto
-        </Button>
+        <div className="d-flex justify-content-center gap-3 mt-4">
+          <Button variant="primary" type="submit">
+            Registrar Producto
+          </Button>
+          <Button variant="danger" onClick={() => navigate("/inventario")}>
+            Cancelar
+          </Button>
+        </div>
       </Form>
 
       <ToastContainer />
