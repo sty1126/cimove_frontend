@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Input, Select, Button } from "antd";
+import { Table, Input, Select, Button, DatePicker, Modal, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -8,7 +8,6 @@ import {
   TagsOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
-import { Modal, message } from "antd";
 
 const Inventario = () => {
   const { Search } = Input;
@@ -73,6 +72,14 @@ const Inventario = () => {
   const [selectedSede, setSelectedSede] = useState("general");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newCategory, setNewCategory] = useState("");
+  const [isNovedadModalVisible, setIsNovedadModalVisible] = useState(false); // Estado para el modal de Novedad
+
+  // Estados para el formulario de novedad
+  const [id_tipomov, setIdTipomov] = useState("");
+  const [id_producto, setIdProducto] = useState("");
+  const [cantidad_mov, setCantidadMov] = useState("");
+  const [fecha_movimiento, setFechaMovimiento] = useState(null);
+  const [estado_movimiento, setEstadoMovimiento] = useState("");
 
   const handleCreateCategory = async () => {
     if (!newCategory.trim()) {
@@ -97,6 +104,35 @@ const Inventario = () => {
       setCategories(categoriesRes.data);
     } catch (error) {
       message.error("Error al crear la categoría");
+      console.error(error);
+    }
+  };
+
+  // Función para manejar la creación de una novedad
+  const handleCreateNovedad = async () => {
+    if (!id_tipomov || !id_producto || !cantidad_mov || !fecha_movimiento || !estado_movimiento) {
+      message.error("Todos los campos son obligatorios.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:4000/api/movimientos", {
+        id_tipomov: parseInt(id_tipomov),
+        id_producto: parseInt(id_producto),
+        cantidad_mov: parseInt(cantidad_mov),
+        fecha_movimiento: fecha_movimiento.toISOString().split("T")[0],
+        estado_movimiento: estado_movimiento,
+      });
+
+      message.success("Novedad añadida exitosamente");
+      setIsNovedadModalVisible(false);
+      setIdTipomov("");
+      setIdProducto("");
+      setCantidadMov("");
+      setFechaMovimiento(null);
+      setEstadoMovimiento("");
+    } catch (error) {
+      message.error("Error al añadir la novedad");
       console.error(error);
     }
   };
@@ -264,7 +300,7 @@ const Inventario = () => {
               color: "white",
             }}
             icon={<AppstoreAddOutlined />}
-            onClick={() => navigate("/añadir-novedad")}
+            onClick={() => setIsNovedadModalVisible(true)} // Abre el modal de Novedad
           >
             Añadir Novedad
           </Button>
@@ -276,7 +312,7 @@ const Inventario = () => {
               color: "white",
             }}
             icon={<TagsOutlined />}
-            onClick={() => setIsModalVisible(true)} // Abre el modal
+            onClick={() => setIsModalVisible(true)} // Abre el modal de Categoría
           >
             Crear Categoría
           </Button>
@@ -317,6 +353,47 @@ const Inventario = () => {
           placeholder="Nombre de la nueva categoría"
           value={newCategory}
           onChange={(e) => setNewCategory(e.target.value)}
+        />
+      </Modal>
+
+      {/* Modal para Añadir Novedad */}
+      <Modal
+        title="Añadir Novedad"
+        open={isNovedadModalVisible}
+        onOk={handleCreateNovedad}
+        onCancel={() => setIsNovedadModalVisible(false)}
+        okText="Añadir"
+        cancelText="Cancelar"
+      >
+        <Input
+          placeholder="ID Tipo de Movimiento"
+          value={id_tipomov}
+          onChange={(e) => setIdTipomov(e.target.value)}
+          style={{ marginBottom: "16px" }}
+        />
+        <Input
+          placeholder="ID Producto"
+          value={id_producto}
+          onChange={(e) => setIdProducto(e.target.value)}
+          style={{ marginBottom: "16px" }}
+        />
+        <Input
+          placeholder="Cantidad"
+          value={cantidad_mov}
+          onChange={(e) => setCantidadMov(e.target.value)}
+          style={{ marginBottom: "16px" }}
+        />
+        <DatePicker
+          placeholder="Fecha del Movimiento"
+          value={fecha_movimiento}
+          onChange={(date) => setFechaMovimiento(date)}
+          style={{ width: "100%", marginBottom: "16px" }}
+        />
+        <Input
+          placeholder="Estado del Movimiento"
+          value={estado_movimiento}
+          onChange={(e) => setEstadoMovimiento(e.target.value)}
+          style={{ marginBottom: "16px" }}
         />
       </Modal>
     </div>
