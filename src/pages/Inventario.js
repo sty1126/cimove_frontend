@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Table, Input, Select, Button, DatePicker, Modal, message } from "antd";
+import {
+  Table,
+  Input,
+  Select,
+  Button,
+  DatePicker,
+  Modal,
+  message,
+  Popconfirm,
+  Tooltip,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -7,6 +17,9 @@ import {
   AppstoreAddOutlined,
   TagsOutlined,
   ShoppingCartOutlined,
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 
 const Inventario = () => {
@@ -46,18 +59,32 @@ const Inventario = () => {
       key: "acciones",
       render: (_, record) => (
         <div style={{ display: "flex", gap: "10px" }}>
-          <a
-            href={`/actualizar-producto/${record.id_producto}`}
-            style={{ color: "#1890ff", textDecoration: "underline" }}
+          <Tooltip title="Actualizar">
+            <Button
+              type="link"
+              onClick={() => handleUpdate(record)}
+              icon={<EditOutlined style={{ color: "#1890ff" }} />}
+            />
+          </Tooltip>
+
+          <Tooltip title="Detalles">
+            <Button
+              type="link"
+              onClick={() => handleViewDetails(record)}
+              icon={<EyeOutlined style={{ color: "#52c41a" }} />}
+            />
+          </Tooltip>
+
+          <Popconfirm
+            title="¿Seguro que deseas eliminar?"
+            onConfirm={() => handleDelete(record.id_producto)}
+            okText="Sí"
+            cancelText="No"
           >
-            Actualizar
-          </a>
-          <a
-            href={`/detalles-producto/${record.id_producto}`}
-            style={{ color: "#1890ff", textDecoration: "underline" }}
-          >
-            Detalles
-          </a>
+            <Tooltip title="Eliminar">
+              <Button type="link" danger icon={<DeleteOutlined />} />
+            </Tooltip>
+          </Popconfirm>
         </div>
       ),
     },
@@ -72,14 +99,7 @@ const Inventario = () => {
   const [selectedSede, setSelectedSede] = useState("general");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newCategory, setNewCategory] = useState("");
-  const [isNovedadModalVisible, setIsNovedadModalVisible] = useState(false); // Estado para el modal de Novedad
-
-  // Estados para el formulario de novedad
-  const [id_tipomov, setIdTipomov] = useState("");
-  const [id_producto, setIdProducto] = useState("");
-  const [cantidad_mov, setCantidadMov] = useState("");
-  const [fecha_movimiento, setFechaMovimiento] = useState(null);
-  const [estado_movimiento, setEstadoMovimiento] = useState("");
+  const [searchCode, setSearchCode] = useState(""); // <-- Agregamos el estado
 
   const handleCreateCategory = async () => {
     if (!newCategory.trim()) {
@@ -108,35 +128,6 @@ const Inventario = () => {
     }
   };
 
-  // Función para manejar la creación de una novedad
-  const handleCreateNovedad = async () => {
-    if (!id_tipomov || !id_producto || !cantidad_mov || !fecha_movimiento || !estado_movimiento) {
-      message.error("Todos los campos son obligatorios.");
-      return;
-    }
-
-    try {
-      const response = await axios.post("http://localhost:4000/api/movimientos", {
-        id_tipomov: parseInt(id_tipomov),
-        id_producto: parseInt(id_producto),
-        cantidad_mov: parseInt(cantidad_mov),
-        fecha_movimiento: fecha_movimiento.toISOString().split("T")[0],
-        estado_movimiento: estado_movimiento,
-      });
-
-      message.success("Novedad añadida exitosamente");
-      setIsNovedadModalVisible(false);
-      setIdTipomov("");
-      setIdProducto("");
-      setCantidadMov("");
-      setFechaMovimiento(null);
-      setEstadoMovimiento("");
-    } catch (error) {
-      message.error("Error al añadir la novedad");
-      console.error(error);
-    }
-  };
-
   useEffect(() => {
     const fetchSedesYCategorias = async () => {
       try {
@@ -161,7 +152,6 @@ const Inventario = () => {
           const productsRes = await axios.get(
             "http://localhost:4000/api/productos/detalles"
           );
-          console.log("Inventario General:", productsRes.data); // Imprimir datos recibidos
           setData(formatData(productsRes.data));
           setFilteredData(formatData(productsRes.data));
         } else {
@@ -174,7 +164,6 @@ const Inventario = () => {
           const productsRes = await axios.get(
             `http://localhost:4000/api/inventariolocal/sede/${sedeEncontrada.id_sede}`
           );
-          console.log(`Inventario de ${selectedSede}:`, productsRes.data); // Imprimir datos recibidos
           setData(formatData(productsRes.data));
           setFilteredData(formatData(productsRes.data));
         }
@@ -187,6 +176,18 @@ const Inventario = () => {
       fetchData();
     }
   }, [selectedSede, sedes]);
+
+  const handleUpdate = (record) => {
+    window.location.href = `/actualizar-producto/${record.id_producto}`;
+  };
+
+  const handleViewDetails = (record) => {
+    window.location.href = `/detalles-producto/${record.id_producto}`;
+  };
+
+  const handleDelete = (record) => {
+    window.location.href = `/actualizar-producto/${record.id_producto}`;
+  };
 
   const formatData = (products) => {
     return products.map((item) => ({
@@ -220,8 +221,15 @@ const Inventario = () => {
       );
     }
 
+    if (searchCode) {
+      const searchNumber = parseInt(searchCode, 10); // Convertimos a número
+      if (!isNaN(searchNumber)) {
+        filtered = filtered.filter((item) => item.id_producto === searchNumber);
+      }
+    }
+
     setFilteredData(filtered);
-  }, [searchText, selectedCategory, data]);
+  }, [searchCode, searchText, selectedCategory, data]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -246,10 +254,18 @@ const Inventario = () => {
           alignItems: "center",
         }}
       >
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)", // 2 columnas
+            gap: "10px", // Espaciado entre elementos
+            maxWidth: "450px", // Ajusta el ancho máximo según el diseño
+            marginBottom: "16px",
+          }}
+        >
           <Select
             defaultValue="general"
-            style={{ width: 200 }}
+            style={{ width: "100%" }}
             onChange={setSelectedSede}
           >
             <Option value="general">Inventario General</Option>
@@ -262,12 +278,12 @@ const Inventario = () => {
           <Search
             placeholder="Buscar por nombre"
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 200 }}
+            style={{ width: "100%" }}
           />
           <Select
             placeholder="Filtrar por categoría"
             onChange={setSelectedCategory}
-            style={{ width: 200 }}
+            style={{ width: "100%" }}
             allowClear
           >
             {categories.map((cat) => (
@@ -276,6 +292,16 @@ const Inventario = () => {
               </Option>
             ))}
           </Select>
+          <Search
+            placeholder="Buscar por código"
+            onChange={(e) => setSearchCode(e.target.value)}
+            style={{ width: "100%" }}
+          />{" "}
+          {categories.map((cat) => (
+            <Option key={cat.id_categoria} value={cat.descripcion_categoria}>
+              {cat.descripcion_categoria}
+            </Option>
+          ))}
         </div>
         <div
           style={{
@@ -300,7 +326,7 @@ const Inventario = () => {
               color: "white",
             }}
             icon={<AppstoreAddOutlined />}
-            onClick={() => setIsNovedadModalVisible(true)} // Abre el modal de Novedad
+            onClick={() => navigate("/anadir-novedad")}
           >
             Añadir Novedad
           </Button>
@@ -353,47 +379,6 @@ const Inventario = () => {
           placeholder="Nombre de la nueva categoría"
           value={newCategory}
           onChange={(e) => setNewCategory(e.target.value)}
-        />
-      </Modal>
-
-      {/* Modal para Añadir Novedad */}
-      <Modal
-        title="Añadir Novedad"
-        open={isNovedadModalVisible}
-        onOk={handleCreateNovedad}
-        onCancel={() => setIsNovedadModalVisible(false)}
-        okText="Añadir"
-        cancelText="Cancelar"
-      >
-        <Input
-          placeholder="ID Tipo de Movimiento"
-          value={id_tipomov}
-          onChange={(e) => setIdTipomov(e.target.value)}
-          style={{ marginBottom: "16px" }}
-        />
-        <Input
-          placeholder="ID Producto"
-          value={id_producto}
-          onChange={(e) => setIdProducto(e.target.value)}
-          style={{ marginBottom: "16px" }}
-        />
-        <Input
-          placeholder="Cantidad"
-          value={cantidad_mov}
-          onChange={(e) => setCantidadMov(e.target.value)}
-          style={{ marginBottom: "16px" }}
-        />
-        <DatePicker
-          placeholder="Fecha del Movimiento"
-          value={fecha_movimiento}
-          onChange={(date) => setFechaMovimiento(date)}
-          style={{ width: "100%", marginBottom: "16px" }}
-        />
-        <Input
-          placeholder="Estado del Movimiento"
-          value={estado_movimiento}
-          onChange={(e) => setEstadoMovimiento(e.target.value)}
-          style={{ marginBottom: "16px" }}
         />
       </Modal>
     </div>

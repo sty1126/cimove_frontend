@@ -7,7 +7,9 @@ import Inventario from "./pages/Inventario";
 import ConsultaProducto from "./pages/ConsultaProducto";
 import RegistroProducto from "./pages/RegistroProducto";
 import ListaProducto from "./pages/ListaProducto";
+import DetallesProducto from "./pages/DetallesProducto";
 import ActualizarProducto from "./pages/ActualizarProducto";
+import AnadirNovedad from "./pages/AnadirNovedad";
 
 function App() {
   return (
@@ -26,14 +28,18 @@ function App() {
               element={<ActualizarProducto />}
             />
             <Route
-              path="/actualizar-producto"
+              path="/detalles-producto/:productoId"
+              element={<DetallesProducto />}
+            />
+            <Route
+              path="/actualizar-producto/:id"
               element={<ActualizarProducto />}
             />
+            <Route path="/anadir-novedad" element={<AnadirNovedad />} />
           </Routes>
         </div>
       </div>
     </Router>
   );
 }
-
 export default App;

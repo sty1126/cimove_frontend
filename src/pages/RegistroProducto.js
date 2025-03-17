@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Container } from "react-bootstrap";
+import { Form, Button, Container, FloatingLabel } from "react-bootstrap";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -73,8 +73,11 @@ const RegistrarProducto = () => {
     <Container className="mt-4 pb-5">
       <h2 className="text-center mb-4">📦 Registrar Producto</h2>
       <Form onSubmit={handleSubmit}>
-        <Form.Group>
-          <Form.Label>ID Producto</Form.Label>
+        <FloatingLabel
+          controlId="id_producto"
+          label="ID Producto"
+          className="mb-3"
+        >
           <Form.Control
             type="text"
             name="id_producto"
@@ -82,10 +85,13 @@ const RegistrarProducto = () => {
             onChange={handleChange}
             required
           />
-        </Form.Group>
+        </FloatingLabel>
 
-        <Form.Group>
-          <Form.Label>Nombre</Form.Label>
+        <FloatingLabel
+          controlId="nombre_producto"
+          label="Nombre"
+          className="mb-3"
+        >
           <Form.Control
             type="text"
             name="nombre_producto"
@@ -93,10 +99,13 @@ const RegistrarProducto = () => {
             onChange={handleChange}
             required
           />
-        </Form.Group>
+        </FloatingLabel>
 
-        <Form.Group>
-          <Form.Label>Descripción</Form.Label>
+        <FloatingLabel
+          controlId="descripcion_producto"
+          label="Descripción"
+          className="mb-3"
+        >
           <Form.Control
             type="text"
             name="descripcion_producto"
@@ -104,12 +113,14 @@ const RegistrarProducto = () => {
             onChange={handleChange}
             required
           />
-        </Form.Group>
+        </FloatingLabel>
 
-        <Form.Group>
-          <Form.Label>Categoría</Form.Label>
-          <Form.Control
-            as="select"
+        <FloatingLabel
+          controlId="id_categoria_producto"
+          label="Categoría"
+          className="mb-3"
+        >
+          <Form.Select
             name="id_categoria_producto"
             value={formData.id_categoria_producto}
             onChange={handleChange}
@@ -125,11 +136,14 @@ const RegistrarProducto = () => {
             ) : (
               <option disabled>Cargando categorías...</option>
             )}
-          </Form.Control>
-        </Form.Group>
+          </Form.Select>
+        </FloatingLabel>
 
-        <Form.Group>
-          <Form.Label>Precio Venta</Form.Label>
+        <FloatingLabel
+          controlId="precioventaact_producto"
+          label="Precio Venta"
+          className="mb-3"
+        >
           <Form.Control
             type="number"
             name="precioventaact_producto"
@@ -137,10 +151,13 @@ const RegistrarProducto = () => {
             onChange={handleChange}
             required
           />
-        </Form.Group>
+        </FloatingLabel>
 
-        <Form.Group>
-          <Form.Label>Costo Venta</Form.Label>
+        <FloatingLabel
+          controlId="costoventa_producto"
+          label="Costo Venta"
+          className="mb-3"
+        >
           <Form.Control
             type="number"
             name="costoventa_producto"
@@ -148,41 +165,62 @@ const RegistrarProducto = () => {
             onChange={handleChange}
             required
           />
-        </Form.Group>
+        </FloatingLabel>
 
-        <Form.Group>
-          <Form.Label>Margen Utilidad (calculado)</Form.Label>
+        <FloatingLabel
+          controlId="margenutilidad_producto"
+          label="Margen Utilidad (calculado)"
+          className="mb-3"
+        >
           <Form.Control
             type="text"
             name="margenutilidad_producto"
             value={formData.margenutilidad_producto}
             readOnly
+            className="bg-light"
           />
-        </Form.Group>
-
-        <Form.Group>
-          <Form.Label>IVA (%)</Form.Label>
+        </FloatingLabel>
+        <FloatingLabel
+          controlId="valoriva_producto"
+          label="IVA (%)"
+          className="mb-3"
+        >
           <Form.Control
             type="number"
             name="valoriva_producto"
-            value={formData.valoriva_producto * 100}
-            onChange={handleChange}
+            value={
+              formData.valoriva_producto
+                ? Math.round(formData.valoriva_producto * 100)
+                : ""
+            }
+            onChange={(e) => {
+              const value = e.target.value.replace(/^0+/, ""); // Elimina ceros a la izquierda
+              handleChange({
+                target: {
+                  name: "valoriva_producto",
+                  value: value ? Number(value) / 100 : 0,
+                },
+              });
+            }}
             min="0"
             max="100"
             required
           />
-        </Form.Group>
+        </FloatingLabel>
 
         <div className="d-flex justify-content-center gap-3 mt-4">
-          <Button variant="primary" type="submit">
+          <Button variant="primary" type="submit" className="px-4 py-2">
             Registrar Producto
           </Button>
-          <Button variant="danger" onClick={() => navigate("/inventario")}>
+          <Button
+            variant="danger"
+            onClick={() => navigate("/inventario")}
+            className="px-4 py-2"
+          >
             Cancelar
           </Button>
         </div>
       </Form>
-
       <ToastContainer />
     </Container>
   );
