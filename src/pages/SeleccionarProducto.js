@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Modal, Button, Form, Table } from "react-bootstrap";
+import { Modal, Form, Table } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { FaCheckCircle, FaEye } from "react-icons/fa";
 
 export default function SeleccionarProducto({
   show,
@@ -8,6 +10,7 @@ export default function SeleccionarProducto({
 }) {
   const [productos, setProductos] = useState([]);
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -39,6 +42,10 @@ export default function SeleccionarProducto({
     handleClose();
   };
 
+  const verDetalles = (productoId) => {
+    navigate(`/detalles-producto/${productoId}`);
+  };
+
   return (
     <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
@@ -57,7 +64,7 @@ export default function SeleccionarProducto({
             <tr>
               <th>ID</th>
               <th>Nombre</th>
-              <th>Acción</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -65,14 +72,19 @@ export default function SeleccionarProducto({
               <tr key={producto.id_producto}>
                 <td>{producto.id_producto}</td>
                 <td>{producto.nombre_producto || "Sin nombre"}</td>
-                <td>
-                  <Button
-                    variant="primary"
-                    size="sm"
+                <td className="text-center">
+                  <FaCheckCircle
+                    className="text-success me-3"
+                    style={{ cursor: "pointer", fontSize: "1.2rem" }}
                     onClick={() => handleSelect(producto)}
-                  >
-                    Seleccionar
-                  </Button>
+                    title="Seleccionar producto"
+                  />
+                  <FaEye
+                    className="text-info"
+                    style={{ cursor: "pointer", fontSize: "1.2rem" }}
+                    onClick={() => verDetalles(producto.id_producto)}
+                    title="Ver detalles del producto"
+                  />
                 </td>
               </tr>
             ))}

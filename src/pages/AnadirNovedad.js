@@ -8,16 +8,29 @@ import {
   InputGroup,
 } from "react-bootstrap";
 import SeleccionarProducto from "./SeleccionarProducto";
+import SeleccionarCliente from "./SeleccionarCliente";
+import SeleccionarProveedor from "./SeleccionarProveedor"; // ✅ Importar el nuevo modal
 
-export default function AgregarNovedad() {
+export default function AnadirNovedad() {
   const [tipoMov, setTipoMov] = useState("");
   const [producto, setProducto] = useState("");
   const [cantidad, setCantidad] = useState("");
   const [fecha, setFecha] = useState(new Date().toISOString().split("T")[0]);
   const [estado, setEstado] = useState("Pendiente");
   const [tiposMovimiento, setTiposMovimiento] = useState([]);
+  const [sedes, setSedes] = useState([]);
+  const [sede, setSede] = useState("");
+  const [sedeDestino, setSedeDestino] = useState("");
+  const [cliente, setCliente] = useState("");
+  const [clientes, setClientes] = useState([]);
   const [showProductoModal, setShowProductoModal] = useState(false);
   const navigate = useNavigate();
+  const [showClienteModal, setShowClienteModal] = useState(false);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
+  const [proveedor, setProveedor] = useState("");
+  const [proveedores, setProveedores] = useState([]);
+  const [showProveedorModal, setShowProveedorModal] = useState(false);
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:4000/api/movimientos/tipo")
@@ -26,29 +39,59 @@ export default function AgregarNovedad() {
       .catch((error) =>
         console.error("Error cargando tipos de movimiento", error)
       );
+
+    fetch("http://localhost:4000/api/sedes")
+      .then((response) => response.json())
+      .then((data) => setSedes(data))
+      .catch((error) => console.error("Error cargando sedes", error));
+
+    fetch("http://localhost:4000/api/clientes")
+      .then((response) => response.json())
+      .then((data) => setClientes(data))
+      .catch((error) => console.error("Error cargando clientes", error));
+
+    fetch("http://localhost:4000/api/proveedores/all")
+      .then((response) => response.json())
+      .then((data) => setProveedores(data))
+      .catch((error) => console.error("Error cargando proveedores", error));
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const novedad = {
       ID_TIPOMOV: tipoMov,
-      ID_PRODUCTO: producto,
+      ID_PRODUCTO: producto ? producto.id_producto : null,
       CANTIDAD_MOV: cantidad,
       FECHA_MOVIMIENTO: fecha,
       ESTADO_MOVIMIENTO: estado,
+      ID_SEDE_MOVIMIENTO: sede,
+      ID_SEDEDESTINO_MOVIMIENTO: tipoMov === "5" ? sedeDestino : null,
+      ID_CLIENTE_MOVIMIENTO:
+        tipoMov === "3" || tipoMov === "6"
+          ? clienteSeleccionado?.id_cliente
+          : null,
+      ID_PROVEEDOR_MOVIMIENTO:
+        tipoMov === "7" || tipoMov === "9"
+          ? proveedorSeleccionado?.id_proveedor
+          : null,
     };
 
+    console.log("Datos a enviar:", novedad); // Verifica los datos en consola
+
     try {
-      const response = await fetch("/api/novedades", {
+      const response = await fetch("http://localhost:4000/api/movimientos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(novedad),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         navigate("/inventario");
       } else {
-        console.error("Error al registrar la novedad");
+        console.error("Error al registrar la novedad:", data);
       }
     } catch (error) {
       console.error("Error de conexión", error);
@@ -77,6 +120,87 @@ export default function AgregarNovedad() {
             ))}
           </Form.Select>
         </FloatingLabel>
+
+        <FloatingLabel controlId="sede" label="Sede" className="mb-3">
+          <Form.Select
+            value={sede}
+            onChange={(e) => setSede(e.target.value)}
+            required
+          >
+            <option value="">Seleccione Sede</option>
+            {sedes.map((s) => (
+              <option key={s.id_sede} value={s.id_sede}>
+                {s.nombre_sede}
+              </option>
+            ))}
+          </Form.Select>
+        </FloatingLabel>
+
+        {tipoMov === "5" && (
+          <FloatingLabel
+            controlId="sedeDestino"
+            label="Sede Destino"
+            className="mb-3"
+          >
+            <Form.Select
+              value={sedeDestino}
+              onChange={(e) => setSedeDestino(e.target.value)}
+            >
+              <option value="">Seleccione Sede Destino</option>
+              {sedes.map((s) => (
+                <option key={s.id_sede} value={s.id_sede}>
+                  {s.nombre_sede}
+                </option>
+              ))}
+            </Form.Select>
+          </FloatingLabel>
+        )}
+
+        {(tipoMov === "3" || tipoMov === "6") && (
+          <InputGroup className="mb-3">
+            <FloatingLabel controlId="cliente" label="Cliente">
+              <Form.Control
+                type="text"
+                value={
+                  clienteSeleccionado
+                    ? `${clienteSeleccionado.id_cliente} - ${clienteSeleccionado.nombre} (${clienteSeleccionado.tipo})`
+                    : "Seleccione un cliente"
+                }
+                readOnly
+                required
+              />
+            </FloatingLabel>
+            <Button
+              variant="secondary"
+              onClick={() => setShowClienteModal(true)}
+            >
+              Seleccionar
+            </Button>
+          </InputGroup>
+        )}
+
+        {(tipoMov === "7" || tipoMov === "9") && (
+          <InputGroup className="mb-3">
+            <FloatingLabel controlId="proveedor" label="Proveedor">
+              <Form.Control
+                type="text"
+                value={
+                  proveedorSeleccionado && proveedorSeleccionado.id
+                    ? `${proveedorSeleccionado.id} - ${proveedorSeleccionado.nombre}`
+                    : "Seleccione un proveedor"
+                }
+                readOnly
+                required
+              />
+            </FloatingLabel>
+            <Button
+              variant="secondary"
+              onClick={() => setShowProveedorModal(true)}
+            >
+              Seleccionar
+            </Button>
+          </InputGroup>
+        )}
 
         <InputGroup className="mb-3">
           <FloatingLabel controlId="producto" label="Producto">
@@ -132,6 +256,18 @@ export default function AgregarNovedad() {
         show={showProductoModal}
         handleClose={() => setShowProductoModal(false)}
         setProducto={setProducto}
+      />
+
+      <SeleccionarCliente
+        show={showClienteModal}
+        handleClose={() => setShowClienteModal(false)}
+        setCliente={setClienteSeleccionado}
+      />
+
+      <SeleccionarProveedor
+        show={showProveedorModal}
+        handleClose={() => setShowProveedorModal(false)}
+        setProveedor={setProveedorSeleccionado}
       />
     </Container>
   );

@@ -99,7 +99,8 @@ const Inventario = () => {
   const [selectedSede, setSelectedSede] = useState("general");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newCategory, setNewCategory] = useState("");
-  const [searchCode, setSearchCode] = useState(""); // <-- Agregamos el estado
+  const [searchCode, setSearchCode] = useState("");
+  const [productos, setProductos] = useState([]);
 
   const handleCreateCategory = async () => {
     if (!newCategory.trim()) {
@@ -185,8 +186,35 @@ const Inventario = () => {
     window.location.href = `/detalles-producto/${record.id_producto}`;
   };
 
-  const handleDelete = (record) => {
-    window.location.href = `/actualizar-producto/${record.id_producto}`;
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/productos/eliminar/${id}`,
+        {
+          method: "PUT",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al eliminar");
+      }
+
+      // Mostrar mensaje emergente de éxito
+      message.success("Producto eliminado exitosamente");
+
+      // Actualizar estado para reflejar el cambio en la tabla
+      setProductos((prev) => prev.filter((p) => p.id_producto !== id));
+
+      // Esperar un momento y luego recargar la página
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (error) {
+      // Mostrar mensaje emergente de error
+      message.error("Error al eliminar el producto: " + error.message);
+    }
   };
 
   const formatData = (products) => {
