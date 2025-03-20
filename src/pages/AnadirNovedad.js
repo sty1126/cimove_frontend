@@ -59,25 +59,32 @@ export default function AnadirNovedad() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    console.log(
+      "📌 Estado actual de proveedorSeleccionado:",
+      proveedorSeleccionado
+    );
+
     const novedad = {
-      ID_TIPOMOV: tipoMov,
-      ID_PRODUCTO: producto ? producto.id_producto : null,
-      CANTIDAD_MOV: cantidad,
+      ID_TIPOMOV_MOVIMIENTO: Number(tipoMov),
+      ID_PRODUCTO_MOVIMIENTO: producto ? Number(producto.id_producto) : null,
+      CANTIDAD_MOVIMIENTO: Number(cantidad),
       FECHA_MOVIMIENTO: fecha,
-      ESTADO_MOVIMIENTO: estado,
-      ID_SEDE_MOVIMIENTO: sede,
-      ID_SEDEDESTINO_MOVIMIENTO: tipoMov === "5" ? sedeDestino : null,
+      ESTADO_MOVIMIENTO: estado === "Aprobado" ? "A" : "P",
+      ID_SEDE_MOVIMIENTO: Number(sede),
+      ID_SEDEDESTINO_MOVIMIENTO:
+        tipoMov === "5" ? (sedeDestino ? Number(sedeDestino) : null) : null,
       ID_CLIENTE_MOVIMIENTO:
         tipoMov === "3" || tipoMov === "6"
-          ? clienteSeleccionado?.id_cliente
+          ? clienteSeleccionado?.id_cliente ?? null
           : null,
       ID_PROVEEDOR_MOVIMIENTO:
         tipoMov === "7" || tipoMov === "9"
-          ? proveedorSeleccionado?.id_proveedor
+          ? proveedorSeleccionado?.id_proveedor ?? null
           : null,
     };
 
-    console.log("Datos a enviar:", novedad); // Verifica los datos en consola
+    // 📤 Debug para ver qué se envía
+    console.log("📤 Datos a enviar:", JSON.stringify(novedad, null, 2));
 
     try {
       const response = await fetch("http://localhost:4000/api/movimientos", {
@@ -87,14 +94,18 @@ export default function AnadirNovedad() {
       });
 
       const data = await response.json();
+      console.log("📩 Respuesta del servidor:", data);
 
       if (response.ok) {
+        alert("Novedad registrada exitosamente.");
         navigate("/inventario");
       } else {
-        console.error("Error al registrar la novedad:", data);
+        console.error("❌ Error al registrar la novedad:", data);
+        alert(`Error: ${data.error}`);
       }
     } catch (error) {
-      console.error("Error de conexión", error);
+      console.error("🔌 Error de conexión", error);
+      alert("Error de conexión con el servidor.");
     }
   };
 
@@ -156,6 +167,7 @@ export default function AnadirNovedad() {
           </FloatingLabel>
         )}
 
+        {/* Cliente */}
         {(tipoMov === "3" || tipoMov === "6") && (
           <InputGroup className="mb-3">
             <FloatingLabel controlId="cliente" label="Cliente">
@@ -179,13 +191,14 @@ export default function AnadirNovedad() {
           </InputGroup>
         )}
 
+        {/* Proveedor */}
         {(tipoMov === "7" || tipoMov === "9") && (
           <InputGroup className="mb-3">
             <FloatingLabel controlId="proveedor" label="Proveedor">
               <Form.Control
                 type="text"
                 value={
-                  proveedorSeleccionado && proveedorSeleccionado.id
+                  proveedorSeleccionado
                     ? `${proveedorSeleccionado.id} - ${proveedorSeleccionado.nombre}`
                     : "Seleccione un proveedor"
                 }
@@ -204,7 +217,13 @@ export default function AnadirNovedad() {
 
         <InputGroup className="mb-3">
           <FloatingLabel controlId="producto" label="Producto">
-            <Form.Control type="text" value={producto} readOnly required />
+            <Form.Control
+              type="text"
+              value={producto ? producto.nombre_producto : ""}
+              readOnly
+              required
+              onChange={() => console.log("📌 Producto en input:", producto)}
+            />
           </FloatingLabel>
           <Button
             variant="secondary"
@@ -256,6 +275,7 @@ export default function AnadirNovedad() {
         show={showProductoModal}
         handleClose={() => setShowProductoModal(false)}
         setProducto={setProducto}
+        idSede={sede} // ✅ Se pasa la ID de la sede seleccionada
       />
 
       <SeleccionarCliente
@@ -263,11 +283,10 @@ export default function AnadirNovedad() {
         handleClose={() => setShowClienteModal(false)}
         setCliente={setClienteSeleccionado}
       />
-
       <SeleccionarProveedor
         show={showProveedorModal}
         handleClose={() => setShowProveedorModal(false)}
-        setProveedor={setProveedorSeleccionado}
+        setProveedor={setProveedorSeleccionado} // ✅ Asegúrate de que esto esté bien
       />
     </Container>
   );

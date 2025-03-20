@@ -11,6 +11,7 @@ export default function SeleccionarProveedor({
   const [proveedores, setProveedores] = useState([]);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
 
   useEffect(() => {
     const fetchProveedores = async () => {
@@ -44,10 +45,14 @@ export default function SeleccionarProveedor({
   };
 
   const handleSelect = (proveedor) => {
-    setProveedor({
-      id: proveedor.id_proveedor,
+    const proveedorInfo = {
+      id_proveedor: proveedor.id_proveedor,
       nombre: proveedor.nombre_proveedor || "Sin nombre",
-    });
+    };
+
+    console.log("✅ Proveedor seleccionado:", proveedorInfo);
+
+    setProveedorSeleccionado(proveedorInfo);
     handleClose();
   };
 

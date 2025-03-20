@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { Modal, Form, Table } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaEye } from "react-icons/fa";
+import axios from "axios";
 
 export default function SeleccionarProducto({
   show,
   handleClose,
   setProducto,
+  idSede,
 }) {
   const [productos, setProductos] = useState([]);
   const [search, setSearch] = useState("");
@@ -14,21 +16,25 @@ export default function SeleccionarProducto({
 
   useEffect(() => {
     const fetchProductos = async () => {
+      if (!idSede) return; // ✅ Evita llamadas innecesarias si no hay sede seleccionada
+
       try {
-        const response = await fetch("http://localhost:4000/api/productos");
-        const data = await response.json();
-        setProductos(data);
+        const response = await axios.get(
+          `http://localhost:4000/api/inventariolocal/sede/${idSede}`
+        );
+        setProductos(response.data);
       } catch (error) {
-        console.error("Error al obtener productos", error);
+        console.error("❌ Error al obtener productos", error);
       }
     };
+
     if (show) fetchProductos();
-  }, [show]);
+  }, [show, idSede]);
 
   const filtrarProductos = () => {
     return productos.filter((p) => {
       const nombre_producto = p.nombre_producto
-        ? p.nombre_producto.toString().toLowerCase()
+        ? p.nombre_producto.toLowerCase()
         : "";
       const id = p.id_producto ? p.id_producto.toString() : "";
       return (
@@ -38,7 +44,8 @@ export default function SeleccionarProducto({
   };
 
   const handleSelect = (producto) => {
-    setProducto(producto.id_producto);
+    console.log("✅ Producto seleccionado:", producto);
+    setProducto(producto);
     handleClose();
   };
 
@@ -52,6 +59,10 @@ export default function SeleccionarProducto({
         <Modal.Title>Seleccionar Producto</Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        <p>
+          <strong>Sede Seleccionada:</strong> {idSede || "Ninguna"}
+        </p>{" "}
+        {/* ✅ Muestra la sede seleccionada */}
         <Form.Control
           type="text"
           placeholder="Buscar por código o nombre"
