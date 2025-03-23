@@ -47,11 +47,15 @@ export default function SeleccionarProveedor({
   const handleSelect = (proveedor) => {
     const proveedorInfo = {
       id_proveedor: proveedor.id_proveedor,
-      nombre: proveedor.nombre_proveedor || "Sin nombre",
+      nombre_proveedor: proveedor.nombre_proveedor || "Sin nombre",
     };
 
-    console.log("✅ Proveedor seleccionado:", proveedorInfo);
+    console.log(
+      "✅ Proveedor seleccionado (estado actualizado):",
+      proveedorInfo
+    );
 
+    setProveedor(proveedorInfo);
     setProveedorSeleccionado(proveedorInfo);
     handleClose();
   };

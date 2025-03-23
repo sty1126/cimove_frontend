@@ -50,7 +50,7 @@ export default function SeleccionarProducto({
   };
 
   const verDetalles = (productoId) => {
-    navigate(`/detalles-producto/${productoId}`);
+    window.open(`/detalles-producto/${productoId}`, "_blank");
   };
 
   return (

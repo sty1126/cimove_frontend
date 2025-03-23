@@ -9,7 +9,8 @@ import {
 } from "react-bootstrap";
 import SeleccionarProducto from "./SeleccionarProducto";
 import SeleccionarCliente from "./SeleccionarCliente";
-import SeleccionarProveedor from "./SeleccionarProveedor"; // ✅ Importar el nuevo modal
+import SeleccionarProveedor from "./SeleccionarProveedor";
+import { Modal } from "react-bootstrap";
 
 export default function AnadirNovedad() {
   const [tipoMov, setTipoMov] = useState("");
@@ -31,6 +32,9 @@ export default function AnadirNovedad() {
   const [proveedores, setProveedores] = useState([]);
   const [showProveedorModal, setShowProveedorModal] = useState(false);
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [stockMinimo, setStockMinimo] = useState("");
+  const [stockMaximo, setStockMaximo] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:4000/api/movimientos/tipo")
@@ -82,6 +86,12 @@ export default function AnadirNovedad() {
           ? proveedorSeleccionado?.id_proveedor ?? null
           : null,
     };
+
+    if (stockMinimo && stockMaximo) {
+      // Si el usuario ya ingresó stock mínimo y máximo, los agregamos
+      novedad.STOCK_MINIMO = Number(stockMinimo);
+      novedad.STOCK_MAXIMO = Number(stockMaximo);
+    }
 
     // 📤 Debug para ver qué se envía
     console.log("📤 Datos a enviar:", JSON.stringify(novedad, null, 2));
@@ -199,7 +209,7 @@ export default function AnadirNovedad() {
                 type="text"
                 value={
                   proveedorSeleccionado
-                    ? `${proveedorSeleccionado.id} - ${proveedorSeleccionado.nombre}`
+                    ? `${proveedorSeleccionado.id_proveedor} - ${proveedorSeleccionado.nombre_proveedor}`
                     : "Seleccione un proveedor"
                 }
                 readOnly
@@ -237,7 +247,10 @@ export default function AnadirNovedad() {
           <Form.Control
             type="number"
             value={cantidad}
-            onChange={(e) => setCantidad(e.target.value)}
+            onChange={(e) => {
+              const nuevaCantidad = Math.max(0, Number(e.target.value)); // Evita valores negativos
+              setCantidad(nuevaCantidad);
+            }}
             required
           />
         </FloatingLabel>
@@ -286,8 +299,69 @@ export default function AnadirNovedad() {
       <SeleccionarProveedor
         show={showProveedorModal}
         handleClose={() => setShowProveedorModal(false)}
-        setProveedor={setProveedorSeleccionado} // ✅ Asegúrate de que esto esté bien
+        setProveedor={setProveedorSeleccionado}
+      />
+
+      <ModalStockMinimoMaximo
+        show={showStockModal}
+        handleClose={() => setShowStockModal(false)}
+        setStockMinimo={setStockMinimo}
+        setStockMaximo={setStockMaximo}
+        handleConfirm={() => {
+          setShowStockModal(false);
+          handleSubmit(new Event("submit"));
+        }}
       />
     </Container>
   );
+
+  function ModalStockMinimoMaximo({
+    show,
+    handleClose,
+    setStockMinimo,
+    setStockMaximo,
+    handleConfirm,
+  }) {
+    return (
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Definir Stock Mínimo y Máximo</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <FloatingLabel
+            controlId="stockMinimo"
+            label="Stock Mínimo"
+            className="mb-3"
+          >
+            <Form.Control
+              type="number"
+              min="0"
+              onChange={(e) => setStockMinimo(e.target.value)}
+              required
+            />
+          </FloatingLabel>
+          <FloatingLabel
+            controlId="stockMaximo"
+            label="Stock Máximo"
+            className="mb-3"
+          >
+            <Form.Control
+              type="number"
+              min="0"
+              onChange={(e) => setStockMaximo(e.target.value)}
+              required
+            />
+          </FloatingLabel>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={handleConfirm}>
+            Confirmar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
 }
