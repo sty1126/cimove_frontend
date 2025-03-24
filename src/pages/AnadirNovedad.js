@@ -33,6 +33,7 @@ export default function AnadirNovedad() {
   const [showProveedorModal, setShowProveedorModal] = useState(false);
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
   const [showStockModal, setShowStockModal] = useState(false);
+  const [mostrarCamposStock, setMostrarCamposStock] = useState(false);
   const [stockMinimo, setStockMinimo] = useState("");
   const [stockMaximo, setStockMaximo] = useState("");
 
@@ -63,17 +64,17 @@ export default function AnadirNovedad() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(
-      "📌 Estado actual de proveedorSeleccionado:",
-      proveedorSeleccionado
-    );
+    if (cantidad <= 0) {
+      alert("La cantidad debe ser mayor a 0.");
+      return; // ⛔ Evita el envío del formulario
+    }
 
     const novedad = {
       ID_TIPOMOV_MOVIMIENTO: Number(tipoMov),
       ID_PRODUCTO_MOVIMIENTO: producto ? Number(producto.id_producto) : null,
       CANTIDAD_MOVIMIENTO: Number(cantidad),
       FECHA_MOVIMIENTO: fecha,
-      ESTADO_MOVIMIENTO: estado === "Aprobado" ? "A" : "P",
+      ESTADO_MOVIMIENTO: "A", // 🔥 Siempre "A"
       ID_SEDE_MOVIMIENTO: Number(sede),
       ID_SEDEDESTINO_MOVIMIENTO:
         tipoMov === "5" ? (sedeDestino ? Number(sedeDestino) : null) : null,
@@ -88,13 +89,9 @@ export default function AnadirNovedad() {
     };
 
     if (stockMinimo && stockMaximo) {
-      // Si el usuario ya ingresó stock mínimo y máximo, los agregamos
       novedad.STOCK_MINIMO = Number(stockMinimo);
       novedad.STOCK_MAXIMO = Number(stockMaximo);
     }
-
-    // 📤 Debug para ver qué se envía
-    console.log("📤 Datos a enviar:", JSON.stringify(novedad, null, 2));
 
     try {
       const response = await fetch("http://localhost:4000/api/movimientos", {
@@ -105,6 +102,14 @@ export default function AnadirNovedad() {
 
       const data = await response.json();
       console.log("📩 Respuesta del servidor:", data);
+
+      if (data.error === "FALTA_STOCK") {
+        alert(
+          "El producto no existe en la sede destino. Ingrese stock mínimo y máximo."
+        );
+        setMostrarCamposStock(true); // ✅ Muestra los nuevos inputs
+        return; // ⛔ Evita la recarga de la página
+      }
 
       if (response.ok) {
         alert("Novedad registrada exitosamente.");
@@ -246,11 +251,9 @@ export default function AnadirNovedad() {
         <FloatingLabel controlId="cantidad" label="Cantidad" className="mb-3">
           <Form.Control
             type="number"
+            min="1" // ⛔ Evita valores negativos y ceros desde el input
             value={cantidad}
-            onChange={(e) => {
-              const nuevaCantidad = Math.max(0, Number(e.target.value)); // Evita valores negativos
-              setCantidad(nuevaCantidad);
-            }}
+            onChange={(e) => setCantidad(Math.max(1, Number(e.target.value)))}
             required
           />
         </FloatingLabel>
@@ -268,29 +271,46 @@ export default function AnadirNovedad() {
           />
         </FloatingLabel>
 
-        <FloatingLabel controlId="estado" label="Estado" className="mb-3">
-          <Form.Select
-            value={estado}
-            onChange={(e) => setEstado(e.target.value)}
-            required
-          >
-            <option value="Pendiente">Pendiente</option>
-            <option value="Aprobado">Aprobado</option>
-          </Form.Select>
-        </FloatingLabel>
+        {mostrarCamposStock && (
+          <>
+            <FloatingLabel
+              controlId="stockMinimo"
+              label="Stock Mínimo"
+              className="mb-3"
+            >
+              <Form.Control
+                type="number"
+                min="0"
+                onChange={(e) => setStockMinimo(e.target.value)}
+                required
+              />
+            </FloatingLabel>
+
+            <FloatingLabel
+              controlId="stockMaximo"
+              label="Stock Máximo"
+              className="mb-3"
+            >
+              <Form.Control
+                type="number"
+                min="0"
+                onChange={(e) => setStockMaximo(e.target.value)}
+                required
+              />
+            </FloatingLabel>
+          </>
+        )}
 
         <Button type="submit" className="w-100 mt-3" variant="primary">
           Guardar
         </Button>
       </Form>
-
       <SeleccionarProducto
         show={showProductoModal}
         handleClose={() => setShowProductoModal(false)}
         setProducto={setProducto}
         idSede={sede} // ✅ Se pasa la ID de la sede seleccionada
       />
-
       <SeleccionarCliente
         show={showClienteModal}
         handleClose={() => setShowClienteModal(false)}
@@ -301,67 +321,6 @@ export default function AnadirNovedad() {
         handleClose={() => setShowProveedorModal(false)}
         setProveedor={setProveedorSeleccionado}
       />
-
-      <ModalStockMinimoMaximo
-        show={showStockModal}
-        handleClose={() => setShowStockModal(false)}
-        setStockMinimo={setStockMinimo}
-        setStockMaximo={setStockMaximo}
-        handleConfirm={() => {
-          setShowStockModal(false);
-          handleSubmit(new Event("submit"));
-        }}
-      />
     </Container>
   );
-
-  function ModalStockMinimoMaximo({
-    show,
-    handleClose,
-    setStockMinimo,
-    setStockMaximo,
-    handleConfirm,
-  }) {
-    return (
-      <Modal show={show} onHide={handleClose} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Definir Stock Mínimo y Máximo</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <FloatingLabel
-            controlId="stockMinimo"
-            label="Stock Mínimo"
-            className="mb-3"
-          >
-            <Form.Control
-              type="number"
-              min="0"
-              onChange={(e) => setStockMinimo(e.target.value)}
-              required
-            />
-          </FloatingLabel>
-          <FloatingLabel
-            controlId="stockMaximo"
-            label="Stock Máximo"
-            className="mb-3"
-          >
-            <Form.Control
-              type="number"
-              min="0"
-              onChange={(e) => setStockMaximo(e.target.value)}
-              required
-            />
-          </FloatingLabel>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={handleConfirm}>
-            Confirmar
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    );
-  }
 }

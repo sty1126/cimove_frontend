@@ -378,7 +378,7 @@ const Inventario = () => {
               color: "white",
             }}
             icon={<ShoppingCartOutlined />}
-            onClick={() => navigate("/añadir-stock")}
+            onClick={() => navigate("/anadir-stock")}
           >
             Añadir Stock
           </Button>

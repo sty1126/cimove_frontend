@@ -10,6 +10,7 @@ import ListaProducto from "./pages/ListaProducto";
 import DetallesProducto from "./pages/DetallesProducto";
 import ActualizarProducto from "./pages/ActualizarProducto";
 import AnadirNovedad from "./pages/AnadirNovedad";
+import AnadirStock from "./pages/AnadirStock";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
               element={<ActualizarProducto />}
             />
             <Route path="/anadir-novedad" element={<AnadirNovedad />} />
+            <Route path="/anadir-stock" element={<AnadirStock />} />
           </Routes>
         </div>
       </div>
