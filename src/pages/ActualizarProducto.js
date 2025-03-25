@@ -94,6 +94,7 @@ function ActualizarProducto() {
   };
 
   return (
+
     <Container className="mt-4 pb-5">
       <Form onSubmit={handleSubmit}>
         <h2 className="text-center mb-4">📦 Actualizar Producto</h2>

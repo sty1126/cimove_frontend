@@ -22,22 +22,45 @@ export default function AnadirStock() {
       .catch((error) => console.error("Error cargando sedes", error));
   }, []);
 
-  const agregarSede = () => {
-    if (
-      sedeSeleccionada &&
-      !stockPorSede.some((s) => s.sede === sedeSeleccionada)
-    ) {
-      setStockPorSede([
-        ...stockPorSede,
-        {
-          sede: sedeSeleccionada,
-          cantidad: "",
-          stockMinimo: "",
-          stockMaximo: "",
-        },
-      ]);
-      setSedeSeleccionada("");
+  const verificarSiExiste = async (idSede) => {
+    if (!producto) return false;
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/inventariolocal/existe/${producto.id_producto}/${idSede}`
+      );
+      const data = await response.json();
+      return data.existe; // Retorna true si el producto ya está en la sede
+    } catch (error) {
+      console.error("Error verificando existencia del producto", error);
+      return false;
     }
+  };
+
+  const agregarSede = async () => {
+    if (!sedeSeleccionada || !producto) {
+      alert("Seleccione un producto y una sede");
+      return;
+    }
+
+    // Verificar si la sede ya está en la lista antes de hacer la consulta
+    if (stockPorSede.some((s) => s.sede === sedeSeleccionada)) {
+      alert("Esta sede ya ha sido agregada.");
+      return;
+    }
+
+    const yaExiste = await verificarSiExiste(sedeSeleccionada);
+
+    setStockPorSede([
+      ...stockPorSede,
+      {
+        sede: sedeSeleccionada,
+        cantidad: "",
+        stockMinimo: yaExiste ? null : "",
+        stockMaximo: yaExiste ? null : "",
+        existe: yaExiste,
+      },
+    ]);
+    setSedeSeleccionada("");
   };
 
   const actualizarCantidad = (index, campo, valor) => {
@@ -52,39 +75,56 @@ export default function AnadirStock() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!producto) {
       alert("Seleccione un producto");
       return;
     }
 
-    const datosAEnviar = stockPorSede.map((s) => ({
-      ID_PRODUCTO_INVENTARIOLOCAL: producto.id_producto,
-      ID_SEDE_INVENTARIOLOCAL: Number(s.sede),
-      EXISTENCIA_INVENTARIOLOCAL: Number(s.cantidad),
-      STOCKMINIMO_INVENTARIOLOCAL: s.stockMinimo ? Number(s.stockMinimo) : null, // ✅ Corrige NaN
-      STOCKMAXIMO_INVENTARIOLOCAL: Number(s.stockMaximo),
-    }));
-
     try {
-      const response = await fetch(
-        "http://localhost:4000/api/inventario/agregar-stock",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(datosAEnviar),
-        }
+      const respuestas = await Promise.all(
+        stockPorSede.map(async (s) => {
+          let url, method, bodyData;
+
+          if (s.existe) {
+            // Aquí corregimos la URL de PATCH
+            url = `http://localhost:4000/api/inventariolocal/${producto.id_producto}/${s.sede}/ajustar`;
+            method = "PATCH";
+            bodyData = { cantidad: Number(s.cantidad) };
+          } else {
+            url = "http://localhost:4000/api/inventariolocal";
+            method = "POST";
+            bodyData = {
+              id_producto_inventariolocal: producto.id_producto,
+              id_sede_inventariolocal: Number(s.sede),
+              existencia_inventariolocal: Number(s.cantidad),
+              stockminimo_inventariolocal: s.stockMinimo
+                ? Number(s.stockMinimo)
+                : 0, // Valor predeterminado
+              stockmaximo_inventariolocal: s.stockMaximo
+                ? Number(s.stockMaximo)
+                : 1, // Valor predeterminado
+            };
+          }
+
+          const response = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodyData),
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.message || "Error al añadir stock");
+          }
+          return data;
+        })
       );
 
-      const data = await response.json();
-      if (response.ok) {
-        alert("Stock agregado exitosamente");
-      } else {
-        alert(`Error: ${data.error}`);
-      }
+      alert("Stock actualizado correctamente");
+      setStockPorSede([]);
     } catch (error) {
-      console.error("Error de conexión", error);
-      alert("Error de conexión con el servidor");
+      console.error("Error:", error);
+      alert(error.message || "Error de conexión con el servidor");
     }
   };
 
@@ -92,7 +132,6 @@ export default function AnadirStock() {
     <Container className="p-4 bg-white shadow rounded">
       <h2 className="text-xl font-bold mb-4">Añadir Stock</h2>
       <Form onSubmit={handleSubmit}>
-        {/* Selección de Producto */}
         <InputGroup className="mb-3">
           <FloatingLabel controlId="producto" label="Producto">
             <Form.Control
@@ -111,7 +150,6 @@ export default function AnadirStock() {
           </Button>
         </InputGroup>
 
-        {/* Selección de Sede */}
         <FloatingLabel controlId="sede" label="Sede" className="mb-3">
           <Form.Select
             value={sedeSeleccionada}
@@ -130,10 +168,8 @@ export default function AnadirStock() {
           Añadir Sede
         </Button>
 
-        {/* Lista de Sedes con Cantidad, Stock Mínimo y Máximo */}
         {stockPorSede.map((s, index) => (
           <InputGroup className="mb-3" key={index}>
-            {/* Nombre de la Sede */}
             <Form.Control
               type="text"
               value={
@@ -143,7 +179,6 @@ export default function AnadirStock() {
               readOnly
             />
 
-            {/* Cantidad de Stock */}
             <Form.Control
               type="number"
               min="0"
@@ -155,28 +190,30 @@ export default function AnadirStock() {
               required
             />
 
-            {/* Stock Mínimo */}
-            <Form.Control
-              type="number"
-              min="0"
-              placeholder="Stock Mín."
-              value={s.stockMinimo}
-              onChange={(e) =>
-                actualizarCantidad(index, "stockMinimo", e.target.value)
-              }
-            />
+            {!s.existe && (
+              <>
+                <Form.Control
+                  type="number"
+                  min="0"
+                  placeholder="Stock Mín."
+                  value={s.stockMinimo}
+                  onChange={(e) =>
+                    actualizarCantidad(index, "stockMinimo", e.target.value)
+                  }
+                />
 
-            {/* Stock Máximo */}
-            <Form.Control
-              type="number"
-              min="1"
-              placeholder="Stock Máx."
-              value={s.stockMaximo}
-              onChange={(e) =>
-                actualizarCantidad(index, "stockMaximo", e.target.value)
-              }
-              required
-            />
+                <Form.Control
+                  type="number"
+                  min="1"
+                  placeholder="Stock Máx."
+                  value={s.stockMaximo}
+                  onChange={(e) =>
+                    actualizarCantidad(index, "stockMaximo", e.target.value)
+                  }
+                  required
+                />
+              </>
+            )}
 
             <Button variant="danger" onClick={() => eliminarSede(index)}>
               ❌
@@ -189,7 +226,6 @@ export default function AnadirStock() {
         </Button>
       </Form>
 
-      {/* Modal para seleccionar el producto */}
       <SeleccionarProductoGeneral
         show={showProductoModal}
         handleClose={() => setShowProductoModal(false)}
