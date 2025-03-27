@@ -4,18 +4,30 @@ import { useParams } from "react-router-dom";
 const DetallesProducto = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [proveedores, setProveedores] = useState([]);
   const { productoId } = useParams();
 
   useEffect(() => {
-    fetch(`http://localhost:4000/api/productos/detalle/${productoId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Datos recibidos en el frontend:", data);
-        setProduct(data);
-        setLoading(false);
+    setLoading(true);
+
+    Promise.all([
+      fetch(`http://localhost:4000/api/productos/detalle/${productoId}`).then(
+        (res) => res.json()
+      ),
+      fetch(
+        `http://localhost:4000/api/productos/${productoId}/proveedores`
+      ).then((res) => res.json()),
+    ])
+      .then(([productoData, proveedoresData]) => {
+        console.log("Datos recibidos en el frontend:", productoData);
+        console.log("Proveedores recibidos:", proveedoresData);
+        setProduct(productoData);
+        setProveedores(proveedoresData);
       })
       .catch((error) => {
-        console.error("Error al obtener el producto:", error);
+        console.error("Error al obtener datos:", error);
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, [productoId]);
@@ -71,11 +83,12 @@ const DetallesProducto = () => {
         </p>
       </div>
 
-      <h2 className="text-xl font-bold text-center mt-6 mb-4">
+      <h2 className="text-xl font-bold text-center mt-10 mb-6">
         Inventario en Sedes
       </h2>
+
       {product.inventario_sedes && product.inventario_sedes.length > 0 ? (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto mb-10">
           <table className="w-full border-collapse border border-gray-300 rounded-lg">
             <thead className="bg-gray-100">
               <tr>
@@ -112,6 +125,41 @@ const DetallesProducto = () => {
       ) : (
         <p className="text-center text-gray-600">
           No hay información de inventario en sedes.
+        </p>
+      )}
+
+      {/* Sección de Proveedores */}
+      <h2 className="text-xl font-bold text-center mt-16 mb-6">Proveedores</h2>
+      {proveedores.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border border-gray-300 rounded-lg">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border border-gray-300 px-4 py-2">Nombre</th>
+                <th className="border border-gray-300 px-4 py-2">Teléfono</th>
+                <th className="border border-gray-300 px-4 py-2">Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {proveedores.map((prov, index) => (
+                <tr key={index} className="text-center">
+                  <td className="border border-gray-300 px-4 py-2">
+                    {prov.nombre_proveedor}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {prov.telefono_proveedor}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {prov.email_proveedor}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-center text-gray-600">
+          No hay proveedores asociados a este producto.
         </p>
       )}
     </div>
