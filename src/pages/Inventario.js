@@ -183,7 +183,7 @@ const Inventario = () => {
   };
 
   const handleViewDetails = (record) => {
-    window.location.href = `/detalles-producto/${record.id_producto}`;
+    window.open(`/detalles-producto/${record.id_producto}`, "_blank");
   };
 
   const handleDelete = async (id) => {

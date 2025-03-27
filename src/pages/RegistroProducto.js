@@ -32,17 +32,20 @@ const RegistrarProducto = () => {
     let updatedFormData = { ...formData };
 
     if (name === "precioventaact_producto" || name === "costoventa_producto") {
-      const precioVenta = parseFloat(value) || 0;
+      let valor = value === "" ? "" : Math.max(0, parseFloat(value)); // Restringe a mínimo 0
+      updatedFormData[name] = valor;
+
+      // Calcula el margen de utilidad si ambos valores son válidos
+      const precioVenta =
+        parseFloat(updatedFormData.precioventaact_producto) || 0;
       const costoVenta = parseFloat(updatedFormData.costoventa_producto) || 0;
-      updatedFormData[name] = value;
       updatedFormData.margenutilidad_producto = Math.round(
         precioVenta - costoVenta
       );
     } else if (name === "valoriva_producto") {
-      let iva = parseFloat(value) / 100;
-      if (iva > 1) iva = 1;
-      if (iva < 0) iva = 0;
-      updatedFormData.valoriva_producto = iva.toFixed(2);
+      let iva =
+        value === "" ? "" : Math.min(100, Math.max(0, parseFloat(value))); // Restringe IVA entre 0 y 100
+      updatedFormData.valoriva_producto = iva;
     } else {
       updatedFormData[name] = value;
     }
@@ -54,11 +57,17 @@ const RegistrarProducto = () => {
     e.preventDefault();
     axios
       .post("http://localhost:4000/api/productos", formData)
-      .then(() => {
+      .then((res) => {
+        const idProducto = res.data.id_producto; // Obtener el ID del producto registrado
         toast.success("Producto registrado exitosamente 🎉", {
           position: "top-right",
           autoClose: 3000,
         });
+
+        // Redirigir a la pantalla de asociar proveedores
+        setTimeout(() => {
+          navigate(`/asociar-proveedores/${idProducto}`);
+        }, 2000); // Espera 2 segundos antes de redirigir
       })
       .catch((error) => {
         toast.error("Error al registrar producto 🚨", {
@@ -79,7 +88,7 @@ const RegistrarProducto = () => {
           className="mb-3"
         >
           <Form.Control
-            type="text"
+            type="number"
             name="id_producto"
             value={formData.id_producto}
             onChange={handleChange}
@@ -149,6 +158,8 @@ const RegistrarProducto = () => {
             name="precioventaact_producto"
             value={formData.precioventaact_producto}
             onChange={handleChange}
+            min="0"
+            step="0.01"
             required
           />
         </FloatingLabel>
@@ -163,23 +174,12 @@ const RegistrarProducto = () => {
             name="costoventa_producto"
             value={formData.costoventa_producto}
             onChange={handleChange}
+            min="0"
+            step="0.01"
             required
           />
         </FloatingLabel>
 
-        <FloatingLabel
-          controlId="margenutilidad_producto"
-          label="Margen Utilidad (calculado)"
-          className="mb-3"
-        >
-          <Form.Control
-            type="text"
-            name="margenutilidad_producto"
-            value={formData.margenutilidad_producto}
-            readOnly
-            className="bg-light"
-          />
-        </FloatingLabel>
         <FloatingLabel
           controlId="valoriva_producto"
           label="IVA (%)"
@@ -188,22 +188,11 @@ const RegistrarProducto = () => {
           <Form.Control
             type="number"
             name="valoriva_producto"
-            value={
-              formData.valoriva_producto
-                ? Math.round(formData.valoriva_producto * 100)
-                : ""
-            }
-            onChange={(e) => {
-              const value = e.target.value.replace(/^0+/, ""); // Elimina ceros a la izquierda
-              handleChange({
-                target: {
-                  name: "valoriva_producto",
-                  value: value ? Number(value) / 100 : 0,
-                },
-              });
-            }}
+            value={formData.valoriva_producto}
+            onChange={handleChange}
             min="0"
             max="100"
+            step="0.01"
             required
           />
         </FloatingLabel>

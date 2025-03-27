@@ -11,6 +11,7 @@ import DetallesProducto from "./pages/DetallesProducto";
 import ActualizarProducto from "./pages/ActualizarProducto";
 import AnadirNovedad from "./pages/AnadirNovedad";
 import AnadirStock from "./pages/AnadirStock";
+import AsociarProveedores from "./pages/AsociarProveedores";
 
 function App() {
   return (
@@ -38,6 +39,10 @@ function App() {
             />
             <Route path="/anadir-novedad" element={<AnadirNovedad />} />
             <Route path="/anadir-stock" element={<AnadirStock />} />
+            <Route
+              path="/asociar-proveedores/:idProducto"
+              element={<AsociarProveedores />}
+            />
           </Routes>
         </div>
       </div>
