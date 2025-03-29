@@ -12,6 +12,10 @@ import ActualizarProducto from "./pages/ActualizarProducto";
 import AnadirNovedad from "./pages/AnadirNovedad";
 import AnadirStock from "./pages/AnadirStock";
 import AsociarProveedores from "./pages/AsociarProveedores";
+import ListaProveedores from "./pages/ListaProveedores";
+import DetallesProveedor from "./pages/DetallesProveedor";
+import RegistroProveedor from "./pages/RegistroProveedor";
+import ActualizarProveedor from "./pages/ActualizarProveedor";
 
 function App() {
   return (
@@ -42,6 +46,19 @@ function App() {
             <Route
               path="/asociar-proveedores/:idProducto"
               element={<AsociarProveedores />}
+            />
+            <Route path="/proveedores" element={<ListaProveedores />} />
+            <Route
+              path="/proveedores/:id"
+              element={<DetallesProveedor />}
+            />
+            <Route
+              path="/registro-proveedor"
+              element={<RegistroProveedor />}
+            />
+            <Route
+              path="/actualizar-proveedor/:id"
+              element={<ActualizarProveedor />}
             />
           </Routes>
         </div>
