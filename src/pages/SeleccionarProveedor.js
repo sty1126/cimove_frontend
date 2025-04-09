@@ -1,7 +1,42 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { Modal, Form, Table } from "react-bootstrap";
+import {
+  Modal,
+  Input,
+  Table,
+  Button,
+  Space,
+  Typography,
+  Empty,
+  Spin,
+  Tooltip,
+  Divider,
+} from "antd";
+import {
+  SearchOutlined,
+  CheckCircleOutlined,
+  EyeOutlined,
+  UsergroupAddOutlined,
+  IdcardOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { FaCheckCircle, FaEye } from "react-icons/fa";
+
+const { Text, Title } = Typography;
+
+// Paleta de colores personalizada
+const colors = {
+  primary: "#0D7F93",
+  secondary: "#4D8A52",
+  accent: "#7FBAD6",
+  light: "#C3D3C6",
+  background: "#E8EAEC",
+  text: "#2A3033",
+  success: "#4D8A52",
+  warning: "#E0A458",
+  danger: "#C25F48",
+};
 
 export default function SeleccionarProveedor({
   show,
@@ -10,11 +45,14 @@ export default function SeleccionarProveedor({
 }) {
   const [proveedores, setProveedores] = useState([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
 
   useEffect(() => {
     const fetchProveedores = async () => {
+      if (!show) return;
+
+      setLoading(true);
       try {
         const response = await fetch(
           "http://localhost:4000/api/proveedores/all"
@@ -23,96 +61,177 @@ export default function SeleccionarProveedor({
         setProveedores(data);
       } catch (error) {
         console.error("Error al obtener proveedores", error);
+      } finally {
+        setLoading(false);
       }
     };
-    if (show) fetchProveedores();
+
+    fetchProveedores();
   }, [show]);
 
-  const filtrarProveedores = () => {
-    return proveedores.filter((p) => {
-      const id = p.id_proveedor ? p.id_proveedor.toString() : "";
-      const nombre = p.nombre_proveedor ? p.nombre_proveedor.toLowerCase() : "";
-      const representante = p.representante_proveedor
-        ? p.representante_proveedor.toLowerCase()
-        : "";
-
-      return (
-        id.includes(search) ||
-        nombre.includes(search.toLowerCase()) ||
-        representante.includes(search.toLowerCase())
-      );
-    });
-  };
+  const proveedoresFiltrados = proveedores.filter((p) => {
+    const id = p.id_proveedor?.toString() || "";
+    const nombre = p.nombre_proveedor?.toLowerCase() || "";
+    const representante = p.representante_proveedor?.toLowerCase() || "";
+    return (
+      id.includes(search) ||
+      nombre.includes(search.toLowerCase()) ||
+      representante.includes(search.toLowerCase())
+    );
+  });
 
   const handleSelect = (proveedor) => {
     const proveedorInfo = {
       id_proveedor: proveedor.id_proveedor,
       nombre_proveedor: proveedor.nombre_proveedor || "Sin nombre",
     };
-
-    console.log(
-      "✅ Proveedor seleccionado (estado actualizado):",
-      proveedorInfo
-    );
-
+    console.log("Proveedor seleccionado:", proveedorInfo);
     setProveedor(proveedorInfo);
-    setProveedorSeleccionado(proveedorInfo);
     handleClose();
   };
 
-  const verDetalles = (proveedorId) => {
-    window.open(`/detalles-proveedor/${proveedorId}`, "_blank");
+  const verDetalles = (id) => {
+    window.open(`/detalles-proveedor/${id}`, "_blank");
   };
 
+  const columns = [
+    {
+      title: (
+        <Space>
+          <IdcardOutlined style={{ color: colors.primary }} />
+          ID
+        </Space>
+      ),
+      dataIndex: "id_proveedor",
+      key: "id_proveedor",
+      width: 80,
+      render: (id) => (
+        <Text strong style={{ color: colors.primary }}>
+          {id}
+        </Text>
+      ),
+    },
+    {
+      title: (
+        <Space>
+          <UsergroupAddOutlined style={{ color: colors.primary }} />
+          Nombre
+        </Space>
+      ),
+      dataIndex: "nombre_proveedor",
+      key: "nombre_proveedor",
+      render: (nombre) => <Text strong>{nombre || "Sin nombre"}</Text>,
+    },
+    {
+      title: (
+        <Space>
+          <UserOutlined style={{ color: colors.primary }} />
+          Representante
+        </Space>
+      ),
+      dataIndex: "representante_proveedor",
+      key: "representante_proveedor",
+      render: (rep) => <Text>{rep || "Sin representante"}</Text>,
+    },
+    {
+      title: "Acciones",
+      key: "acciones",
+      width: 120,
+      align: "center",
+      render: (_, proveedor) => (
+        <Space size="middle">
+          <Tooltip title="Seleccionar proveedor">
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<CheckCircleOutlined />}
+              onClick={() => handleSelect(proveedor)}
+              style={{
+                backgroundColor: colors.success,
+                borderColor: colors.success,
+              }}
+            />
+          </Tooltip>
+          <Tooltip title="Ver detalles">
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<EyeOutlined />}
+              onClick={() => verDetalles(proveedor.id_proveedor)}
+              style={{
+                backgroundColor: colors.accent,
+                borderColor: colors.accent,
+              }}
+            />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
   return (
-    <Modal show={show} onHide={handleClose} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Seleccionar Proveedor</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form.Control
-          type="text"
-          placeholder="Buscar por ID, nombre o representante"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="mb-3"
+    <Modal
+      title={
+        <Space align="center">
+          <UsergroupAddOutlined
+            style={{ color: colors.primary, fontSize: "20px" }}
+          />
+          <Title level={4} style={{ margin: 0 }}>
+            Seleccionar Proveedor
+          </Title>
+        </Space>
+      }
+      open={show}
+      onCancel={handleClose}
+      footer={null}
+      width={800}
+      centered
+      bodyStyle={{ padding: "16px" }}
+    >
+      <Input
+        placeholder="Buscar por ID, nombre o representante"
+        prefix={<SearchOutlined style={{ color: colors.primary }} />}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ marginBottom: "16px" }}
+        allowClear
+      />
+
+      <Divider style={{ margin: "8px 0 16px", borderColor: colors.light }} />
+
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "40px 0" }}>
+          <Spin size="large" tip="Cargando proveedores..." />
+        </div>
+      ) : proveedoresFiltrados.length > 0 ? (
+        <Table
+          columns={columns}
+          dataSource={proveedoresFiltrados}
+          rowKey="id_proveedor"
+          pagination={{
+            pageSize: 5,
+            showSizeChanger: false,
+            showTotal: (total) => `Total: ${total} proveedores`,
+          }}
+          size="middle"
+          scroll={{ y: 300 }}
         />
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Representante</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtrarProveedores().map((proveedor) => (
-              <tr key={proveedor.id_proveedor}>
-                <td>{proveedor.id_proveedor}</td>
-                <td>{proveedor.nombre_proveedor || "Sin nombre"}</td>
-                <td>
-                  {proveedor.representante_proveedor || "Sin representante"}
-                </td>
-                <td className="text-center">
-                  <FaCheckCircle
-                    className="text-success me-3"
-                    style={{ cursor: "pointer", fontSize: "1.2rem" }}
-                    onClick={() => handleSelect(proveedor)}
-                    title="Seleccionar proveedor"
-                  />
-                  <FaEye
-                    className="text-info"
-                    style={{ cursor: "pointer", fontSize: "1.2rem" }}
-                    onClick={() => verDetalles(proveedor.id_proveedor)}
-                    title="Ver detalles del proveedor"
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </Modal.Body>
+      ) : (
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={
+            <Space direction="vertical" align="center">
+              <Text type="secondary">No hay proveedores disponibles</Text>
+              {search && (
+                <Button type="link" onClick={() => setSearch("")}>
+                  Limpiar búsqueda
+                </Button>
+              )}
+            </Space>
+          }
+          style={{ margin: "40px 0" }}
+        />
+      )}
     </Modal>
   );
 }

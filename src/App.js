@@ -6,7 +6,6 @@ import Home from "./pages/Home";
 import Inventario from "./pages/Inventario";
 import ConsultaProducto from "./pages/ConsultaProducto";
 import RegistroProducto from "./pages/RegistroProducto";
-import ListaProducto from "./pages/ListaProducto";
 import DetallesProducto from "./pages/DetallesProducto";
 import ActualizarProducto from "./pages/ActualizarProducto";
 import AnadirNovedad from "./pages/AnadirNovedad";
@@ -16,6 +15,8 @@ import ListaProveedores from "./pages/ListaProveedores";
 import DetallesProveedor from "./pages/DetallesProveedor";
 import RegistroProveedor from "./pages/RegistroProveedor";
 import ActualizarProveedor from "./pages/ActualizarProveedor";
+import Catalogo from "./pages/Catalogo";
+import FacturacionProveedor from "./pages/FacturacionProveedor";
 
 function App() {
   return (
@@ -48,17 +49,16 @@ function App() {
               element={<AsociarProveedores />}
             />
             <Route path="/proveedores" element={<ListaProveedores />} />
-            <Route
-              path="/proveedores/:id"
-              element={<DetallesProveedor />}
-            />
-            <Route
-              path="/registro-proveedor"
-              element={<RegistroProveedor />}
-            />
+            <Route path="/proveedores/:id" element={<DetallesProveedor />} />
+            <Route path="/registro-proveedor" element={<RegistroProveedor />} />
             <Route
               path="/actualizar-proveedor/:id"
               element={<ActualizarProveedor />}
+            />
+            <Route path="/catalogo" element={<Catalogo />} />
+            <Route
+              path="/facturacion-proveedor"
+              element={<FacturacionProveedor />}
             />
           </Routes>
         </div>
