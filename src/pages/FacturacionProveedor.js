@@ -32,16 +32,18 @@ const FacturacionProveedor = () => {
     }
   };
 
-  const formatCurrency = (value) =>
-    value.toLocaleString("es-CO", {
+  const formatCurrency = (value) => {
+    if (value == null) return "-"; // Si el valor es null o undefined, retorna un guion o algún valor predeterminado
+    return value.toLocaleString("es-CO", {
       style: "currency",
       currency: "COP",
       minimumFractionDigits: 0,
     });
+  };
 
   const filtrarFacturas = () => {
     return facturas.filter((f) => {
-      const estado = f.estado_factura.toLowerCase();
+      const estado = (f.estado_facturaproveedor || "").toLowerCase();
       return (
         (filtroProveedor === "" || f.nombre_proveedor === filtroProveedor) &&
         (filtroEstado === "" || estado === filtroEstado)
@@ -106,16 +108,16 @@ const FacturacionProveedor = () => {
               return (
                 <tr key={factura.id_factura} className="hover:bg-gray-50">
                   <td className="p-2 border text-center">
-                    {factura.id_factura}
+                    {factura.id_facturaproveedor}
                   </td>
                   <td className="p-2 border text-center">
                     {factura.nombre_proveedor}
                   </td>
                   <td className="p-2 border text-center">
-                    {new Date(factura.fecha_factura).toLocaleDateString()}
+                    {new Date(factura.fecha_facturaproveedor).toLocaleDateString()}
                   </td>
                   <td className="p-2 border text-center">
-                    {formatCurrency(factura.monto_factura)}
+                    {formatCurrency(factura.monto_facturaproveedor)}
                   </td>
                   <td className="p-2 border text-center">
                     {formatCurrency(factura.total_abonado)}
@@ -126,14 +128,14 @@ const FacturacionProveedor = () => {
                   <td className="p-2 border text-center">
                     <span
                       className={`px-2 py-1 rounded text-white text-sm ${
-                        factura.estado_factura === "Pagada"
+                        factura.estado_facturaproveedor === "Pagada"
                           ? "bg-green-600"
-                          : factura.estado_factura === "Pendiente"
+                          : factura.estado_facturaproveedor === "Pendiente"
                           ? "bg-red-500"
                           : "bg-yellow-500"
                       }`}
                     >
-                      {factura.estado_factura}
+                      {factura.estado_facturaproveedor}
                     </span>
                   </td>
                   <td className="p-2 border text-center space-x-2">
