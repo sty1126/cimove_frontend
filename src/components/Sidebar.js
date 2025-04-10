@@ -218,7 +218,7 @@ const Sidebar = () => {
                 icon: <FaIcons.FaFileInvoice />,
                 label: (
                   <NavLink
-                    to="/facturacion-compras"
+                    to="/facturacion-proveedor"
                     style={{ color: colors.text, fontWeight: "bold" }}
                   >
                     Facturación

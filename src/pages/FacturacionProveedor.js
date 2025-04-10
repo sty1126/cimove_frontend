@@ -1,24 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const FacturacionProveedor = () => {
-  const facturas = [
-    {
-      id: "F-001",
-      proveedor: "Proveedor A",
-      fecha: "2025-04-01",
-      montoTotal: 1000000,
-      totalAbonado: 600000,
-      estado: "Parcial",
-    },
-    {
-      id: "F-002",
-      proveedor: "Proveedor B",
-      fecha: "2025-03-28",
-      montoTotal: 800000,
-      totalAbonado: 800000,
-      estado: "Pagada",
-    },
-  ];
+  const [facturas, setFacturas] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
+  const [filtroProveedor, setFiltroProveedor] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("");
+
+  useEffect(() => {
+    fetchFacturas();
+    fetchProveedores();
+  }, []);
+
+  const fetchFacturas = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:4000/api/facturas-proveedor"
+      );
+      setFacturas(res.data);
+    } catch (error) {
+      console.error("Error al obtener las facturas:", error);
+    }
+  };
+
+  const fetchProveedores = async () => {
+    try {
+      const res = await axios.get("http://localhost:4000/api/proveedores/all");
+      setProveedores(res.data);
+    } catch (error) {
+      console.error("Error al obtener proveedores:", error);
+    }
+  };
 
   const formatCurrency = (value) =>
     value.toLocaleString("es-CO", {
@@ -26,6 +38,16 @@ const FacturacionProveedor = () => {
       currency: "COP",
       minimumFractionDigits: 0,
     });
+
+  const filtrarFacturas = () => {
+    return facturas.filter((f) => {
+      const estado = f.estado_factura.toLowerCase();
+      return (
+        (filtroProveedor === "" || f.nombre_proveedor === filtroProveedor) &&
+        (filtroEstado === "" || estado === filtroEstado)
+      );
+    });
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -35,13 +57,24 @@ const FacturacionProveedor = () => {
 
       {/* Filtros */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <select className="border p-2 rounded w-full">
+        <select
+          className="border p-2 rounded w-full"
+          value={filtroProveedor}
+          onChange={(e) => setFiltroProveedor(e.target.value)}
+        >
           <option value="">Todos los proveedores</option>
-          <option>Proveedor A</option>
-          <option>Proveedor B</option>
+          {proveedores.map((prov) => (
+            <option key={prov.id_proveedor} value={prov.nombre_proveedor}>
+              {prov.nombre_proveedor}
+            </option>
+          ))}
         </select>
 
-        <select className="border p-2 rounded w-full">
+        <select
+          className="border p-2 rounded w-full"
+          value={filtroEstado}
+          onChange={(e) => setFiltroEstado(e.target.value)}
+        >
           <option value="">Todos los estados</option>
           <option value="pendiente">Pendiente</option>
           <option value="pagada">Pagada</option>
@@ -68,20 +101,24 @@ const FacturacionProveedor = () => {
             </tr>
           </thead>
           <tbody>
-            {facturas.map((factura) => {
-              const saldo = factura.montoTotal - factura.totalAbonado;
+            {filtrarFacturas().map((factura) => {
+              const saldo = factura.monto_factura - factura.total_abonado;
               return (
-                <tr key={factura.id} className="hover:bg-gray-50">
-                  <td className="p-2 border text-center">{factura.id}</td>
+                <tr key={factura.id_factura} className="hover:bg-gray-50">
                   <td className="p-2 border text-center">
-                    {factura.proveedor}
-                  </td>
-                  <td className="p-2 border text-center">{factura.fecha}</td>
-                  <td className="p-2 border text-center">
-                    {formatCurrency(factura.montoTotal)}
+                    {factura.id_factura}
                   </td>
                   <td className="p-2 border text-center">
-                    {formatCurrency(factura.totalAbonado)}
+                    {factura.nombre_proveedor}
+                  </td>
+                  <td className="p-2 border text-center">
+                    {new Date(factura.fecha_factura).toLocaleDateString()}
+                  </td>
+                  <td className="p-2 border text-center">
+                    {formatCurrency(factura.monto_factura)}
+                  </td>
+                  <td className="p-2 border text-center">
+                    {formatCurrency(factura.total_abonado)}
                   </td>
                   <td className="p-2 border text-center">
                     {formatCurrency(saldo)}
@@ -89,14 +126,14 @@ const FacturacionProveedor = () => {
                   <td className="p-2 border text-center">
                     <span
                       className={`px-2 py-1 rounded text-white text-sm ${
-                        factura.estado === "Pagada"
+                        factura.estado_factura === "Pagada"
                           ? "bg-green-600"
-                          : factura.estado === "Pendiente"
+                          : factura.estado_factura === "Pendiente"
                           ? "bg-red-500"
                           : "bg-yellow-500"
                       }`}
                     >
-                      {factura.estado}
+                      {factura.estado_factura}
                     </span>
                   </td>
                   <td className="p-2 border text-center space-x-2">
