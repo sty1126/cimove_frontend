@@ -1,5 +1,6 @@
 "use client";
 
+import { useCart } from "../context/CartContext";
 import { Drawer, Select, message } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -10,6 +11,7 @@ import {
   FaMinus,
   FaTrash,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -100,13 +102,14 @@ const buttonStyles = {
 };
 
 const Catalogo = () => {
+  const { cart, setCart } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cart, setCart] = useState([]);
   const [sedes, setSedes] = useState([]);
   const [selectedSede, setSelectedSede] = useState(null);
   const [generalProducts, setGeneralProducts] = useState([]);
   const [sedeProducts, setSedeProducts] = useState([]);
   const [busqueda, setBusqueda] = useState("");
+  const navigate = useNavigate();
 
   const formatData = (productos) =>
     productos.map((prod) => ({
@@ -175,17 +178,13 @@ const Catalogo = () => {
 
   const addToCart = (producto) => {
     setCart((prevCart) => {
-      const existente = prevCart.find(
+      const yaExiste = prevCart.some(
         (p) => p.id_producto === producto.id_producto
       );
-      if (existente) {
-        return prevCart.map((p) =>
-          p.id_producto === producto.id_producto
-            ? { ...p, cantidad: p.cantidad + 1 }
-            : p
-        );
+      if (yaExiste) {
+        return prevCart;
       } else {
-        return [...prevCart, { ...producto, cantidad: 1 }];
+        return [...prevCart, { ...producto }];
       }
     });
   };
@@ -586,79 +585,6 @@ const Catalogo = () => {
                     <button
                       onClick={() =>
                         setCart((prev) =>
-                          prev.map((prod) =>
-                            prod.id_producto === item.id_producto &&
-                            prod.cantidad > 1
-                              ? { ...prod, cantidad: prod.cantidad - 1 }
-                              : prod
-                          )
-                        )
-                      }
-                      style={buttonStyles.quantity}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor =
-                          buttonStyles.quantity.hover.backgroundColor;
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor =
-                          buttonStyles.quantity.backgroundColor;
-                      }}
-                    >
-                      <FaMinus size={12} />
-                    </button>
-
-                    <input
-                      type="number"
-                      min="1"
-                      value={item.cantidad}
-                      onChange={(e) => {
-                        const nuevaCantidad = Number.parseInt(e.target.value);
-                        if (nuevaCantidad > 0) {
-                          setCart((prev) =>
-                            prev.map((prod) =>
-                              prod.id_producto === item.id_producto
-                                ? { ...prod, cantidad: nuevaCantidad }
-                                : prod
-                            )
-                          );
-                        }
-                      }}
-                      style={{
-                        width: "50px",
-                        textAlign: "center",
-                        padding: "6px",
-                        border: "1px solid #e5e7eb",
-                        borderRadius: "6px",
-                        fontSize: "14px",
-                      }}
-                    />
-
-                    <button
-                      onClick={() =>
-                        setCart((prev) =>
-                          prev.map((prod) =>
-                            prod.id_producto === item.id_producto
-                              ? { ...prod, cantidad: prod.cantidad + 1 }
-                              : prod
-                          )
-                        )
-                      }
-                      style={buttonStyles.quantity}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor =
-                          buttonStyles.quantity.hover.backgroundColor;
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor =
-                          buttonStyles.quantity.backgroundColor;
-                      }}
-                    >
-                      <FaPlus size={12} />
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setCart((prev) =>
                           prev.filter((p) => p.id_producto !== item.id_producto)
                         )
                       }
@@ -687,28 +613,6 @@ const Catalogo = () => {
               ))}
             </ul>
 
-            {/* Total */}
-            <div
-              style={{
-                marginTop: "24px",
-                paddingTop: "16px",
-                borderTop: "1px solid #e5e7eb",
-                fontWeight: "bold",
-                fontSize: "18px",
-                textAlign: "right",
-                color: colors.secondary,
-              }}
-            >
-              Total: $
-              {cart
-                .reduce(
-                  (acc, item) =>
-                    acc + item.cantidad * (item.costoventa_producto || 0),
-                  0
-                )
-                .toLocaleString("es-CO")}
-            </div>
-
             <div
               style={{
                 marginTop: "24px",
@@ -717,6 +621,7 @@ const Catalogo = () => {
               }}
             >
               <button
+                onClick={() => navigate("/procesar-pedido")}
                 style={{
                   ...buttonStyles.secondary,
                   padding: "12px 24px",
