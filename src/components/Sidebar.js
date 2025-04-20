@@ -320,6 +320,18 @@ const Sidebar = () => {
                   </NavLink>
                 ),
               },
+              {
+                key: "13",
+                icon: <FaIcons.FaUsers />,
+                label: (
+                  <NavLink
+                    to="/empleados"
+                    style={{ color: colors.text, fontWeight: "bold" }}
+                  >
+                    Empleados
+                  </NavLink>
+                ),
+              },
             ],
           },
         ]}

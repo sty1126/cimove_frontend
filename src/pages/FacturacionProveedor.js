@@ -436,15 +436,6 @@ const FacturacionProveedor = () => {
               }}
             />
           </Tooltip>
-          <Tooltip title="Eliminar">
-            <Button
-              type="primary"
-              shape="circle"
-              icon={<DeleteOutlined />}
-              size="small"
-              danger
-            />
-          </Tooltip>
         </Space>
       ),
     },
@@ -557,6 +548,15 @@ const FacturacionProveedor = () => {
                 backgroundColor: colors.warning,
                 borderColor: colors.warning,
               }}
+            />
+          </Tooltip>
+          <Tooltip title="Eliminar">
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<DeleteOutlined />}
+              size="small"
+              danger
             />
           </Tooltip>
         </Space>

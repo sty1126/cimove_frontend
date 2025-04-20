@@ -177,8 +177,8 @@ const ProcesarPedido = () => {
 
       // Redirigir después de un breve retraso
       setTimeout(() => {
-        navigate("/facturacion-proveedores");
-      }, 1500);
+        navigate("/facturacion-proveedor");
+      }, 500);
     } catch (err) {
       console.error("Error en la petición:", err);
       message.error("Error al procesar el pedido");

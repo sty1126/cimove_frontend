@@ -51,7 +51,7 @@ const colors = {
   danger: "#C25F48", // Rojo más vibrante para peligro
 };
 
-const ClientesTable = () => {
+const ListaClientes = () => {
   const [clientes, setClientes] = useState([]);
   const [tipoActivo, setTipoActivo] = useState("todos");
   const [filtro, setFiltro] = useState("");
@@ -157,8 +157,42 @@ const ClientesTable = () => {
     });
   };
 
+  // Funciones de navegación
+  const handleCreate = () => {
+    navigate("/crear-cliente");
+  };
+
+  const handleViewDetails = (record) => {
+    navigate(`/cliente/${record.id_cliente}`);
+  };
+
   const handleUpdate = (record) => {
     navigate(`/actualizar-cliente/${record.id_cliente}`);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/clientes/eliminar/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        message.success("Cliente eliminado correctamente");
+        // Recargar la lista de clientes
+        fetchClientes();
+      } else {
+        message.error("Error al eliminar el cliente");
+      }
+    } catch (error) {
+      console.error("Error al eliminar cliente:", error);
+      message.error("Error al eliminar el cliente");
+    }
   };
 
   // Columnas para la tabla
@@ -345,6 +379,7 @@ const ClientesTable = () => {
                 backgroundColor: colors.primary,
                 borderColor: colors.primary,
               }}
+              onClick={() => handleViewDetails(record)}
             />
           </Tooltip>
           <Tooltip title="Editar">
@@ -366,6 +401,7 @@ const ClientesTable = () => {
               description="Esta acción no se puede deshacer"
               okText="Sí"
               cancelText="No"
+              onConfirm={() => handleDelete(record.id_cliente)}
               okButtonProps={{
                 style: {
                   backgroundColor: colors.danger,
@@ -433,6 +469,7 @@ const ClientesTable = () => {
                   backgroundColor: colors.secondary,
                   borderColor: colors.secondary,
                 }}
+                onClick={handleCreate}
               >
                 Crear Cliente
               </Button>
@@ -557,4 +594,4 @@ const ClientesTable = () => {
   );
 };
 
-export default ClientesTable;
+export default ListaClientes;

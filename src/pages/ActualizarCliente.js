@@ -1,268 +1,566 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Form, Button, Container, FloatingLabel, Modal } from "react-bootstrap";
+"use client";
 
-function ActualizarCliente() {
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Form,
+  Input,
+  Button,
+  Select,
+  Card,
+  Typography,
+  Divider,
+  Row,
+  Col,
+  DatePicker,
+  Space,
+  message,
+  Modal,
+  Spin,
+} from "antd";
+import {
+  UserOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  HomeOutlined,
+  TagOutlined,
+  SaveOutlined,
+  CloseOutlined,
+  CalendarOutlined,
+  BankOutlined,
+  ArrowLeftOutlined,
+  CheckCircleOutlined,
+  GlobalOutlined,
+  EnvironmentOutlined,
+  NumberOutlined,
+  ShopOutlined,
+} from "@ant-design/icons";
+import dayjs from "dayjs";
+
+const { Title, Text } = Typography;
+const { Option } = Select;
+
+// Paleta de colores personalizada
+const colors = {
+  primary: "#0D7F93", // Teal más vibrante
+  secondary: "#4D8A52", // Verde más vibrante
+  accent: "#7FBAD6", // Azul más vibrante
+  light: "#C3D3C6", // Verde menta claro
+  background: "#E8EAEC", // Gris muy claro
+  text: "#2A3033", // Texto oscuro
+  success: "#4D8A52", // Verde más vibrante para éxito
+  warning: "#E0A458", // Naranja apagado para advertencias
+  danger: "#C25F48", // Rojo más vibrante para peligro
+};
+
+const ActualizarCliente = () => {
   const { id } = useParams();
-  const [cliente, setCliente] = useState({});
-  const [showModal, setShowModal] = useState(false);
-  const [mensaje, setMensaje] = useState("");
-  const [sedes, setSedes] = useState([]);
   const navigate = useNavigate();
+  const [form] = Form.useForm();
+  const [cliente, setCliente] = useState({});
+  const [sedes, setSedes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const tipoCliente = Number(cliente.id_tipocliente_cliente);
   const esPersonaNatural = tipoCliente === 1;
 
+  // Cargar datos iniciales
   useEffect(() => {
-    fetch(`http://localhost:4000/api/clientes/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setCliente(data[0]);
-        } else {
-          setCliente(data);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Obtener datos del cliente
+        const clienteRes = await fetch(
+          `http://localhost:4000/api/clientes/${id}`
+        );
+        const clienteData = await clienteRes.json();
+
+        // Manejar si viene como array o como objeto
+        const clienteInfo =
+          Array.isArray(clienteData) && clienteData.length > 0
+            ? clienteData[0]
+            : clienteData;
+        setCliente(clienteInfo);
+
+        // Formatear fecha si existe
+        if (clienteInfo.fechanacimiento_cliente) {
+          clienteInfo.fechanacimiento_cliente = dayjs(
+            clienteInfo.fechanacimiento_cliente.split("T")[0]
+          );
         }
+
+        // Establecer valores en el formulario
+        form.setFieldsValue(clienteInfo);
+
+        // Obtener sedes
+        const sedesRes = await fetch("http://localhost:4000/api/sedes");
+        const sedesData = await sedesRes.json();
+        setSedes(sedesData);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        message.error("Error al cargar los datos del cliente");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id, form]);
+
+  // Enviar formulario
+  const handleSubmit = async (values) => {
+    setSubmitting(true);
+    try {
+      // Formatear fecha si existe
+      if (values.fechanacimiento_cliente) {
+        values.fechanacimiento_cliente =
+          values.fechanacimiento_cliente.format("YYYY-MM-DD");
+      }
+
+      const response = await fetch(`http://localhost:4000/api/clientes/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
       });
 
-    fetch("http://localhost:4000/api/sedes")
-      .then((res) => res.json())
-      .then(setSedes);
-  }, [id]);
+      if (!response.ok) {
+        throw new Error("Error al actualizar el cliente");
+      }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCliente((prev) => ({ ...prev, [name]: value }));
+      setShowModal(true);
+
+      // Cerrar modal y redirigir después de 2 segundos
+      setTimeout(() => {
+        setShowModal(false);
+        navigate("/clientes");
+      }, 2000);
+    } catch (error) {
+      console.error("Error al actualizar cliente:", error);
+      message.error("Error al actualizar el cliente");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    fetch(`http://localhost:4000/api/clientes/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(cliente),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al actualizar el cliente");
-        return res.json();
-      })
-      .then(() => {
-        setShowModal(true);
-        setTimeout(() => {
-          setShowModal(false);
-          navigate("/clientes");
-        }, 2000);
-      })
-      .catch(() => setMensaje("Hubo un error al actualizar el cliente 😢"));
-  };
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Spin size="large" tip="Cargando datos del cliente..." />
+      </div>
+    );
+  }
 
   return (
-    <Container className="mt-4 pb-5">
-      <Form onSubmit={handleSubmit}>
-        <h2 className="text-center mb-4">👤 Actualizar Cliente</h2>
-
-        {esPersonaNatural ? (
-          <>
-            <FloatingLabel
-              controlId="nombre_cliente"
-              label="Nombre:"
-              className="mb-3"
-            >
-              <Form.Control
-                type="text"
-                name="nombre_cliente"
-                value={cliente.nombre_cliente || ""}
-                onChange={handleChange}
-              />
-            </FloatingLabel>
-
-            <FloatingLabel
-              controlId="apellido_cliente"
-              label="Apellido:"
-              className="mb-3"
-            >
-              <Form.Control
-                type="text"
-                name="apellido_cliente"
-                value={cliente.apellido_cliente || ""}
-                onChange={handleChange}
-              />
-            </FloatingLabel>
-
-            <FloatingLabel
-              controlId="fechanacimiento_cliente"
-              label="Fecha de nacimiento:"
-              className="mb-3"
-            >
-              <Form.Control
-                type="date"
-                name="fechanacimiento_cliente"
-                value={cliente.fechanacimiento_cliente?.split("T")[0] || ""}
-                onChange={handleChange}
-              />
-            </FloatingLabel>
-
-            <FloatingLabel
-              controlId="genero_cliente"
-              label="Género:"
-              className="mb-3"
-            >
-              <Form.Select
-                name="genero_cliente"
-                value={cliente.genero_cliente || ""}
-                onChange={handleChange}
-              >
-                <option value="">Seleccione género</option>
-                <option value="Masculino">Masculino</option>
-                <option value="Femenino">Femenino</option>
-                <option value="Otro">Otro</option>
-              </Form.Select>
-            </FloatingLabel>
-          </>
-        ) : (
-          <>
-            <FloatingLabel
-              controlId="razonsocial_cliente"
-              label="Razón Social:"
-              className="mb-3"
-            >
-              <Form.Control
-                type="text"
-                name="razonsocial_cliente"
-                value={cliente.razonsocial_cliente || ""}
-                onChange={handleChange}
-              />
-            </FloatingLabel>
-
-            <FloatingLabel
-              controlId="nombrecomercial_cliente"
-              label="Nombre Comercial:"
-              className="mb-3"
-            >
-              <Form.Control
-                type="text"
-                name="nombrecomercial_cliente"
-                value={cliente.nombrecomercial_cliente || ""}
-                onChange={handleChange}
-              />
-            </FloatingLabel>
-
-            <FloatingLabel
-              controlId="representante_cliente"
-              label="Representante Legal:"
-              className="mb-3"
-            >
-              <Form.Control
-                type="text"
-                name="representante_cliente"
-                value={cliente.representante_cliente || ""}
-                onChange={handleChange}
-              />
-            </FloatingLabel>
-          </>
-        )}
-
-        <FloatingLabel
-          controlId="telefono_cliente"
-          label="Teléfono:"
-          className="mb-3"
+    <div
+      style={{
+        padding: "24px",
+        backgroundColor: colors.background,
+        minHeight: "100vh",
+      }}
+    >
+      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+        {/* Botón de volver */}
+        <Button
+          icon={<ArrowLeftOutlined />}
+          onClick={() => navigate("/clientes")}
+          style={{ marginBottom: "16px" }}
         >
-          <Form.Control
-            type="text"
-            name="telefono_cliente"
-            value={cliente.telefono_cliente || ""}
-            onChange={handleChange}
-          />
-        </FloatingLabel>
-
-        <FloatingLabel
-          controlId="email_cliente"
-          label="Correo Electrónico:"
-          className="mb-3"
-        >
-          <Form.Control
-            type="email"
-            name="email_cliente"
-            value={cliente.email_cliente || ""}
-            onChange={handleChange}
-          />
-        </FloatingLabel>
-
-        <FloatingLabel
-          controlId="direccion_cliente"
-          label="Dirección:"
-          className="mb-3"
-        >
-          <Form.Control
-            type="text"
-            name="direccion_cliente"
-            value={cliente.direccion_cliente || ""}
-            onChange={handleChange}
-          />
-        </FloatingLabel>
-
-        <FloatingLabel
-          controlId="barrio_cliente"
-          label="Barrio:"
-          className="mb-3"
-        >
-          <Form.Control
-            type="text"
-            name="barrio_cliente"
-            value={cliente.barrio_cliente || ""}
-            onChange={handleChange}
-          />
-        </FloatingLabel>
-
-        <FloatingLabel
-          controlId="codigopostal_cliente"
-          label="Código Postal:"
-          className="mb-3"
-        >
-          <Form.Control
-            type="text"
-            name="codigopostal_cliente"
-            value={cliente.codigopostal_cliente || ""}
-            onChange={handleChange}
-          />
-        </FloatingLabel>
-
-        <FloatingLabel
-          controlId="id_sede_cliente"
-          label="Sede:"
-          className="mb-3"
-        >
-          <Form.Select
-            name="id_sede_cliente"
-            value={cliente.id_sede_cliente || ""}
-            onChange={handleChange}
-          >
-            <option value="">Seleccione una sede</option>
-            {sedes.map((sede) => (
-              <option key={sede.id_sede} value={sede.id_sede}>
-                {sede.nombre_sede}
-              </option>
-            ))}
-          </Form.Select>
-        </FloatingLabel>
-
-        <Button variant="primary" type="submit">
-          Actualizar
+          Volver a clientes
         </Button>
 
-        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Cliente actualizado</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>El cliente se actualizó correctamente.</Modal.Body>
-          <Modal.Footer>
-            <Button variant="success" onClick={() => navigate("/clientes")}>
+        <Card
+          bordered={false}
+          style={{
+            marginBottom: "24px",
+            borderRadius: "8px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          }}
+        >
+          <div style={{ textAlign: "center", marginBottom: "24px" }}>
+            <Title level={2} style={{ color: colors.primary, margin: 0 }}>
+              {esPersonaNatural ? (
+                <UserOutlined style={{ marginRight: "12px" }} />
+              ) : (
+                <BankOutlined style={{ marginRight: "12px" }} />
+              )}
+              Actualizar Cliente
+            </Title>
+            <Text type="secondary">
+              Modifique los datos del cliente y guarde los cambios
+            </Text>
+          </div>
+
+          <Divider
+            style={{ margin: "12px 0 24px", borderColor: colors.light }}
+          />
+
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            initialValues={cliente}
+          >
+            {/* Campo de tipo de cliente (solo lectura) */}
+            <Form.Item
+              label={
+                <Space>
+                  <TagOutlined style={{ color: colors.primary }} />
+                  Tipo de Cliente
+                </Space>
+              }
+              name="id_tipocliente_cliente"
+            >
+              <Select disabled>
+                <Option value={1}>Persona Natural</Option>
+                <Option value={2}>Persona Jurídica</Option>
+              </Select>
+            </Form.Item>
+
+            {esPersonaNatural ? (
+              // Campos para persona natural
+              <>
+                <Row gutter={24}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      label={
+                        <Space>
+                          <UserOutlined style={{ color: colors.primary }} />
+                          Nombre
+                        </Space>
+                      }
+                      name="nombre_cliente"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Por favor ingrese el nombre",
+                        },
+                      ]}
+                    >
+                      <Input
+                        placeholder="Ingrese nombre"
+                        disabled={submitting}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      label={
+                        <Space>
+                          <UserOutlined style={{ color: colors.primary }} />
+                          Apellido
+                        </Space>
+                      }
+                      name="apellido_cliente"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Por favor ingrese el apellido",
+                        },
+                      ]}
+                    >
+                      <Input
+                        placeholder="Ingrese apellido"
+                        disabled={submitting}
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+
+                <Row gutter={24}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      label={
+                        <Space>
+                          <CalendarOutlined style={{ color: colors.primary }} />
+                          Fecha de Nacimiento
+                        </Space>
+                      }
+                      name="fechanacimiento_cliente"
+                    >
+                      <DatePicker
+                        style={{ width: "100%" }}
+                        format="YYYY-MM-DD"
+                        placeholder="Seleccione fecha"
+                        disabled={submitting}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      label={
+                        <Space>
+                          <UserOutlined style={{ color: colors.primary }} />
+                          Género
+                        </Space>
+                      }
+                      name="genero_cliente"
+                    >
+                      <Select
+                        placeholder="Seleccione género"
+                        disabled={submitting}
+                      >
+                        <Option value="Masculino">Masculino</Option>
+                        <Option value="Femenino">Femenino</Option>
+                        <Option value="Otro">Otro</Option>
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </>
+            ) : (
+              // Campos para persona jurídica
+              <>
+                <Row gutter={24}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      label={
+                        <Space>
+                          <BankOutlined style={{ color: colors.primary }} />
+                          Razón Social
+                        </Space>
+                      }
+                      name="razonsocial_cliente"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Por favor ingrese la razón social",
+                        },
+                      ]}
+                    >
+                      <Input
+                        placeholder="Ingrese razón social"
+                        disabled={submitting}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      label={
+                        <Space>
+                          <ShopOutlined style={{ color: colors.primary }} />
+                          Nombre Comercial
+                        </Space>
+                      }
+                      name="nombrecomercial_cliente"
+                    >
+                      <Input
+                        placeholder="Ingrese nombre comercial"
+                        disabled={submitting}
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+
+                <Form.Item
+                  label={
+                    <Space>
+                      <UserOutlined style={{ color: colors.primary }} />
+                      Representante Legal
+                    </Space>
+                  }
+                  name="representante_cliente"
+                >
+                  <Input
+                    placeholder="Ingrese representante legal"
+                    disabled={submitting}
+                  />
+                </Form.Item>
+              </>
+            )}
+
+            {/* Campos comunes para ambos tipos de cliente */}
+            <Row gutter={24}>
+              <Col xs={24} md={12}>
+                <Form.Item
+                  label={
+                    <Space>
+                      <PhoneOutlined style={{ color: colors.primary }} />
+                      Teléfono
+                    </Space>
+                  }
+                  name="telefono_cliente"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor ingrese el teléfono",
+                    },
+                  ]}
+                >
+                  <Input placeholder="Ingrese teléfono" disabled={submitting} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item
+                  label={
+                    <Space>
+                      <MailOutlined style={{ color: colors.primary }} />
+                      Correo Electrónico
+                    </Space>
+                  }
+                  name="email_cliente"
+                  rules={[
+                    {
+                      type: "email",
+                      message: "Por favor ingrese un correo electrónico válido",
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="Ingrese correo electrónico"
+                    disabled={submitting}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item
+              label={
+                <Space>
+                  <HomeOutlined style={{ color: colors.primary }} />
+                  Dirección
+                </Space>
+              }
+              name="direccion_cliente"
+            >
+              <Input placeholder="Ingrese dirección" disabled={submitting} />
+            </Form.Item>
+
+            <Row gutter={24}>
+              <Col xs={24} md={12}>
+                <Form.Item
+                  label={
+                    <Space>
+                      <EnvironmentOutlined style={{ color: colors.primary }} />
+                      Barrio
+                    </Space>
+                  }
+                  name="barrio_cliente"
+                >
+                  <Input placeholder="Ingrese barrio" disabled={submitting} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item
+                  label={
+                    <Space>
+                      <NumberOutlined style={{ color: colors.primary }} />
+                      Código Postal
+                    </Space>
+                  }
+                  name="codigopostal_cliente"
+                >
+                  <Input
+                    placeholder="Ingrese código postal"
+                    disabled={submitting}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item
+              label={
+                <Space>
+                  <GlobalOutlined style={{ color: colors.primary }} />
+                  Sede
+                </Space>
+              }
+              name="id_sede_cliente"
+            >
+              <Select placeholder="Seleccione una sede" disabled={submitting}>
+                {sedes.map((sede) => (
+                  <Option key={sede.id_sede} value={sede.id_sede}>
+                    {sede.nombre_sede}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Divider
+              style={{ margin: "12px 0 24px", borderColor: colors.light }}
+            />
+
+            <div
+              style={{ display: "flex", justifyContent: "center", gap: "16px" }}
+            >
+              <Button
+                type="primary"
+                htmlType="submit"
+                icon={<SaveOutlined />}
+                size="large"
+                loading={submitting}
+                style={{
+                  backgroundColor: colors.primary,
+                  borderColor: colors.primary,
+                  minWidth: "180px",
+                }}
+              >
+                Guardar Cambios
+              </Button>
+              <Button
+                danger
+                icon={<CloseOutlined />}
+                size="large"
+                onClick={() => navigate("/clientes")}
+                style={{ minWidth: "120px" }}
+                disabled={submitting}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </Form>
+        </Card>
+
+        {/* Modal de éxito */}
+        <Modal
+          title={
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <CheckCircleOutlined
+                style={{
+                  color: colors.success,
+                  fontSize: "22px",
+                  marginRight: "10px",
+                }}
+              />
+              <span>Cliente Actualizado</span>
+            </div>
+          }
+          open={showModal}
+          footer={null}
+          closable={false}
+          centered
+          maskClosable={false}
+        >
+          <div style={{ padding: "20px 0", textAlign: "center" }}>
+            <p style={{ fontSize: "16px", marginBottom: "20px" }}>
+              El cliente se ha actualizado correctamente.
+            </p>
+            <Button
+              type="primary"
+              style={{
+                backgroundColor: colors.success,
+                borderColor: colors.success,
+              }}
+              onClick={() => {
+                setShowModal(false);
+                navigate("/clientes");
+              }}
+            >
               Aceptar
             </Button>
-          </Modal.Footer>
+          </div>
         </Modal>
-      </Form>
-    </Container>
+      </div>
+    </div>
   );
-}
+};
 
 export default ActualizarCliente;

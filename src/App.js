@@ -19,7 +19,13 @@ import Catalogo from "./pages/Catalogo";
 import FacturacionProveedor from "./pages/FacturacionProveedor";
 import ProcesarPedido from "./pages/ProcesarPedido";
 import ListaClientes from "./pages/ListaClientes";
+import CrearCliente from "./pages/CrearCliente";
 import ActualizarCliente from "./pages/ActualizarCliente";
+import DetalleCliente from "./pages/DetallesCliente";
+import ListaEmpleados from "./pages/ListaEmpleados";
+import CrearEmpleado from "./pages/CrearEmpleado";
+import DetalleEmpleado from "./pages/DetallesEmpleado";
+import ActualizarEmpleado from "./pages/ActualizarEmpleado";
 import { CartProvider } from "./context/CartContext";
 
 function App() {
@@ -73,9 +79,18 @@ function App() {
               />
               <Route path="/procesar-pedido" element={<ProcesarPedido />} />
               <Route path="/clientes" element={<ListaClientes />} />
+              <Route path="/crear-cliente" element={<CrearCliente />} />
               <Route
                 path="/actualizar-cliente/:id"
                 element={<ActualizarCliente />}
+              />
+              <Route path="/cliente/:id" element={<DetalleCliente />} />
+              <Route path="/empleados" element={<ListaEmpleados />} />
+              <Route path="/crear-empleado" element={<CrearEmpleado />} />
+              <Route path="/empleados/:id" element={<DetalleEmpleado />} />
+              <Route
+                path="/empleados/editar/:id"
+                element={<ActualizarEmpleado />}
               />
             </Routes>
           </div>
