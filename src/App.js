@@ -26,6 +26,9 @@ import ListaEmpleados from "./pages/ListaEmpleados";
 import CrearEmpleado from "./pages/CrearEmpleado";
 import DetalleEmpleado from "./pages/DetallesEmpleado";
 import ActualizarEmpleado from "./pages/ActualizarEmpleado";
+import Ventas from "./pages/Ventas";
+import FacturaVenta from "./pages/FacturaVenta";
+
 import { CartProvider } from "./context/CartContext";
 
 function App() {
@@ -92,6 +95,8 @@ function App() {
                 path="/empleados/editar/:id"
                 element={<ActualizarEmpleado />}
               />
+              <Route path="/ventas" element={<Ventas />} />
+              <Route path="/factura" element={<FacturaVenta />} />
             </Routes>
           </div>
         </div>

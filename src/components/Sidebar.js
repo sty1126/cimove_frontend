@@ -233,7 +233,7 @@ const Sidebar = () => {
                     to="/pagos-compras"
                     style={{ color: colors.text, fontWeight: "bold" }}
                   >
-                    Pagos
+                    Abonos
                   </NavLink>
                 ),
               },

@@ -144,11 +144,6 @@ const AsociarProveedores = () => {
     setSubmitting(true);
 
     try {
-      // Eliminar asociaciones existentes
-      await axios.delete(
-        `http://localhost:4000/api/proveedor-producto/${idProducto}`
-      );
-
       // Crear nuevas asociaciones
       await Promise.all(
         proveedoresSeleccionados.map((idProveedor) =>
@@ -162,9 +157,7 @@ const AsociarProveedores = () => {
       message.success({
         content: "Proveedores asociados correctamente",
         icon: <CheckCircleIcon />,
-        style: {
-          marginTop: "20px",
-        },
+        style: { marginTop: "20px" },
       });
 
       // Redirigir al inventario después de 1.5 segundos
