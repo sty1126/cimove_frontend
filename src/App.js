@@ -26,14 +26,12 @@ import ListaEmpleados from "./pages/ListaEmpleados";
 import CrearEmpleado from "./pages/CrearEmpleado";
 import DetalleEmpleado from "./pages/DetallesEmpleado";
 import ActualizarEmpleado from "./pages/ActualizarEmpleado";
-<<<<<<< HEAD
 import CrearFacturaProveedor from "./pages/CrearFacturaProveedor";
 import PagosCompras from "./pages/PagosCompras";
 import FormularioAbono from "./pages/FormularioAbono"
-=======
 import Ventas from "./pages/Ventas";
 import FacturaVenta from "./pages/FacturaVenta";
->>>>>>> a4a4b7615d97411a347626afc5155bd377e7e2a7
+
 
 import { CartProvider } from "./context/CartContext";
 
@@ -106,14 +104,13 @@ function App() {
                 path="/empleados/editar/:id"
                 element={<ActualizarEmpleado />}
               />
-<<<<<<< HEAD
               <Route path="/registro-abono/:idFactura" element={<FormularioAbono />} />
 
 
-=======
+
               <Route path="/ventas" element={<Ventas />} />
               <Route path="/factura" element={<FacturaVenta />} />
->>>>>>> a4a4b7615d97411a347626afc5155bd377e7e2a7
+
             </Routes>
           </div>
         </div>
