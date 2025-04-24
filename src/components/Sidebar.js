@@ -179,18 +179,6 @@ const Sidebar = () => {
                 ),
               },
               {
-                key: "3",
-                icon: <FaIcons.FaMoneyBillWave />,
-                label: (
-                  <NavLink
-                    to="/pagos-ventas"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Pagos
-                  </NavLink>
-                ),
-              },
-              {
                 key: "4",
                 icon: <FaIcons.FaUsers />,
                 label: (
@@ -284,18 +272,6 @@ const Sidebar = () => {
               </div>
             ),
             children: [
-              {
-                key: "10",
-                icon: <FaIcons.FaClipboardList />,
-                label: (
-                  <NavLink
-                    to="/productos-vendidos"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Productos vendidos
-                  </NavLink>
-                ),
-              },
               {
                 key: "11",
                 icon: <FaIcons.FaCalendarAlt />,

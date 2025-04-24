@@ -28,10 +28,9 @@ import DetalleEmpleado from "./pages/DetallesEmpleado";
 import ActualizarEmpleado from "./pages/ActualizarEmpleado";
 import CrearFacturaProveedor from "./pages/CrearFacturaProveedor";
 import PagosCompras from "./pages/PagosCompras";
-import FormularioAbono from "./pages/FormularioAbono"
+import FormularioAbono from "./pages/FormularioAbono";
 import Ventas from "./pages/Ventas";
 import FacturaVenta from "./pages/FacturaVenta";
-
 
 import { CartProvider } from "./context/CartContext";
 
@@ -46,10 +45,6 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/inventario" element={<Inventario />} />
-              <Route
-                path="/productos-vendidos"
-                element={<ConsultaProducto />}
-              />
               <Route path="/registro-producto" element={<RegistroProducto />} />
               <Route
                 path="/actualizar-producto/:id"
@@ -87,7 +82,8 @@ function App() {
               <Route path="/catalogo" element={<Catalogo />} />
               <Route
                 path="/nueva-Factura-proveedor"
-                element={<CrearFacturaProveedor />} />
+                element={<CrearFacturaProveedor />}
+              />
 
               <Route path="/procesar-pedido" element={<ProcesarPedido />} />
               <Route path="/clientes" element={<ListaClientes />} />
@@ -104,13 +100,13 @@ function App() {
                 path="/empleados/editar/:id"
                 element={<ActualizarEmpleado />}
               />
-              <Route path="/registro-abono/:idFactura" element={<FormularioAbono />} />
-
-
+              <Route
+                path="/registro-abono/:idFactura"
+                element={<FormularioAbono />}
+              />
 
               <Route path="/ventas" element={<Ventas />} />
               <Route path="/factura" element={<FacturaVenta />} />
-
             </Routes>
           </div>
         </div>
