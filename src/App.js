@@ -26,10 +26,11 @@ import ListaEmpleados from "./pages/ListaEmpleados";
 import CrearEmpleado from "./pages/CrearEmpleado";
 import DetalleEmpleado from "./pages/DetallesEmpleado";
 import ActualizarEmpleado from "./pages/ActualizarEmpleado";
+import CrearFacturaProveedor from "./pages/CrearFacturaProveedor";
+import PagosCompras from "./pages/PagosCompras";
+import FormularioAbono from "./pages/FormularioAbono";
 import Ventas from "./pages/Ventas";
 import FacturaVenta from "./pages/FacturaVenta";
-import CrearFacturaServicioTecnico from "./pages/CrearFacturaServicioTecnico";
-import ListaFacturacionVentas from "./pages/ListaFacturacionVentas";
 
 import { CartProvider } from "./context/CartContext";
 
@@ -66,6 +67,11 @@ function App() {
               <Route path="/proveedores" element={<ListaProveedores />} />
               <Route path="/proveedores/:id" element={<DetallesProveedor />} />
               <Route
+                path="/facturacion-proveedor"
+                element={<FacturacionProveedor />}
+              />
+              <Route path="/pagos-compras" element={<PagosCompras />} />
+              <Route
                 path="/registro-proveedor"
                 element={<RegistroProveedor />}
               />
@@ -75,9 +81,10 @@ function App() {
               />
               <Route path="/catalogo" element={<Catalogo />} />
               <Route
-                path="/facturacion-proveedor"
-                element={<FacturacionProveedor />}
+                path="/nueva-Factura-proveedor"
+                element={<CrearFacturaProveedor />}
               />
+
               <Route path="/procesar-pedido" element={<ProcesarPedido />} />
               <Route path="/clientes" element={<ListaClientes />} />
               <Route path="/crear-cliente" element={<CrearCliente />} />
@@ -93,16 +100,13 @@ function App() {
                 path="/empleados/editar/:id"
                 element={<ActualizarEmpleado />}
               />
+              <Route
+                path="/registro-abono/:idFactura"
+                element={<FormularioAbono />}
+              />
+
               <Route path="/ventas" element={<Ventas />} />
               <Route path="/factura" element={<FacturaVenta />} />
-              <Route
-                path="/servicio-tecnico"
-                element={<CrearFacturaServicioTecnico />}
-              />
-              <Route
-                path="/facturacion-ventas"
-                element={<ListaFacturacionVentas />}
-              />
             </Routes>
           </div>
         </div>
