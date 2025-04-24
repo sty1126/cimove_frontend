@@ -28,6 +28,8 @@ import DetalleEmpleado from "./pages/DetallesEmpleado";
 import ActualizarEmpleado from "./pages/ActualizarEmpleado";
 import Ventas from "./pages/Ventas";
 import FacturaVenta from "./pages/FacturaVenta";
+import CrearFacturaServicioTecnico from "./pages/CrearFacturaServicioTecnico";
+import ListaFacturacionVentas from "./pages/ListaFacturacionVentas";
 
 import { CartProvider } from "./context/CartContext";
 
@@ -42,10 +44,6 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/inventario" element={<Inventario />} />
-              <Route
-                path="/productos-vendidos"
-                element={<ConsultaProducto />}
-              />
               <Route path="/registro-producto" element={<RegistroProducto />} />
               <Route
                 path="/actualizar-producto/:id"
@@ -97,6 +95,14 @@ function App() {
               />
               <Route path="/ventas" element={<Ventas />} />
               <Route path="/factura" element={<FacturaVenta />} />
+              <Route
+                path="/servicio-tecnico"
+                element={<CrearFacturaServicioTecnico />}
+              />
+              <Route
+                path="/facturacion-ventas"
+                element={<ListaFacturacionVentas />}
+              />
             </Routes>
           </div>
         </div>
