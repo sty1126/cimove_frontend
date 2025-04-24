@@ -45,6 +45,7 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -64,7 +65,10 @@ const colors = {
   danger: "#C25F48", // Rojo más vibrante para peligro
 };
 
+
+
 const FacturacionProveedor = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("facturas");
   const [facturas, setFacturas] = useState([]);
   const [ordenes, setOrdenes] = useState([]);
@@ -134,6 +138,13 @@ const FacturacionProveedor = () => {
       message.error("Error al cargar los proveedores");
     }
   };
+
+  //Crear nueva factura
+
+    const handleNewFactura = () => {
+      navigate("/nueva-Factura-proveedor");  
+    };
+  
 
   // Formatear moneda
   const formatCurrency = (value) => {
@@ -413,17 +424,19 @@ const FacturacionProveedor = () => {
             />
           </Tooltip>
           <Tooltip title="Registrar abono">
-            <Button
-              type="primary"
-              shape="circle"
-              icon={<DollarOutlined />}
-              size="small"
-              style={{
-                backgroundColor: colors.success,
-                borderColor: colors.success,
-              }}
-            />
-          </Tooltip>
+  <Button
+    type="primary"
+    shape="circle"
+    icon={<DollarOutlined />}
+    size="small"
+    onClick={() => navigate(`/registro-abono/${record.id_facturaproveedor}`)}
+    style={{
+      backgroundColor: colors.success,
+      borderColor: colors.success,
+    }}
+  />
+</Tooltip>
+
           <Tooltip title="Generar PDF">
             <Button
               type="primary"
@@ -599,6 +612,7 @@ const FacturacionProveedor = () => {
             <Button
               type="primary"
               icon={<PlusOutlined />}
+              onClick={handleNewFactura} 
               style={{
                 backgroundColor: colors.primary,
                 borderColor: colors.primary,
