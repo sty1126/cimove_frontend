@@ -142,7 +142,7 @@ const CrearFacturaProveedor = () => {
             placeholder="Selecciona una orden"
             onChange={handleOrdenSelect}
             options={ordenes.map((orden) => ({
-              label: `OC-${orden.id_ordencompra} | ${orden.nombre_proveedor} | ${orden.fecha_ordencompra}`,
+              label: `OC-${orden.id_ordencompra} | ${orden.nombre_proveedor} | ${dayjs(orden.fecha_ordencompra).format("DD/MM/YYYY")}`,
               value: orden.id_ordencompra,
             }))}
           />
