@@ -1,45 +1,47 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
-import SeleccionarClientePorSede from "./SeleccionarClientePorSede";
+import { Form, Button } from "react-bootstrap";
 import { Select } from "antd";
+import SeleccionarClientePorSede from "./SeleccionarClientePorSede";
+import SeleccionarProveedor from "./SeleccionarProveedor";
 
-// ... resto de imports
-const CrearFacturaServicioTecnico = () => {
-  useEffect(() => {
-    const fetchSedes = async () => {
-      try {
-        const res = await axios.get("http://localhost:4000/api/sedes");
-        setSedes(res.data);
-      } catch (error) {
-        console.error("Error al cargar las sedes:", error);
-      }
-    };
-    fetchSedes();
-  }, []);
+const { Option } = Select;
+
+const ServicioTecnicoForm = () => {
+  const today = new Date().toISOString().split("T")[0]; // <-- aquí se obtiene la fecha de hoy formato YYYY-MM-DD
 
   const [formData, setFormData] = useState({
-    id_cliente_factura: "",
-    total_factura: "",
-    descuento_factura: "",
-    iva_factura: "",
-    subtotal_factura: "",
-    aplica_garantia_factura: false,
-    fecha_garantia_factura: "",
-    saldo_factura: "",
-    id_proveedor_servicio: "",
-    id_sede_servicio: "",
-    nombre_servicio: "",
-    descripcion_servicio: "",
-    costo_servicio: "",
-    fecha_servicio: "",
+    id_proveedor: "", // Inicialmente vacío
+    id_cliente: "",
+    nombre: "",
+    descripcion: "",
+    fecha: today, // <-- se asigna fecha de hoy
+    fechaEntrega: "",
+    tipoDanio: "",
+    claveDispositivo: "",
+    costo: "",
+    abono: "",
+    contactoAlternativo: "",
+    estadoTecnico: "D",
+    autorizado: true,
+    garantiaAplica: false,
+    fechaGarantia: "",
   });
 
+  const [sedes, setSedes] = useState([]);
   const [selectedSede, setSelectedSede] = useState(null);
   const [showModalCliente, setShowModalCliente] = useState(false);
-  const [sedes, setSedes] = useState([]);
-  const [cliente, setCliente] = useState(null);
-  const { Option } = Select;
+  const [showModalProveedor, setShowModalProveedor] = useState(false);
+  const [mostrarSeleccionProveedor, setMostrarSeleccionProveedor] =
+    useState(false);
+  const [errorProveedor, setErrorProveedor] = useState(""); // Estado para manejar el error
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:4000/api/sedes/")
+      .then((res) => setSedes(res.data))
+      .catch((error) => console.error("Error al cargar sedes:", error));
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -52,247 +54,228 @@ const CrearFacturaServicioTecnico = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación mínima: cliente y sede
-    if (!formData.id_cliente_factura || !selectedSede) {
-      alert("Debes seleccionar una sede y un cliente antes de continuar.");
-      return;
+    // Validar que el proveedor no esté vacío
+    if (!formData.id_proveedor) {
+      setErrorProveedor("El proveedor es obligatorio.");
+      return; // Detener el envío del formulario si no hay proveedor
     }
 
-    // Añadir la sede seleccionada
-    const sedeObj = sedes.find((s) => s.nombre_sede === selectedSede);
-    const finalFormData = {
-      ...formData,
-      id_sede_servicio: sedeObj?.id_sede || "",
-    };
+    setErrorProveedor(""); // Limpiar el error si el proveedor está presente
 
     try {
       const response = await axios.post(
-        "/api/factura-servicio-tecnico",
-        finalFormData
+        "http://localhost:4000/api/serviciotecnico",
+        {
+          ...formData,
+          sede: selectedSede, // incluir sede seleccionada si aplica
+        }
       );
-      console.log("Factura creada:", response.data);
-      // Aquí podrías redirigir al detalle de factura para que el admin/técnico edite luego
+      alert("Servicio técnico y factura registrados correctamente.");
+      console.log(response.data);
     } catch (error) {
-      console.error("Error al crear factura:", error);
+      console.error("Error:", error);
+      alert("Ocurrió un error al registrar el servicio técnico.");
     }
   };
 
-  useEffect(() => {
-    if (cliente) {
-      setFormData((prev) => ({
-        ...prev,
-        id_cliente_factura: cliente.id_cliente,
-      }));
-    }
-  }, [cliente]);
-
   return (
-    <Container className="mt-4">
-      <Card>
-        <Card.Body>
-          <Card.Title>Crear Factura de Servicio Técnico</Card.Title>
-          <Form onSubmit={handleSubmit}>
-            <h5 className="mt-3">Datos de la Factura</h5>
-            <Row>
-              <div style={{ marginBottom: 16 }}>
-                <Select
-                  placeholder="Selecciona una sede"
-                  style={{ width: 300 }}
-                  onChange={(value) => setSelectedSede(value)}
-                  value={selectedSede}
-                >
-                  {sedes.map((sede) => (
-                    <Option key={sede.id_sede} value={sede.nombre_sede}>
-                      {sede.nombre_sede}
-                    </Option>
-                  ))}
-                </Select>
+    <div>
+      <h2>Registrar Servicio Técnico</h2>
+      <Form onSubmit={handleSubmit}>
+        {/* Selector de sede */}
+        <Form.Group className="mb-3">
+          <Form.Label>Sede</Form.Label>
+          <Select
+            placeholder="Seleccionar sede"
+            value={selectedSede}
+            onChange={setSelectedSede}
+            style={{ width: "100%" }}
+          >
+            <Option value="general">Seleccionar sede</Option>
+            {sedes.map((sede) => (
+              <Option key={sede.id_sede} value={sede.nombre_sede}>
+                {sede.nombre_sede}
+              </Option>
+            ))}
+          </Select>
+        </Form.Group>
 
-                <Button
-                  type="primary"
-                  style={{ marginLeft: 16 }}
-                  onClick={() => {
-                    if (selectedSede) {
-                      setShowModalCliente(true);
-                    } else {
-                      alert("Primero debes seleccionar una sede.");
-                    }
-                  }}
-                >
-                  Seleccionar Cliente
-                </Button>
-              </div>
+        {/* Botón y modal de selección de cliente */}
+        <Button
+          variant="outline-secondary"
+          onClick={() => setShowModalCliente(true)}
+          className="my-2"
+        >
+          Seleccionar Cliente
+        </Button>
 
-              <Col md={6}>
-                <Form.Group controlId="id_cliente_factura">
-                  <Form.Label>Cliente</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="id_cliente_factura"
-                    value={formData.id_cliente_factura}
-                    onChange={handleChange}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={4}>
-                <Form.Group controlId="total_factura">
-                  <Form.Label>Total</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="total_factura"
-                    value={formData.total_factura}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group controlId="descuento_factura">
-                  <Form.Label>Descuento</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="descuento_factura"
-                    value={formData.descuento_factura}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group controlId="iva_factura">
-                  <Form.Label>IVA</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="iva_factura"
-                    value={formData.iva_factura}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row className="mt-2">
-              <Col md={6}>
-                <Form.Group controlId="subtotal_factura">
-                  <Form.Label>Subtotal</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="subtotal_factura"
-                    value={formData.subtotal_factura}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="saldo_factura">
-                  <Form.Label>Saldo</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="saldo_factura"
-                    value={formData.saldo_factura}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+        <Form.Group className="mb-3">
+          <Form.Label>ID del Cliente Seleccionado</Form.Label>
+          <Form.Control
+            type="text"
+            value={formData.id_cliente || "Ninguno"}
+            readOnly
+          />
+        </Form.Group>
 
-            <Form.Group controlId="aplica_garantia_factura" className="mt-3">
-              <Form.Check
-                type="checkbox"
-                name="aplica_garantia_factura"
-                label="Aplicar Garantía"
-                checked={formData.aplica_garantia_factura}
-                onChange={handleChange}
-              />
-            </Form.Group>
-            {formData.aplica_garantia_factura && (
-              <Form.Group controlId="fecha_garantia_factura" className="mt-2">
-                <Form.Label>Fecha de Garantía</Form.Label>
-                <Form.Control
-                  type="date"
-                  name="fecha_garantia_factura"
-                  value={formData.fecha_garantia_factura}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-            )}
-            <hr />
-            <h5 className="mt-3">Datos del Servicio Técnico (Opcionales)</h5>
-            <Row>
-              <Col md={6}>
-                <Form.Group controlId="id_proveedor_servicio">
-                  <Form.Label>Proveedor</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="id_proveedor_servicio"
-                    value={formData.id_proveedor_servicio}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="nombre_servicio">
-                  <Form.Label>Nombre del Servicio</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="nombre_servicio"
-                    value={formData.nombre_servicio}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Form.Group controlId="descripcion_servicio" className="mt-2">
-              <Form.Label>Descripción</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="descripcion_servicio"
-                value={formData.descripcion_servicio}
-                onChange={handleChange}
-              />
-            </Form.Group>
-            <Row className="mt-2">
-              <Col md={6}>
-                <Form.Group controlId="costo_servicio">
-                  <Form.Label>Costo</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="costo_servicio"
-                    value={formData.costo_servicio}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="fecha_servicio">
-                  <Form.Label>Fecha del Servicio</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="fecha_servicio"
-                    value={formData.fecha_servicio}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+        <SeleccionarClientePorSede
+          show={showModalCliente}
+          handleClose={() => setShowModalCliente(false)}
+          setCliente={(cliente) =>
+            setFormData({ ...formData, id_cliente: cliente.id_cliente })
+          }
+          selectedSede={selectedSede}
+          sedes={sedes}
+        />
 
-            <SeleccionarClientePorSede
-              show={showModalCliente}
-              handleClose={() => setShowModalCliente(false)}
-              setCliente={setCliente}
-              selectedSede={selectedSede}
-              sedes={sedes}
+        {/* Campos del formulario */}
+        <Form.Group className="mb-3">
+          <Form.Label>Nombre del Servicio</Form.Label>
+          <Form.Control
+            name="nombre"
+            value={formData.nombre}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Descripción</Form.Label>
+          <Form.Control
+            as="textarea"
+            name="descripcion"
+            value={formData.descripcion}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Fecha de Ingreso</Form.Label>
+          <Form.Control
+            type="date"
+            name="fecha"
+            value={formData.fecha}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Fecha de Entrega</Form.Label>
+          <Form.Control
+            type="date"
+            name="fechaEntrega"
+            value={formData.fechaEntrega}
+            onChange={handleChange}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Tipo de Daño</Form.Label>
+          <Form.Control
+            name="tipoDanio"
+            value={formData.tipoDanio}
+            onChange={handleChange}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Clave del Dispositivo</Form.Label>
+          <Form.Control
+            name="claveDispositivo"
+            value={formData.claveDispositivo}
+            onChange={handleChange}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Costo Estimado</Form.Label>
+          <Form.Control
+            type="number"
+            name="costo"
+            value={formData.costo}
+            onChange={handleChange}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Abono Inicial</Form.Label>
+          <Form.Control
+            type="number"
+            name="abono"
+            value={formData.abono}
+            onChange={handleChange}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Contacto Alternativo</Form.Label>
+          <Form.Control
+            name="contactoAlternativo"
+            value={formData.contactoAlternativo}
+            onChange={handleChange}
+          />
+        </Form.Group>
+
+        <Form.Check
+          type="checkbox"
+          label="¿Aplica Garantía?"
+          name="garantiaAplica"
+          checked={formData.garantiaAplica}
+          onChange={handleChange}
+          className="mb-2"
+        />
+
+        {formData.garantiaAplica && (
+          <Form.Group className="mb-3">
+            <Form.Label>Fecha de Garantía</Form.Label>
+            <Form.Control
+              type="date"
+              name="fechaGarantia"
+              value={formData.fechaGarantia}
+              onChange={handleChange}
             />
+          </Form.Group>
+        )}
 
-            <Button type="submit" className="mt-4" variant="primary">
-              Crear Factura
+        <Form.Check
+          type="checkbox"
+          label="¿Se conoce cuál será el proveedor?"
+          checked={mostrarSeleccionProveedor}
+          onChange={() =>
+            setMostrarSeleccionProveedor(!mostrarSeleccionProveedor)
+          }
+          className="mb-2"
+        />
+
+        {mostrarSeleccionProveedor && (
+          <>
+            <Button
+              variant="outline-secondary"
+              onClick={() => setShowModalProveedor(true)}
+              className="my-2"
+            >
+              Seleccionar Proveedor
             </Button>
-          </Form>
-        </Card.Body>
-      </Card>
-    </Container>
+            <SeleccionarProveedor
+              show={showModalProveedor}
+              handleClose={() => setShowModalProveedor(false)}
+              setProveedor={(prov) =>
+                setFormData({ ...formData, id_proveedor: prov.id_proveedor })
+              }
+            />
+          </>
+        )}
+
+        {errorProveedor && <p style={{ color: "red" }}>{errorProveedor}</p>}
+
+        <Button type="submit" variant="primary" className="mt-3">
+          Registrar Servicio Técnico
+        </Button>
+      </Form>
+    </div>
   );
 };
 
-export default CrearFacturaServicioTecnico;
+export default ServicioTecnicoForm;

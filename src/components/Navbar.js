@@ -144,6 +144,14 @@ const Navbar = () => {
     setTimeout(() => setUserIconAnimated(false), 1000);
   };
 
+  const handleLogout = () => {
+    // Elimina el token o el estado de autenticación (esto depende de tu implementación)
+    localStorage.removeItem("token"); // o el método que uses para gestionar la sesión
+
+    // Redirige al usuario a la página de inicio de sesión
+    window.location.href = "/login"; // o la ruta que uses para el login
+  };
+
   return (
     <nav style={styles.navbar} className="navbar navbar-expand-lg">
       <a
@@ -272,6 +280,7 @@ const Navbar = () => {
                   logout: false,
                 })
               }
+              onClick={handleLogout} // Aquí
             >
               <FiLogOut
                 style={{

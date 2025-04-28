@@ -30,7 +30,7 @@ const Sidebar = () => {
 
     // Mapeo de rutas a claves de menú
     const routeToKey = {
-      "/": "1",
+      "/home": "1",
       "/facturacion-ventas": "2",
       "/pagos-ventas": "3",
       "/clientes": "4",
@@ -150,7 +150,7 @@ const Sidebar = () => {
             icon: <FaIcons.FaHome />,
             label: !collapsed && (
               <NavLink
-                to="/"
+                to="/home"
                 style={{ color: colors.text, fontWeight: "bold" }}
               >
                 Inicio

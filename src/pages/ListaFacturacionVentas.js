@@ -79,7 +79,7 @@ const ListaFacturacionVentas = () => {
     setLoading(true);
     try {
       // Cargar facturas
-      const resFacturas = await fetch("http://localhost:4000/api/factura");
+      const resFacturas = await fetch("http://localhost:4000/api/factura/");
       const dataFacturas = await resFacturas.json();
       setFacturas(Array.isArray(dataFacturas) ? dataFacturas : [dataFacturas]);
       setFilteredFacturas(
@@ -88,7 +88,7 @@ const ListaFacturacionVentas = () => {
 
       // Cargar servicios técnicos
       const resServicios = await fetch(
-        "http://localhost:4000/api/serviciotecnico"
+        "http://localhost:4000/api/serviciotecnico/"
       );
       const dataServicios = await resServicios.json();
       setServiciosTecnicos(Array.isArray(dataServicios) ? dataServicios : []);

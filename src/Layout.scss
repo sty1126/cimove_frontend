@@ -1,0 +1,112 @@
+// Paleta de colores personalizada
+$primary: #0d7f93;
+$secondary: #4d8a52;
+$accent: #7fbad6;
+$light: #c3d3c6;
+$background: #e8eaec;
+$text: #2a3033;
+
+// Variables de layout
+$sidebar-width: 16rem;
+$navbar-height: 4rem;
+
+// Estilos del layout principal
+.app-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+
+  // Sidebar
+  .app-sidebar {
+    width: $sidebar-width;
+    height: 100vh;
+    background-color: #f0f4f8; // Color de fondo del sidebar
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+    // Estilos para scrollbar
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+  }
+
+  // Contenedor principal
+  .app-main {
+    flex: 1;
+    margin-left: $sidebar-width;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: calc(100% - #{$sidebar-width});
+
+    // Navbar
+    .app-navbar {
+      height: $navbar-height;
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 5;
+      width: 100%;
+    }
+
+    // Contenido
+    .app-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      background-color: #f9fafb;
+      height: calc(100vh - #{$navbar-height});
+
+      // Estilos para scrollbar
+      &::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 4px;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.25);
+        }
+      }
+    }
+  }
+}
+
+// Media queries para responsividad
+@media (max-width: 768px) {
+  .app-layout {
+    .app-sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+
+      &.open {
+        transform: translateX(0);
+      }
+    }
+
+    .app-main {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+}
