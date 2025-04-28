@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   Form,
   Input,
@@ -18,7 +18,7 @@ import {
   message,
   Tooltip,
   Spin,
-} from "antd";
+} from "antd"
 import {
   UserOutlined,
   PhoneOutlined,
@@ -35,13 +35,12 @@ import {
   TeamOutlined,
   ArrowLeftOutlined,
   GlobalOutlined,
-} from "@ant-design/icons";
-import axios from "axios";
-import dayjs from "dayjs";
+} from "@ant-design/icons"
+import axios from "axios"
+import dayjs from "dayjs"
 
-const { Title, Text } = Typography;
-const { TextArea } = Input;
-const { Option } = Select;
+const { Title, Text } = Typography
+const { Option } = Select
 
 // Paleta de colores personalizada
 const colors = {
@@ -54,99 +53,121 @@ const colors = {
   success: "#4D8A52", // Verde más vibrante para éxito
   warning: "#E0A458", // Naranja apagado para advertencias
   danger: "#C25F48", // Rojo más vibrante para peligro
-};
+}
 
 const RegistroProveedor = () => {
-  const navigate = useNavigate();
-  const [form] = Form.useForm();
-  const [tiposProveedor, setTiposProveedor] = useState([]);
-  const [ciudades, setCiudades] = useState([]);
-  const [loadingTipos, setLoadingTipos] = useState(true);
-  const [loadingCiudades, setLoadingCiudades] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [digitoVerificacion, setDigitoVerificacion] = useState("");
+  const navigate = useNavigate()
+  const [form] = Form.useForm()
+  const [tiposProveedor, setTiposProveedor] = useState([])
+  const [ciudades, setCiudades] = useState([])
+  const [loadingTipos, setLoadingTipos] = useState(true)
+  const [loadingCiudades, setLoadingCiudades] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [digitoVerificacion, setDigitoVerificacion] = useState("")
 
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Obtener tipos de proveedor
-        const tiposResponse = await axios.get(
-          "http://localhost:4000/api/proveedores/tipos"
-        );
-        setTiposProveedor(tiposResponse.data);
-        setLoadingTipos(false);
+        const tiposResponse = await axios.get("http://localhost:4000/api/proveedores/tipos")
+        setTiposProveedor(tiposResponse.data)
+        setLoadingTipos(false)
 
         // Obtener ciudades
-        const ciudadesResponse = await axios.get(
-          "http://localhost:4000/api/ciudades/ciudades"
-        );
-        setCiudades(ciudadesResponse.data);
-        setLoadingCiudades(false);
+        const ciudadesResponse = await axios.get("http://localhost:4000/api/ciudades/ciudades")
+        setCiudades(ciudadesResponse.data)
+        setLoadingCiudades(false)
       } catch (error) {
-        console.error("Error al obtener datos:", error);
-        message.error("Error al cargar datos iniciales");
-        setLoadingTipos(false);
-        setLoadingCiudades(false);
+        console.error("Error al obtener datos:", error)
+        message.error("Error al cargar datos iniciales")
+        setLoadingTipos(false)
+        setLoadingCiudades(false)
       }
-    };
+    }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   // Manejar cambio en el ID/NIT para calcular dígito de verificación
   const handleIdChange = (e) => {
-    const value = e.target.value;
+    const value = e.target.value
     if (value && value.length > 0) {
-      const ultimoDigito = value.slice(-1);
-      setDigitoVerificacion(ultimoDigito);
-      form.setFieldsValue({ digitoverificacion_proveedor: ultimoDigito });
+      const ultimoDigito = value.slice(-1)
+
+      // Verificar si el último dígito es un número
+      if (/^\d$/.test(ultimoDigito)) {
+        setDigitoVerificacion(ultimoDigito)
+        form.setFieldsValue({ digitoverificacion_proveedor: ultimoDigito })
+      } else {
+        setDigitoVerificacion("")
+        form.setFieldsValue({ digitoverificacion_proveedor: "" })
+      }
     } else {
-      setDigitoVerificacion("");
-      form.setFieldsValue({ digitoverificacion_proveedor: "" });
+      setDigitoVerificacion("")
+      form.setFieldsValue({ digitoverificacion_proveedor: "" })
     }
-  };
+  }
 
   // Enviar formulario
   const handleSubmit = async (values) => {
-    setSubmitting(true);
+    // Verificar que el último dígito del NIT sea un número
+    const ultimoDigito = values.id_proveedor.slice(-1)
+    if (!/^\d$/.test(ultimoDigito)) {
+      message.error({
+        content: "El último carácter del NIT debe ser un número",
+        style: {
+          marginTop: "20px",
+        },
+      })
+      return
+    }
+
+    // Verificar que el saldo inicial sea un número mayor a cero
+    const saldo = values.saldo_proveedor
+    if (typeof saldo !== "number" || saldo <= 0) {
+      message.error({
+        content: "El saldo inicial debe ser un número mayor a cero",
+        style: {
+          marginTop: "20px",
+        },
+      })
+      return
+    }
+
+    setSubmitting(true)
     try {
       // Formatear fecha
       if (values.fecharegistro_proveedor) {
-        values.fecharegistro_proveedor =
-          values.fecharegistro_proveedor.format("YYYY-MM-DD");
+        values.fecharegistro_proveedor = values.fecharegistro_proveedor.format("YYYY-MM-DD")
       }
 
-      await axios.post("http://localhost:4000/api/proveedores", values);
+      await axios.post("http://localhost:4000/api/proveedores", values)
       message.success({
         content: "Proveedor registrado exitosamente",
         icon: <CheckCircleIcon />,
         style: {
           marginTop: "20px",
         },
-      });
+      })
 
       // Redirigir a la lista de proveedores
       setTimeout(() => {
-        navigate("/proveedores");
-      }, 1500);
+        navigate("/proveedores")
+      }, 1500)
     } catch (error) {
-      console.error(
-        "Error al registrar:",
-        error.response?.data || error.message
-      );
-      const errorMessage =
-        error.response?.data?.message || "Error al registrar proveedor";
+      console.error("Error al registrar:", error.response?.data || error.message)
+      const errorMessage = error.response?.data?.message || "Error al registrar proveedor"
       message.error({
         content: errorMessage,
         style: {
           marginTop: "20px",
         },
-      });
+      })
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
     <div
@@ -158,11 +179,7 @@ const RegistroProveedor = () => {
     >
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         {/* Botón de volver */}
-        <Button
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate("/proveedores")}
-          style={{ marginBottom: "16px" }}
-        >
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/proveedores")} style={{ marginBottom: "16px" }}>
           Volver a proveedores
         </Button>
 
@@ -179,15 +196,10 @@ const RegistroProveedor = () => {
               <TeamOutlined style={{ marginRight: "12px" }} />
               Registrar Nuevo Proveedor
             </Title>
-            <Text type="secondary">
-              Complete el formulario para registrar un nuevo proveedor en el
-              sistema
-            </Text>
+            <Text type="secondary">Complete el formulario para registrar un nuevo proveedor en el sistema</Text>
           </div>
 
-          <Divider
-            style={{ margin: "12px 0 24px", borderColor: colors.light }}
-          />
+          <Divider style={{ margin: "12px 0 24px", borderColor: colors.light }} />
 
           {(loadingTipos || loadingCiudades) && (
             <div style={{ textAlign: "center", padding: "20px" }}>
@@ -210,7 +222,7 @@ const RegistroProveedor = () => {
                 id_tipoproveedor_proveedor: "",
                 representante_proveedor: "",
                 fecharegistro_proveedor: dayjs(),
-                saldo_proveedor: "0",
+                saldo_proveedor: 0.01,
                 digitoverificacion_proveedor: "",
               }}
             >
@@ -229,14 +241,19 @@ const RegistroProveedor = () => {
                         required: true,
                         message: "Por favor ingrese el ID/NIT del proveedor",
                       },
+                      {
+                        validator: (_, value) => {
+                          if (!value || value.length === 0) return Promise.resolve()
+                          const ultimoDigito = value.slice(-1)
+                          if (/^\d$/.test(ultimoDigito)) {
+                            return Promise.resolve()
+                          }
+                          return Promise.reject(new Error("El último carácter del NIT debe ser un número"))
+                        },
+                      },
                     ]}
                   >
-                    <Input
-                      placeholder="Ingrese ID/NIT"
-                      maxLength={9}
-                      onChange={handleIdChange}
-                      disabled={submitting}
-                    />
+                    <Input placeholder="Ingrese ID/NIT" maxLength={9} onChange={handleIdChange} disabled={submitting} />
                   </Form.Item>
                 </Col>
 
@@ -247,9 +264,7 @@ const RegistroProveedor = () => {
                         <NumberOutlined style={{ color: colors.primary }} />
                         Dígito de Verificación
                         <Tooltip title="Este valor se calcula automáticamente del último dígito del ID/NIT">
-                          <InfoCircleOutlined
-                            style={{ color: colors.accent }}
-                          />
+                          <InfoCircleOutlined style={{ color: colors.accent }} />
                         </Tooltip>
                       </Space>
                     }
@@ -282,11 +297,7 @@ const RegistroProveedor = () => {
                       },
                     ]}
                   >
-                    <Input
-                      placeholder="Ingrese nombre"
-                      maxLength={25}
-                      disabled={submitting}
-                    />
+                    <Input placeholder="Ingrese nombre" maxLength={25} disabled={submitting} />
                   </Form.Item>
                 </Col>
 
@@ -300,11 +311,7 @@ const RegistroProveedor = () => {
                     }
                     name="representante_proveedor"
                   >
-                    <Input
-                      placeholder="Ingrese representante"
-                      maxLength={25}
-                      disabled={submitting}
-                    />
+                    <Input placeholder="Ingrese representante" maxLength={25} disabled={submitting} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -326,15 +333,9 @@ const RegistroProveedor = () => {
                       },
                     ]}
                   >
-                    <Select
-                      placeholder="Seleccione un tipo de proveedor"
-                      disabled={submitting}
-                    >
+                    <Select placeholder="Seleccione un tipo de proveedor" disabled={submitting}>
                       {tiposProveedor.map((tipo) => (
-                        <Option
-                          key={tipo.id_tipoproveedor}
-                          value={tipo.id_tipoproveedor}
-                        >
+                        <Option key={tipo.id_tipoproveedor} value={tipo.id_tipoproveedor}>
                           {tipo.nombre_tipoproveedor}
                         </Option>
                       ))}
@@ -358,10 +359,7 @@ const RegistroProveedor = () => {
                       },
                     ]}
                   >
-                    <Select
-                      placeholder="Seleccione una ciudad"
-                      disabled={submitting}
-                    >
+                    <Select placeholder="Seleccione una ciudad" disabled={submitting}>
                       {ciudades.map((ciudad) => (
                         <Option key={ciudad.id_ciudad} value={ciudad.id_ciudad}>
                           {ciudad.nombre_ciudad}
@@ -380,15 +378,9 @@ const RegistroProveedor = () => {
                   </Space>
                 }
                 name="direccion_proveedor"
-                rules={[
-                  { required: true, message: "Por favor ingrese la dirección" },
-                ]}
+                rules={[{ required: true, message: "Por favor ingrese la dirección" }]}
               >
-                <Input
-                  placeholder="Ingrese dirección"
-                  maxLength={30}
-                  disabled={submitting}
-                />
+                <Input placeholder="Ingrese dirección" maxLength={30} disabled={submitting} />
               </Form.Item>
 
               <Row gutter={24}>
@@ -408,11 +400,7 @@ const RegistroProveedor = () => {
                       },
                     ]}
                   >
-                    <Input
-                      placeholder="Ingrese teléfono"
-                      maxLength={13}
-                      disabled={submitting}
-                    />
+                    <Input placeholder="Ingrese teléfono" maxLength={13} disabled={submitting} />
                   </Form.Item>
                 </Col>
 
@@ -432,11 +420,7 @@ const RegistroProveedor = () => {
                       },
                     ]}
                   >
-                    <Input
-                      placeholder="Ingrese email"
-                      maxLength={25}
-                      disabled={submitting}
-                    />
+                    <Input placeholder="Ingrese email" maxLength={30} disabled={submitting} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -476,22 +460,49 @@ const RegistroProveedor = () => {
                       </Space>
                     }
                     name="saldo_proveedor"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Por favor ingrese un saldo inicial",
+                      },
+                      {
+                        validator: (_, value) => {
+                          if (value === null || value === undefined) {
+                            return Promise.reject(new Error("El saldo inicial es requerido"))
+                          }
+                          if (typeof value !== "number") {
+                            return Promise.reject(new Error("El saldo inicial debe ser un número"))
+                          }
+                          if (value <= 0) {
+                            return Promise.reject(new Error("El saldo inicial debe ser mayor a cero"))
+                          }
+                          return Promise.resolve()
+                        },
+                      },
+                    ]}
                   >
                     <InputNumber
                       style={{ width: "100%" }}
                       placeholder="Ingrese saldo inicial"
-                      min={0}
+                      min={0.01}
                       precision={2}
                       disabled={submitting}
                       prefix="$"
+                      stringMode={false}
+                      onKeyDown={(e) => {
+                        // Permitir solo números, punto decimal, teclas de navegación y control
+                        const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"]
+                        const isNumber = /^[0-9.]$/.test(e.key)
+                        if (!isNumber && !allowedKeys.includes(e.key)) {
+                          e.preventDefault()
+                        }
+                      }}
                     />
                   </Form.Item>
                 </Col>
               </Row>
 
-              <Divider
-                style={{ margin: "12px 0 24px", borderColor: colors.light }}
-              />
+              <Divider style={{ margin: "12px 0 24px", borderColor: colors.light }} />
 
               <div
                 style={{
@@ -530,23 +541,17 @@ const RegistroProveedor = () => {
         </Card>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Componente de icono personalizado
 const CheckCircleIcon = () => (
-  <svg
-    width="1em"
-    height="1em"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
+  <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
       d="M12 22C6.477 22 2 17.523 2 12C2 6.477 6.477 2 12 2C17.523 2 22 6.477 22 12C22 17.523 17.523 22 12 22ZM11.003 16L17.073 9.929L15.659 8.515L11.003 13.172L8.174 10.343L6.76 11.757L11.003 16Z"
       fill={colors.success}
     />
   </svg>
-);
+)
 
-export default RegistroProveedor;
+export default RegistroProveedor

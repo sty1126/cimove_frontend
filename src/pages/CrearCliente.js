@@ -242,7 +242,7 @@ const CrearCliente = () => {
                       },
                     ]}
                   >
-                    <Input placeholder="Ingrese número de documento" />
+                    <Input placeholder="Ingrese número de documento" maxLength={10} />
                   </Form.Item>
                 </Col>
 
@@ -345,7 +345,7 @@ const CrearCliente = () => {
                     }
                     name="telefono_cliente"
                   >
-                    <Input placeholder="Ingrese teléfono" />
+                    <Input placeholder="Ingrese teléfono" maxLength={13} />
                   </Form.Item>
                 </Col>
 
@@ -365,7 +365,7 @@ const CrearCliente = () => {
                       },
                     ]}
                   >
-                    <Input placeholder="Ingrese email" />
+                    <Input placeholder="Ingrese email" maxLength={30} />
                   </Form.Item>
                 </Col>
 
@@ -407,7 +407,7 @@ const CrearCliente = () => {
                     }
                     name="direccion_cliente"
                   >
-                    <Input placeholder="Ingrese dirección" />
+                    <Input placeholder="Ingrese dirección" maxLength={30} />
                   </Form.Item>
                 </Col>
 
@@ -423,7 +423,7 @@ const CrearCliente = () => {
                     }
                     name="barrio_cliente"
                   >
-                    <Input placeholder="Ingrese barrio" />
+                    <Input placeholder="Ingrese barrio" maxLength={15}/>
                   </Form.Item>
                 </Col>
 
@@ -439,7 +439,7 @@ const CrearCliente = () => {
                     }
                     name="codigopostal_cliente"
                   >
-                    <Input placeholder="Ingrese código postal" />
+                    <Input placeholder="Ingrese código postal" maxLength={6} />
                   </Form.Item>
                 </Col>
               </Row>

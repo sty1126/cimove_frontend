@@ -153,7 +153,7 @@ const FormularioAbono = () => {
             <Button
               type="primary"
               htmlType="submit"
-              loading={submitting}
+              loading={loading}
               disabled={saldoPendiente <= 0}
               block
               size="large"
