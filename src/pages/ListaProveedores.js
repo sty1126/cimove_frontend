@@ -161,7 +161,7 @@ const ListaProveedores = () => {
     }
 
     try {
-      await axios.post("http://localhost:4000/api/proveedores/tipos", {
+      await axios.post("http://localhost:4000/api/tipoproveedores", {
         nombre_tipoproveedor: newTipo,
       });
 
@@ -671,6 +671,7 @@ const ListaProveedores = () => {
         <Input
           placeholder="Nombre del tipo de proveedor"
           value={newTipo}
+          maxLength={25}
           onChange={(e) => setNewTipo(e.target.value)}
           onPressEnter={handleCreateTipo}
           prefix={<AppstoreAddOutlined style={{ color: "#bfbfbf" }} />}
