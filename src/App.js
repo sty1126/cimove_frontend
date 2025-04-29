@@ -38,6 +38,9 @@ import ListaFacturacionVentas from "./pages/ListaFacturacionVentas";
 import CrearFacturaServicioTecnico from "./pages/CrearFacturaServicioTecnico";
 import Login from "./pages/Login";
 import Estadisticas from "./pages/Estadisticas";
+import DetallesVentas from "./pages/DetallesVentas";
+import DetallesServicioTecnico from "./pages/DetallesServicioTecnico";
+import ActualizarServicioTecnico from "./pages/ActualizarServicioTecnico";
 
 import { CartProvider } from "./context/CartContext";
 
@@ -185,6 +188,18 @@ function App() {
             <Route
               path="estadisticas"
               element={<PrivateRoute element={<Estadisticas />} />}
+            />
+            <Route
+              path="detalles-ventas/:ventasId"
+              element={<PrivateRoute element={<DetallesVentas />} />}
+            />
+            <Route
+              path="detalles-servicio/:id"
+              element={<PrivateRoute element={<DetallesServicioTecnico />} />}
+            />
+            <Route
+              path="editar-servicio/:id"
+              element={<PrivateRoute element={<ActualizarServicioTecnico />} />}
             />
           </Route>
         </Routes>
