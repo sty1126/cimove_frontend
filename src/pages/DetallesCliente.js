@@ -62,7 +62,7 @@ const DetalleCliente = () => {
   useEffect(() => {
     const fetchCliente = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/api/clientes/${id}`);
+        const res = await axios.get(`https://cimove-backend.onrender.com/api/clientes/${id}`);
         setCliente(Array.isArray(res.data) ? res.data[0] : res.data);
       } catch (err) {
         console.error("Error cargando detalles del cliente:", err);

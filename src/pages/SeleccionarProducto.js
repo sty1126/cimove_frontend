@@ -56,14 +56,14 @@ const SeleccionarProducto = ({ show, handleClose, setProducto, idSede }) => {
       try {
         // Obtener productos de la sede
         const response = await axios.get(
-          `http://localhost:4000/api/inventariolocal/sede/${idSede}`
+          `https://cimove-backend.onrender.com/api/inventariolocal/sede/${idSede}`
         );
         setProductos(response.data);
 
         // Obtener nombre de la sede
         try {
           const sedeResponse = await axios.get(
-            `http://localhost:4000/api/sedes/${idSede}`
+            `https://cimove-backend.onrender.com/api/sedes/${idSede}`
           );
           setNombreSede(sedeResponse.data.nombre_sede || `Sede ${idSede}`);
         } catch (error) {

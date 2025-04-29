@@ -103,7 +103,7 @@ const FacturacionProveedor = () => {
     setLoading(true);
     try {
       const res = await axios.get(
-        "http://localhost:4000/api/facturas-proveedor"
+        "https://cimove-backend.onrender.com/api/facturas-proveedor"
       );
       setFacturas(res.data);
     } catch (error) {
@@ -118,7 +118,7 @@ const FacturacionProveedor = () => {
   const fetchOrdenes = async () => {
     setLoadingOrdenes(true);
     try {
-      const res = await axios.get("http://localhost:4000/api/ordenes");
+      const res = await axios.get("https://cimove-backend.onrender.com/api/ordenes");
       setOrdenes(res.data);
     } catch (error) {
       console.error("Error al obtener órdenes de compra:", error);
@@ -131,7 +131,7 @@ const FacturacionProveedor = () => {
   // Obtener proveedores
   const fetchProveedores = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/proveedores/all");
+      const res = await axios.get("https://cimove-backend.onrender.com/api/proveedores/all");
       setProveedores(res.data);
     } catch (error) {
       console.error("Error al obtener proveedores:", error);

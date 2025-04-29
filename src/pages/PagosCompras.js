@@ -71,7 +71,7 @@ const PagosCompras = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get("http://localhost:4000/api/abonos");
+      const res = await axios.get("https://cimove-backend.onrender.com/api/abonos");
       setAbonos(res.data);
       setFilteredAbonos(res.data);
     } catch (error) {

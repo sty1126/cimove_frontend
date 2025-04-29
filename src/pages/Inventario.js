@@ -264,7 +264,7 @@ const Inventario = () => {
     }
 
     try {
-      await axios.post("http://localhost:4000/api/categorias", {
+      await axios.post("https://cimove-backend.onrender.com/api/categorias", {
         descripcion_categoria: newCategory,
       });
 
@@ -274,7 +274,7 @@ const Inventario = () => {
 
       // Recargar las categorías después de crear una nueva
       const categoriesRes = await axios.get(
-        "http://localhost:4000/api/categorias"
+        "https://cimove-backend.onrender.com/api/categorias"
       );
       setCategories(categoriesRes.data);
     } catch (error) {
@@ -295,7 +295,7 @@ const Inventario = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:4000/api/productos/eliminar/${id}`,
+        `https://cimove-backend.onrender.com/api/productos/eliminar/${id}`,
         {
           method: "PUT",
         }
@@ -349,8 +349,8 @@ const Inventario = () => {
     const fetchSedesYCategorias = async () => {
       try {
         const [categoriesRes, sedesRes] = await Promise.all([
-          axios.get("http://localhost:4000/api/categorias"),
-          axios.get("http://localhost:4000/api/sedes"),
+          axios.get("https://cimove-backend.onrender.com/api/categorias"),
+          axios.get("https://cimove-backend.onrender.com/api/sedes"),
         ]);
         setCategories(categoriesRes.data);
         setSedes(sedesRes.data);
@@ -368,7 +368,7 @@ const Inventario = () => {
     try {
       if (selectedSede === "general") {
         const productsRes = await axios.get(
-          "http://localhost:4000/api/productos/detalles"
+          "https://cimove-backend.onrender.com/api/productos/detalles"
         );
         setData(formatData(productsRes.data));
         setFilteredData(formatData(productsRes.data));
@@ -380,7 +380,7 @@ const Inventario = () => {
         if (!sedeEncontrada) return;
 
         const productsRes = await axios.get(
-          `http://localhost:4000/api/inventariolocal/sede/${sedeEncontrada.id_sede}`
+          `https://cimove-backend.onrender.com/api/inventariolocal/sede/${sedeEncontrada.id_sede}`
         );
         setData(formatData(productsRes.data));
         setFilteredData(formatData(productsRes.data));

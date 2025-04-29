@@ -69,7 +69,7 @@ const AnadirStock = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const sedesRes = await axios.get("http://localhost:4000/api/sedes");
+        const sedesRes = await axios.get("https://cimove-backend.onrender.com/api/sedes");
         setSedes(sedesRes.data);
       } catch (error) {
         console.error("Error al obtener sedes:", error);
@@ -88,7 +88,7 @@ const AnadirStock = () => {
     try {
       setAddingLocation(true);
       const response = await axios.get(
-        `http://localhost:4000/api/inventariolocal/existe/${producto.id_producto}/${idSede}`
+        `https://cimove-backend.onrender.com/api/inventariolocal/existe/${producto.id_producto}/${idSede}`
       );
       return response.data.existe; // Retorna true si el producto ya está en la sede
     } catch (error) {
@@ -179,11 +179,11 @@ const AnadirStock = () => {
           let url, method, bodyData;
 
           if (s.existe) {
-            url = `http://localhost:4000/api/inventariolocal/${producto.id_producto}/${s.sede}/ajustar`;
+            url = `https://cimove-backend.onrender.com/api/inventariolocal/${producto.id_producto}/${s.sede}/ajustar`;
             method = "PATCH";
             bodyData = { cantidad: Number(s.cantidad) };
           } else {
-            url = "http://localhost:4000/api/inventariolocal";
+            url = "https://cimove-backend.onrender.com/api/inventariolocal";
             method = "POST";
             bodyData = {
               id_producto_inventariolocal: producto.id_producto,

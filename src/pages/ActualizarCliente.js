@@ -73,7 +73,7 @@ const ActualizarCliente = () => {
       try {
         // Obtener datos del cliente
         const clienteRes = await fetch(
-          `http://localhost:4000/api/clientes/${id}`
+          `https://cimove-backend.onrender.com/api/clientes/${id}`
         );
         const clienteData = await clienteRes.json();
 
@@ -95,7 +95,7 @@ const ActualizarCliente = () => {
         form.setFieldsValue(clienteInfo);
 
         // Obtener sedes
-        const sedesRes = await fetch("http://localhost:4000/api/sedes");
+        const sedesRes = await fetch("https://cimove-backend.onrender.com/api/sedes");
         const sedesData = await sedesRes.json();
         setSedes(sedesData);
       } catch (error) {
@@ -119,7 +119,7 @@ const ActualizarCliente = () => {
           values.fechanacimiento_cliente.format("YYYY-MM-DD");
       }
 
-      const response = await fetch(`http://localhost:4000/api/clientes/${id}`, {
+      const response = await fetch(`https://cimove-backend.onrender.com/api/clientes/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),

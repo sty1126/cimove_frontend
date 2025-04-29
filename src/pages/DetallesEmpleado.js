@@ -59,7 +59,7 @@ const DetalleEmpleado = () => {
     const fetchEmpleado = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:4000/api/empleados/${id}`
+          `https://cimove-backend.onrender.com/api/empleados/${id}`
         );
         setEmpleado(Array.isArray(res.data) ? res.data[0] : res.data);
       } catch (err) {

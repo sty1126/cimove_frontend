@@ -60,7 +60,7 @@ const RegistrarProducto = () => {
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/categorias");
+        const res = await axios.get("https://cimove-backend.onrender.com/api/categorias");
         setCategorias(res.data);
       } catch (error) {
         console.error("Error al obtener categorías", error);
@@ -101,7 +101,7 @@ const RegistrarProducto = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/productos",
+        "https://cimove-backend.onrender.com/api/productos",
         values
       );
       const idProducto = response.data.id_producto;

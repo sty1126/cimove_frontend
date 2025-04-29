@@ -70,12 +70,12 @@ const RegistroProveedor = () => {
     const fetchData = async () => {
       try {
         // Obtener tipos de proveedor
-        const tiposResponse = await axios.get("http://localhost:4000/api/proveedores/tipos")
+        const tiposResponse = await axios.get("https://cimove-backend.onrender.com/api/proveedores/tipos")
         setTiposProveedor(tiposResponse.data)
         setLoadingTipos(false)
 
         // Obtener ciudades
-        const ciudadesResponse = await axios.get("http://localhost:4000/api/ciudades/ciudades")
+        const ciudadesResponse = await axios.get("https://cimove-backend.onrender.com/api/ciudades/ciudades")
         setCiudades(ciudadesResponse.data)
         setLoadingCiudades(false)
       } catch (error) {
@@ -142,7 +142,7 @@ const RegistroProveedor = () => {
         values.fecharegistro_proveedor = values.fecharegistro_proveedor.format("YYYY-MM-DD")
       }
 
-      await axios.post("http://localhost:4000/api/proveedores", values)
+      await axios.post("https://cimove-backend.onrender.com/api/proveedores", values)
       message.success({
         content: "Proveedor registrado exitosamente",
         icon: <CheckCircleIcon />,

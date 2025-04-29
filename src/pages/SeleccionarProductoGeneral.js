@@ -52,7 +52,7 @@ const SeleccionarProductoGeneral = ({ show, handleClose, setProducto }) => {
 
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:4000/api/productos");
+        const response = await axios.get("https://cimove-backend.onrender.com/api/productos");
         setProductos(response.data);
       } catch (error) {
         console.error("Error al obtener productos", error);

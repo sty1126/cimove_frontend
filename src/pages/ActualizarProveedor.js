@@ -75,9 +75,9 @@ const ActualizarProveedor = () => {
         // Obtener datos iniciales
         const [tiposResponse, ciudadesResponse, proveedorResponse] =
           await Promise.all([
-            axios.get("http://localhost:4000/api/proveedores/tipos"),
-            axios.get("http://localhost:4000/api/ciudades/ciudades"),
-            axios.get(`http://localhost:4000/api/proveedores/${id}`),
+            axios.get("https://cimove-backend.onrender.com/tipos"),
+            axios.get("https://cimove-backend.onrender.com/ciudades"),
+            axios.get(`https://cimove-backend.onrender.com/api/proveedores/${id}`),
           ]);
 
         setTiposProveedor(tiposResponse.data);
@@ -127,7 +127,7 @@ const ActualizarProveedor = () => {
           values.fecharegistro_proveedor.format("YYYY-MM-DD");
       }
 
-      await axios.put(`http://localhost:4000/api/proveedores/${id}`, values);
+      await axios.put(`https://cimove-backend.onrender.com/api/proveedores/${id}`, values);
       message.success({
         content: "Proveedor actualizado exitosamente",
         icon: <CheckCircleIcon />,

@@ -25,7 +25,7 @@ const CrearFacturaProveedor = () => {
 
   useEffect(() => {
     const fetchOrdenes = async () => {
-      const res = await axios.get("http://localhost:4000/api/ordenes");
+      const res = await axios.get("https://cimove-backend.onrender.com/api/ordenes");
       setOrdenes(res.data);
     };
     fetchOrdenes();
@@ -34,7 +34,7 @@ const CrearFacturaProveedor = () => {
   const handleOrdenSelect = async (id_ordencompra) => {
     setSelectedOrden(id_ordencompra);
     const res = await axios.get(
-      `http://localhost:4000/api/facturas-proveedor/facturas/orden/${id_ordencompra}`
+      `https://cimove-backend.onrender.com/api/facturas-proveedor/facturas/orden/${id_ordencompra}`
     );
     const productosConSubtotal = res.data.map((p) => ({
       ...p,
@@ -74,7 +74,7 @@ const CrearFacturaProveedor = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:4000/api/facturas-proveedor/generar-desde-orden",
+        "https://cimove-backend.onrender.com/api/facturas-proveedor/generar-desde-orden",
         {
           id_ordencompra: selectedOrden,
           productos: productos.map((p) => ({

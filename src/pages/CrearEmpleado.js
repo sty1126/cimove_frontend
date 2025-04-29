@@ -64,9 +64,9 @@ const CrearEmpleado = () => {
       try {
         setDataLoading(true);
         const [resSedes, resDocs, resUsuarios] = await Promise.all([
-          axios.get("http://localhost:4000/api/sedes"),
-          axios.get("http://localhost:4000/api/tipodocumento"),
-          axios.get("http://localhost:4000/api/tipousuario"),
+          axios.get("https://cimove-backend.onrender.com/api/sedes"),
+          axios.get("https://cimove-backend.onrender.com/api/tipodocumento"),
+          axios.get("https://cimove-backend.onrender.com/api/tipousuario"),
         ]);
         setSedes(resSedes.data);
         setTiposDocumento(resDocs.data);
@@ -91,7 +91,7 @@ const CrearEmpleado = () => {
         telefono_usuario: values.telefono_empleado, // Usar el mismo teléfono para usuario
       };
 
-      await axios.post("http://localhost:4000/api/empleados", data);
+      await axios.post("https://cimove-backend.onrender.com/api/empleados", data);
 
       messageApi.success("Empleado creado correctamente");
 

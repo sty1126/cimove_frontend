@@ -130,7 +130,7 @@ const Catalogo = () => {
 
   const fetchSedes = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/sedes");
+      const res = await axios.get("https://cimove-backend.onrender.com/api/sedes");
       setSedes(res.data);
       if (res.data.length > 0) {
         setSelectedSede(res.data[0].nombre_sede);
@@ -144,7 +144,7 @@ const Catalogo = () => {
     try {
       // Inventario general
       const generalRes = await axios.get(
-        "http://localhost:4000/api/productos/detalles"
+        "https://cimove-backend.onrender.com/api/productos/detalles"
       );
       setGeneralProducts(formatData(generalRes.data));
 
@@ -152,7 +152,7 @@ const Catalogo = () => {
       const sedeObj = sedes.find((s) => s.nombre_sede === selectedSede);
       if (!sedeObj) return;
       const sedeRes = await axios.get(
-        `http://localhost:4000/api/inventariolocal/sede/${sedeObj.id_sede}`
+        `https://cimove-backend.onrender.com/inventariolocal/sede/${sedeObj.id_sede}`
       );
       setSedeProducts(formatData(sedeRes.data));
     } catch (error) {

@@ -66,13 +66,13 @@ const ActualizarEmpleado = () => {
       try {
         // Obtener datos del empleado y opciones para los selects
         const [empleadoRes, tiposRes, sedesRes] = await Promise.all([
-          fetch(`http://localhost:4000/api/empleados/${id}`).then((res) =>
+          fetch(`https://cimove-backend.onrender.com/api/empleados/${id}`).then((res) =>
             res.json()
           ),
-          fetch("http://localhost:4000/api/tipousuario").then((res) =>
+          fetch("https://cimove-backend.onrender.com/api/tipousuario").then((res) =>
             res.json()
           ),
-          fetch("http://localhost:4000/api/sedes").then((res) => res.json()),
+          fetch("https://cimove-backend.onrender.com/api/sedes").then((res) => res.json()),
         ]);
 
         // Procesar datos del empleado
@@ -105,7 +105,7 @@ const ActualizarEmpleado = () => {
     setSubmitting(true);
     try {
       const response = await fetch(
-        `http://localhost:4000/api/empleados/${id}`,
+        `https://cimove-backend.onrender.com/api/empleados/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

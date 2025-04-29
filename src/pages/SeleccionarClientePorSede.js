@@ -75,13 +75,13 @@ const SeleccionarClientePorSede = ({
       try {
         // Primero obtenemos la ID de la sede a partir del nombre de la sede seleccionada
         const resSede = await axios.get(
-          `http://localhost:4000/api/sedes/nombre/${selectedSede}`
+          `https://cimove-backend.onrender.com/api/sedes/nombre/${selectedSede}`
         );
         const sedeId = resSede.data.id_sede; // Obtenemos la ID de la sede
 
         // Ahora usamos la ID de la sede para obtener los clientes
         const resClientes = await axios.get(
-          `http://localhost:4000/api/clientes/sede/${sedeId}`
+          `https://cimove-backend.onrender.com/clientes/sede/${sedeId}`
         );
         setClientes(resClientes.data);
       } catch (err) {

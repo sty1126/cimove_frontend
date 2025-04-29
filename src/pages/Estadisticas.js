@@ -67,7 +67,7 @@ export default function EstadisticasPage() {
   // Funciones para obtener datos
   const getClientes = async () => {
     try {
-      const { data } = await axios.get("http://localhost:4000/api/estadisticas/ultimos-clientes")
+      const { data } = await axios.get("https://cimove-backend.onrender.com/api/estadisticas/ultimos-clientes")
       setClientes(data)
 
       // Contar clientes por tipo
@@ -88,7 +88,7 @@ export default function EstadisticasPage() {
 
   const getAbonos = async () => {
     try {
-      const { data } = await axios.get("http://localhost:4000/api/estadisticas/ultimos-abonos")
+      const { data } = await axios.get("https://cimove-backend.onrender.com/api/estadisticas/ultimos-abonos")
       setAbonos(data)
 
       // Preparar datos para el gráfico de abonos
@@ -114,7 +114,7 @@ export default function EstadisticasPage() {
 
   const getProductosStock = async () => {
     try {
-      const { data } = await axios.get("http://localhost:4000/api/estadisticas/productos-stock-bajo")
+      const { data } = await axios.get("https://cimove-backend.onrender.com/api/estadisticas/productos-stock-bajo")
       setProductosStock(data)
 
       // Preparar datos para el gráfico de stock

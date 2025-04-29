@@ -83,8 +83,8 @@ const AnadirNovedad = () => {
     const fetchData = async () => {
       try {
         const [tiposMovRes, sedesRes] = await Promise.all([
-          axios.get("http://localhost:4000/api/movimientos/tipo"),
-          axios.get("http://localhost:4000/api/sedes"),
+          axios.get("https://cimove-backend.onrender.com/api/movimientos/tipo"),
+          axios.get("https://cimove-backend.onrender.com/api/sedes"),
         ]);
 
         setTiposMovimiento(tiposMovRes.data);
@@ -169,7 +169,7 @@ const AnadirNovedad = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:4000/api/movimientos",
+        "https://cimove-backend.onrender.com/api/movimientos",
         novedad
       );
 

@@ -71,9 +71,9 @@ const CrearCliente = () => {
       try {
         setDataLoading(true);
         const [resDocs, resTipos, resSedes] = await Promise.all([
-          axios.get("http://localhost:4000/api/tipodocumento"),
-          axios.get("http://localhost:4000/api/tipocliente"),
-          axios.get("http://localhost:4000/api/sedes"),
+          axios.get("https://cimove-backend.onrender.com/api/tipodocumento"),
+          axios.get("https://cimove-backend.onrender.com/api/tipocliente"),
+          axios.get("https://cimove-backend.onrender.com/api/sedes"),
         ]);
         setDocumentos(resDocs.data);
         setTiposCliente(resTipos.data);
@@ -129,7 +129,7 @@ const CrearCliente = () => {
           values.fechanacimiento_cliente.format("YYYY-MM-DD");
       }
 
-      await axios.post("http://localhost:4000/api/clientes", values);
+      await axios.post("https://cimove-backend.onrender.com/api/clientes", values);
 
       // Mostrar modal de éxito
       setModalVisible(true);

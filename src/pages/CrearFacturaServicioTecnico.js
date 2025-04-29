@@ -31,7 +31,7 @@ const CrearServicioTecnico = () => {
   useEffect(() => {
     const fetchSedes = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/api/sedes/");
+        const response = await axios.get("https://cimove-backend.onrender.com/api/sedes/");
         setSedes(response.data);
       } catch (error) {
         console.error("Error cargando sedes:", error);
@@ -41,7 +41,7 @@ const CrearServicioTecnico = () => {
     const fetchProveedores = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:4000/api/proveedores/all"
+          "https://cimove-backend.onrender.com/api/proveedores/all"
         );
         setProveedores(response.data);
       } catch (error) {
@@ -110,7 +110,7 @@ const CrearServicioTecnico = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/serviciotecnico",
+        "https://cimove-backend.onrender.com/api/serviciotecnico",
         payload
       );
       alert("Servicio técnico creado exitosamente.");

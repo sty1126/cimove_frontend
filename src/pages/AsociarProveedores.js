@@ -65,13 +65,13 @@ const AsociarProveedores = () => {
       try {
         // Cargar proveedores
         const proveedoresRes = await axios.get(
-          "http://localhost:4000/api/proveedores/all"
+          "https://cimove-backend.onrender.com/api/proveedores/all"
         );
         setProveedores(proveedoresRes.data);
 
         // Cargar detalles del producto
         const productoRes = await axios.get(
-          `http://localhost:4000/api/productos/${idProducto}`
+          `https://cimove-backend.onrender.com/api/productos/${idProducto}`
         );
         let productoData;
         if (Array.isArray(productoRes.data) && productoRes.data.length > 0) {
@@ -84,7 +84,7 @@ const AsociarProveedores = () => {
         // Cargar proveedores ya asociados
         try {
           const asociadosRes = await axios.get(
-            `http://localhost:4000/api/productos/${idProducto}/proveedores`
+            `https://cimove-backend.onrender.com/api/productos/${idProducto}/proveedores`
           );
           setProveedoresAsociados(asociadosRes.data.map((p) => p.id_proveedor));
         } catch (error) {
@@ -147,7 +147,7 @@ const AsociarProveedores = () => {
       // Crear nuevas asociaciones
       await Promise.all(
         proveedoresSeleccionados.map((idProveedor) =>
-          axios.post("http://localhost:4000/api/proveedor-producto", {
+          axios.post("https://cimove-backend.onrender.com/api/proveedor-producto", {
             id_proveedor_proveedorproducto: idProveedor,
             id_producto_proveedorproducto: idProducto,
           })

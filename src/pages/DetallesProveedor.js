@@ -64,14 +64,14 @@ const DetallesProveedor = () => {
       try {
         // Obtener detalles del proveedor
         const responseProveedor = await axios.get(
-          `http://localhost:4000/api/proveedores/${id}`
+          `https://cimove-backend.onrender.com/api/proveedores/${id}`
         );
         setProveedor(responseProveedor.data);
 
         // Intentar obtener productos asociados al proveedor (si existe el endpoint)
         try {
           const responseProductos = await axios.get(
-            `http://localhost:4000/api/proveedores/${id}/productos`
+            `https://cimove-backend.onrender.com/api/proveedores/${id}/productos`
           );
           setProductos(responseProductos.data);
         } catch (error) {

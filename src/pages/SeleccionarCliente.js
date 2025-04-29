@@ -55,7 +55,7 @@ const SeleccionarCliente = ({ show, handleClose, setCliente }) => {
       setLoading(true);
       try {
         const response = await axios.get(
-          "http://localhost:4000/api/clientes/formateados"
+          "https://cimove-backend.onrender.com/api/clientes/formateados"
         );
         setClientes(response.data);
       } catch (error) {

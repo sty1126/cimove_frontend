@@ -38,8 +38,12 @@ import ListaFacturacionVentas from "./pages/ListaFacturacionVentas";
 import CrearFacturaServicioTecnico from "./pages/CrearFacturaServicioTecnico";
 import Login from "./pages/Login";
 import Estadisticas from "./pages/Estadisticas";
+import { disableReactDevTools } from '@fvilers/disable-react-devtools';
 
 import { CartProvider } from "./context/CartContext";
+
+
+if (process.env.NODE_ENV === 'production') disableReactDevTools()
 
 function App() {
   return (

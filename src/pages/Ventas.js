@@ -101,8 +101,8 @@ const Ventas = () => {
       try {
         setLoading(true);
         const [categoriasRes, sedesRes] = await Promise.all([
-          axios.get("http://localhost:4000/api/categorias"),
-          axios.get("http://localhost:4000/api/sedes"),
+          axios.get("https://cimove-backend.onrender.com/api/categorias"),
+          axios.get("https://cimove-backend.onrender.com/api/sedes"),
         ]);
 
         setCategorias(categoriasRes.data);

@@ -35,7 +35,7 @@ const FormularioAbono = () => {
   const fetchFactura = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:4000/api/facturas-proveedor/${idFactura}`);
+      const response = await axios.get(`https://cimove-backend.onrender.com/api/facturas-proveedor/${idFactura}`);
       setFactura(response.data);
     } catch (error) {
       message.error('Error al cargar la factura');
@@ -54,7 +54,7 @@ const FormularioAbono = () => {
   const registrarAbono = async (values) => {
     setSubmitting(true);
     try {
-      await axios.post('http://localhost:4000/api/abonos', {
+      await axios.post('https://cimove-backend.onrender.com/api/abonos', {
         id_facturaproveedor_abonofactura: idFactura,
         fecha_abonofactura: values.fecha.format('YYYY-MM-DD'),
         monto_abonofactura: values.monto,

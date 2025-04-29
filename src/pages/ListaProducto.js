@@ -48,10 +48,10 @@ const Inventario = () => {
     const fetchData = async () => {
       try {
         const categoriesRes = await axios.get(
-          "http://localhost:4000/api/categorias"
+          "https://cimove-backend.onrender.com/api/categorias"
         );
         const productsRes = await axios.get(
-          "http://localhost:4000/api/productos"
+          "https://cimove-backend.onrender.com/api/productos"
         );
 
         setCategories(categoriesRes.data);

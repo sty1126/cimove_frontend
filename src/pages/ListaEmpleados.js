@@ -82,7 +82,7 @@ const ListaEmpleados = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:4000/api/empleados/");
+      const res = await axios.get("https://cimove-backend.onrender.com/api/empleados/");
       setEmpleados(res.data);
       setFilteredData(res.data);
 
@@ -160,7 +160,7 @@ const ListaEmpleados = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:4000/api/empleados/eliminar/${id}`,
+        `https://cimove-backend.onrender.com/api/empleados/eliminar/${id}`,
         {
           method: "PUT",
         }

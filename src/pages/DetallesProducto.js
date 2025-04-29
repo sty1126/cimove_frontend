@@ -59,11 +59,11 @@ const DetallesProducto = () => {
     setLoading(true);
 
     Promise.all([
-      fetch(`http://localhost:4000/api/productos/detalle/${productoId}`).then(
+      fetch(`https://cimove-backend.onrender.com/api/productos/detalle/${productoId}`).then(
         (res) => res.json()
       ),
       fetch(
-        `http://localhost:4000/api/productos/${productoId}/proveedores`
+        `https://cimove-backend.onrender.com/api/productos/${productoId}/proveedores`
       ).then((res) => res.json()),
     ])
       .then(([productoData, proveedoresData]) => {

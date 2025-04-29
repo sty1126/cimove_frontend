@@ -75,7 +75,7 @@ const ListaClientes = () => {
   const fetchClientes = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:4000/api/clientes");
+      const response = await fetch("https://cimove-backend.onrender.com/api/clientes");
       const data = await response.json();
       setClientes(data);
     } catch (error) {
@@ -173,7 +173,7 @@ const ListaClientes = () => {
   const handleDelete = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/api/clientes/eliminar/${id}`,
+        `https://cimove-backend.onrender.com/api/clientes/eliminar/${id}`,
         {
           method: "PUT",
           headers: {

@@ -55,7 +55,7 @@ export default function SeleccionarProveedor({
       setLoading(true);
       try {
         const response = await fetch(
-          "http://localhost:4000/api/proveedores/all"
+          "https://cimove-backend.onrender.com/api/proveedores/all"
         );
         const data = await response.json();
         setProveedores(data);

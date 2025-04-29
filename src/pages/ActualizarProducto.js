@@ -68,7 +68,7 @@ const ActualizarProducto = () => {
       try {
         // Obtener producto
         const productoRes = await axios.get(
-          `http://localhost:4000/api/productos/${id}`
+          `https://cimove-backend.onrender.com/api/productos/${id}`
         );
         let productoData;
 
@@ -101,7 +101,7 @@ const ActualizarProducto = () => {
 
         // Obtener categorías
         const categoriasRes = await axios.get(
-          "http://localhost:4000/api/categorias"
+          "https://cimove-backend.onrender.com/api/categorias"
         );
         setCategorias(categoriasRes.data);
       } catch (error) {
@@ -145,7 +145,7 @@ const ActualizarProducto = () => {
       values.valoriva_producto = values.valoriva_producto / 100;
 
       // Enviar actualización
-      await axios.put(`http://localhost:4000/api/productos/${id}`, values);
+      await axios.put(`https://cimove-backend.onrender.com/api/productos/${id}`, values);
 
       // Mostrar modal de éxito
       setModalVisible(true);

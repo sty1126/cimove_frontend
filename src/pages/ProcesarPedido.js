@@ -68,7 +68,7 @@ const ProcesarPedido = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:4000/api/proveedor-producto?ids=${ids}`
+          `https://cimove-backend.onrender.com/api/proveedor-producto?ids=${ids}`
         );
         const data = await res.json();
 
@@ -166,7 +166,7 @@ const ProcesarPedido = () => {
 
     setSubmitting(true);
     try {
-      await axios.post("http://localhost:4000/api/ordenes/procesar-pedido", {
+      await axios.post("https://cimove-backend.onrender.com/api/ordenes/procesar-pedido", {
         productos: payload,
       });
 

@@ -83,8 +83,8 @@ const ListaProveedores = () => {
     setLoading(true);
     try {
       const [providersRes, typesRes] = await Promise.all([
-        axios.get("http://localhost:4000/api/proveedores/all"),
-        axios.get("http://localhost:4000/api/proveedores/tipos"),
+        axios.get("https://cimove-backend.onrender.com/api/proveedores/all"),
+        axios.get("https://cimove-backend.onrender.com/api/proveedores/tipos"),
       ]);
 
       setData(providersRes.data);
@@ -141,7 +141,7 @@ const ListaProveedores = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.put(`http://localhost:4000/api/proveedores/eliminar/${id}`);
+      await axios.put(`https://cimove-backend.onrender.com/api/proveedores/eliminar/${id}`);
       message.success("Proveedor desactivado exitosamente");
       setData((prev) =>
         prev.map((p) =>
@@ -161,7 +161,7 @@ const ListaProveedores = () => {
     }
 
     try {
-      await axios.post("http://localhost:4000/api/tipoproveedores", {
+      await axios.post("https://cimove-backend.onrender.com/api/tipoproveedores", {
         nombre_tipoproveedor: newTipo,
       });
 
@@ -171,7 +171,7 @@ const ListaProveedores = () => {
 
       // Recargar los tipos
       const typesRes = await axios.get(
-        "http://localhost:4000/api/proveedores/tipos"
+        "https://cimove-backend.onrender.com/api/proveedores/tipos"
       );
       setTiposProveedor(typesRes.data);
     } catch (error) {

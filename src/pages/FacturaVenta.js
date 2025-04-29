@@ -98,7 +98,7 @@ const FacturaVenta = () => {
     // Cargar los métodos de pago
     setLoading(true);
     axios
-      .get("http://localhost:4000/api/tipometodopago")
+      .get("https://cimove-backend.onrender.com/api/tipometodopago")
       .then((response) => {
         setMetodosPago(response.data);
         setLoading(false);
@@ -198,7 +198,7 @@ const FacturaVenta = () => {
       };
 
       const response = await axios.post(
-        "http://localhost:4000/api/factura",
+        "https://cimove-backend.onrender.com/api/factura",
         venta
       );
 
