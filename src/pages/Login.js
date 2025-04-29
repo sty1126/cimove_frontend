@@ -49,6 +49,10 @@ const Login = () => {
         }
       );
 
+      console.log("Datos enviados al backend:", {
+        email_usuario: identificacion,
+        contrasena_ingresada: contrasena,
+      });
       // Evitar error si el backend no devuelve JSON válido
       const text = await response.text();
       let data;
