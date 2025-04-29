@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { FiMail, FiLock, FiLogIn } from "react-icons/fi";
 import "../Login.scss"; // Importamos estilos específicos para el login
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Login = () => {
   const [identificacion, setIdentificacion] = useState("");
@@ -12,6 +13,7 @@ const Login = () => {
   const [recordarme, setRecordarme] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  console.log(API_URL);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,19 +40,16 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch(
-        "https://cimove-backend.onrender.com/api/usuario/check-password",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email_usuario: identificacion,
-            contrasena_ingresada: contrasena,
-          }),
-        }
-      );
+      const response = await fetch("${API_URL}/api/usuario/check-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email_usuario: identificacion,
+          contrasena_ingresada: contrasena,
+        }),
+      });
 
       const data = await response.json();
       console.log("Datos de la respuesta:", data);
