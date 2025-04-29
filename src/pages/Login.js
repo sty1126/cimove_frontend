@@ -40,16 +40,19 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch("${API_URL}/api/usuario/check-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email_usuario: identificacion,
-          contrasena_ingresada: contrasena,
-        }),
-      });
+      const response = await fetch(
+        "https://cimove-backend.onrender.com/api/usuario/check-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email_usuario: identificacion,
+            contrasena_ingresada: contrasena,
+          }),
+        }
+      );
 
       const data = await response.json();
       console.log("Datos de la respuesta:", data);
