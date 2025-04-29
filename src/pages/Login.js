@@ -14,7 +14,6 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   console.log(API_URL);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -28,12 +27,8 @@ const Login = () => {
         confirmButtonColor: "#0D7F93",
         background: "#fff",
         iconColor: "#C25F48",
-        showClass: {
-          popup: "swal-animate-show",
-        },
-        hideClass: {
-          popup: "swal-animate-hide",
-        },
+        showClass: { popup: "swal-animate-show" },
+        hideClass: { popup: "swal-animate-hide" },
       });
       setIsLoading(false);
       return;
@@ -54,20 +49,26 @@ const Login = () => {
         }
       );
 
-      const data = await response.json();
+      // Evitar error si el backend no devuelve JSON válido
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error(`Respuesta inesperada del servidor: ${text}`);
+      }
+
       console.log("Datos de la respuesta:", data);
 
       if (response.ok) {
         const { token, user } = data;
 
-        // Guarda el token en el localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("rol", user.tipo_usuario);
         localStorage.setItem("id_empleado", user.id);
         localStorage.setItem("id_sede", user.sede);
         localStorage.setItem("email", user.email);
 
-        // Redirige directamente a la página de inicio sin mostrar alerta
         navigate("/home");
       } else {
         Swal.fire({
@@ -80,36 +81,29 @@ const Login = () => {
           confirmButtonColor: "#0D7F93",
           background: "#fff",
           iconColor: "#C25F48",
-          showClass: {
-            popup: "swal-animate-show",
-          },
-          hideClass: {
-            popup: "swal-animate-hide",
-          },
+          showClass: { popup: "swal-animate-show" },
+          hideClass: { popup: "swal-animate-hide" },
         });
       }
     } catch (error) {
-      console.error("Error al hacer login:", error);
+      console.error("Error al hacer login:", error.message);
       Swal.fire({
         icon: "error",
         title: "Error de Conexión",
-        text: "No se pudo conectar con el servidor. Por favor verifica tu conexión a internet e inténtalo de nuevo.",
+        text:
+          error.message ||
+          "No se pudo conectar con el servidor. Por favor verifica tu conexión a internet e inténtalo de nuevo.",
         confirmButtonText: "Entendido",
         confirmButtonColor: "#0D7F93",
         background: "#fff",
         iconColor: "#C25F48",
-        showClass: {
-          popup: "swal-animate-show",
-        },
-        hideClass: {
-          popup: "swal-animate-hide",
-        },
+        showClass: { popup: "swal-animate-show" },
+        hideClass: { popup: "swal-animate-hide" },
       });
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="login-container">
       {/* Columna izquierda */}
