@@ -19,8 +19,11 @@ const colors = {
   active: "rgba(255, 255, 255, 0.3)",
 };
 
-const SidebarVendedor = () => {
-  const [collapsed, setCollapsed] = useState(false);
+const SidebarVendedor = ({ externalCollapsed, setExternalCollapsed }) => {
+  // Usar el estado externo en lugar del interno
+  const collapsed = externalCollapsed;
+  const setCollapsed = setExternalCollapsed;
+
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState([]);
 
@@ -48,6 +51,7 @@ const SidebarVendedor = () => {
       collapsible
       collapsed={collapsed}
       width={220}
+      collapsedWidth={80}
       style={{
         height: "100vh",
         backgroundColor: colors.primary,
@@ -114,77 +118,45 @@ const SidebarVendedor = () => {
             ),
           },
           {
-            type: "group",
-            label: (
-              <div
-                style={{
-                  color: colors.text,
-                  fontWeight: "bold",
-                  padding: "10px 16px",
-                }}
+            key: "2",
+            icon: <FaIcons.FaFileInvoiceDollar />,
+            label: !collapsed && (
+              <NavLink
+                to="/facturacion-ventas"
+                style={{ color: colors.text, fontWeight: "bold" }}
               >
-                Ventas
-              </div>
+                Facturación y Ventas
+              </NavLink>
             ),
-            children: [
-              {
-                key: "2",
-                icon: <FaIcons.FaFileInvoiceDollar />,
-                label: (
-                  <NavLink
-                    to="/facturacion-ventas"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Facturación
-                  </NavLink>
-                ),
-              },
-            ],
           },
           {
-            type: "group",
-            label: (
-              <div
-                style={{
-                  color: colors.text,
-                  fontWeight: "bold",
-                  padding: "10px 16px",
-                }}
+            key: "3",
+            icon: <FaIcons.FaUsers />,
+            label: !collapsed && (
+              <NavLink
+                to="/clientes"
+                style={{ color: colors.text, fontWeight: "bold" }}
               >
-                Gestión
-              </div>
+                Clientes
+              </NavLink>
             ),
-            children: [
-              {
-                key: "3",
-                icon: <FaIcons.FaUsers />,
-                label: (
-                  <NavLink
-                    to="/clientes"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Clientes
-                  </NavLink>
-                ),
-              },
-              {
-                key: "4",
-                icon: <FaIcons.FaWarehouse />,
-                label: (
-                  <NavLink
-                    to="/inventario"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Inventario
-                  </NavLink>
-                ),
-              },
-            ],
+          },
+          {
+            key: "4",
+            icon: <FaIcons.FaBoxes />,
+            label: !collapsed && (
+              <NavLink
+                to="/inventario"
+                style={{ color: colors.text, fontWeight: "bold" }}
+              >
+                Inventario
+              </NavLink>
+            ),
           },
           {
             key: "5",
             icon: <FaIcons.FaCalendarAlt />,
-            label: (
+            label: !collapsed && (
               <NavLink
                 to="/calendario"
                 style={{ color: colors.text, fontWeight: "bold" }}
@@ -195,6 +167,19 @@ const SidebarVendedor = () => {
           },
         ]}
       />
+
+      {/* Estilos para ocultar títulos de grupo cuando está colapsado */}
+      <style>
+        {`
+          /* Ocultar títulos de grupo cuando el sidebar está colapsado */
+          .ant-layout-sider-collapsed .ant-menu-item-group-title {
+            display: none !important;
+            padding: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+          }
+        `}
+      </style>
     </Sider>
   );
 };

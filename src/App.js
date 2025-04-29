@@ -37,6 +37,8 @@ import FacturaVenta from "./pages/FacturaVenta";
 import ListaFacturacionVentas from "./pages/ListaFacturacionVentas";
 import CrearFacturaServicioTecnico from "./pages/CrearFacturaServicioTecnico";
 import Login from "./pages/Login";
+import Estadisticas from "./pages/Estadisticas";
+
 import { CartProvider } from "./context/CartContext";
 
 function App() {
@@ -179,6 +181,10 @@ function App() {
               element={
                 <PrivateRoute element={<CrearFacturaServicioTecnico />} />
               }
+            />
+            <Route
+              path="estadisticas"
+              element={<PrivateRoute element={<Estadisticas />} />}
             />
           </Route>
         </Routes>

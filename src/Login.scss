@@ -5,6 +5,7 @@ $accent: #7fbad6;
 $light: #c3d3c6;
 $background: #e8eaec;
 $text: #2a3033;
+$danger: #c25f48;
 
 // Resetear estilos para el componente de login
 .login-container {
@@ -328,4 +329,92 @@ $text: #2a3033;
       padding: 1.5rem;
     }
   }
+}
+
+// Estilos personalizados para SweetAlert2
+// ======================================
+
+// Animaciones para SweetAlert2
+@keyframes swalShow {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes swalHide {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+// Clases de animación para SweetAlert2
+.swal-animate-show {
+  animation: swalShow 0.3s ease;
+}
+
+.swal-animate-hide {
+  animation: swalHide 0.3s ease;
+}
+
+// Personalización de SweetAlert2
+.swal2-popup {
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  font-family: "Nunito", serif !important;
+}
+
+.swal2-title {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: $text !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.swal2-html-container {
+  font-size: 1rem !important;
+  color: lighten($text, 20%) !important;
+  margin-top: 0.5rem !important;
+}
+
+.swal2-confirm {
+  background: linear-gradient(135deg, $primary 0%, $secondary 100%) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  padding: 10px 24px !important;
+  box-shadow: 0 4px 6px rgba($primary, 0.2) !important;
+  transition: all 0.3s ease !important;
+
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 8px rgba($primary, 0.3) !important;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($primary, 0.3) !important;
+  }
+}
+
+// Personalización de los iconos de error
+.swal2-icon.swal2-error {
+  border-color: $danger !important;
+}
+
+.swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
+  background-color: $danger !important;
+}
+
+.swal2-icon {
+  margin: 1.5rem auto !important;
+  border-width: 3px !important;
 }

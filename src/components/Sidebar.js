@@ -19,8 +19,11 @@ const colors = {
   active: "rgba(255, 255, 255, 0.3)",
 };
 
-const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
+const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
+  // Usar el estado externo en lugar del interno
+  const collapsed = externalCollapsed;
+  const setCollapsed = setExternalCollapsed;
+
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState([]);
 
@@ -90,6 +93,7 @@ const Sidebar = () => {
       collapsible
       collapsed={collapsed}
       width={220}
+      collapsedWidth={80}
       style={{
         height: "100vh",
         backgroundColor: colors.primary,
@@ -159,17 +163,17 @@ const Sidebar = () => {
           },
           {
             type: "group",
-            label: (
+            label: !collapsed ? (
               <div style={groupTitleStyle}>
                 <div style={groupIndicatorStyle}></div>
                 <span style={{ marginLeft: "10px" }}>Ventas</span>
               </div>
-            ),
+            ) : null,
             children: [
               {
                 key: "2",
                 icon: <FaIcons.FaFileInvoiceDollar />,
-                label: (
+                label: !collapsed && (
                   <NavLink
                     to="/facturacion-ventas"
                     style={{ color: colors.text, fontWeight: "bold" }}
@@ -181,7 +185,7 @@ const Sidebar = () => {
               {
                 key: "4",
                 icon: <FaIcons.FaUsers />,
-                label: (
+                label: !collapsed && (
                   <NavLink
                     to="/clientes"
                     style={{ color: colors.text, fontWeight: "bold" }}
@@ -194,17 +198,17 @@ const Sidebar = () => {
           },
           {
             type: "group",
-            label: (
+            label: !collapsed ? (
               <div style={groupTitleStyle}>
                 <div style={groupIndicatorStyle}></div>
                 <span style={{ marginLeft: "10px" }}>Compras</span>
               </div>
-            ),
+            ) : null,
             children: [
               {
                 key: "5",
                 icon: <FaIcons.FaFileInvoice />,
-                label: (
+                label: !collapsed && (
                   <NavLink
                     to="/facturacion-proveedor"
                     style={{ color: colors.text, fontWeight: "bold" }}
@@ -216,7 +220,7 @@ const Sidebar = () => {
               {
                 key: "6",
                 icon: <FaIcons.FaMoneyCheckAlt />,
-                label: (
+                label: !collapsed && (
                   <NavLink
                     to="/pagos-compras"
                     style={{ color: colors.text, fontWeight: "bold" }}
@@ -228,7 +232,7 @@ const Sidebar = () => {
               {
                 key: "7",
                 icon: <FaIcons.FaTruck />,
-                label: (
+                label: !collapsed && (
                   <NavLink
                     to="/proveedores"
                     style={{ color: colors.text, fontWeight: "bold" }}
@@ -240,7 +244,7 @@ const Sidebar = () => {
               {
                 key: "8",
                 icon: <FaIcons.FaBoxOpen />,
-                label: (
+                label: !collapsed && (
                   <NavLink
                     to="/catalogo"
                     style={{ color: colors.text, fontWeight: "bold" }}
@@ -252,7 +256,7 @@ const Sidebar = () => {
               {
                 key: "9",
                 icon: <FaIcons.FaWarehouse />,
-                label: (
+                label: !collapsed && (
                   <NavLink
                     to="/inventario"
                     style={{ color: colors.text, fontWeight: "bold" }}
@@ -265,17 +269,17 @@ const Sidebar = () => {
           },
           {
             type: "group",
-            label: (
+            label: !collapsed ? (
               <div style={groupTitleStyle}>
                 <div style={groupIndicatorStyle}></div>
                 <span style={{ marginLeft: "10px" }}>Monitoreo</span>
               </div>
-            ),
+            ) : null,
             children: [
               {
                 key: "11",
                 icon: <FaIcons.FaCalendarAlt />,
-                label: (
+                label: !collapsed && (
                   <NavLink
                     to="/calendario"
                     style={{ color: colors.text, fontWeight: "bold" }}
@@ -287,7 +291,7 @@ const Sidebar = () => {
               {
                 key: "12",
                 icon: <FaIcons.FaChartBar />,
-                label: (
+                label: !collapsed && (
                   <NavLink
                     to="/estadisticas"
                     style={{ color: colors.text, fontWeight: "bold" }}
@@ -299,7 +303,7 @@ const Sidebar = () => {
               {
                 key: "13",
                 icon: <FaIcons.FaUsers />,
-                label: (
+                label: !collapsed && (
                   <NavLink
                     to="/empleados"
                     style={{ color: colors.text, fontWeight: "bold" }}
@@ -371,6 +375,14 @@ const Sidebar = () => {
           @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(180deg); }
+          }
+
+          /* Ocultar títulos de grupo cuando el sidebar está colapsado */
+          .ant-layout-sider-collapsed .ant-menu-item-group-title {
+            display: none !important;
+            padding: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
           }
         `}
       </style>

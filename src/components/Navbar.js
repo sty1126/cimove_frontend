@@ -149,7 +149,7 @@ const Navbar = () => {
     localStorage.removeItem("token"); // o el método que uses para gestionar la sesión
 
     // Redirige al usuario a la página de inicio de sesión
-    window.location.href = "/login"; // o la ruta que uses para el login
+    window.location.href = "/"; // o la ruta que uses para el login
   };
 
   return (

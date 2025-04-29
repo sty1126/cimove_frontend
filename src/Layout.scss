@@ -7,7 +7,8 @@ $background: #e8eaec;
 $text: #2a3033;
 
 // Variables de layout
-$sidebar-width: 16rem;
+$sidebar-width: 220px;
+$sidebar-collapsed-width: 80px;
 $navbar-height: 4rem;
 
 // Estilos del layout principal
@@ -20,39 +21,22 @@ $navbar-height: 4rem;
 
   // Sidebar
   .app-sidebar {
-    width: $sidebar-width;
     height: 100vh;
-    background-color: #f0f4f8; // Color de fondo del sidebar
-    overflow-y: auto;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 10;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 
-    // Estilos para scrollbar
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 3px;
-    }
+    // No establecer width aquí, dejar que el componente Sider lo maneje
   }
 
   // Contenedor principal
   .app-main {
     flex: 1;
-    margin-left: $sidebar-width;
     display: flex;
     flex-direction: column;
     height: 100vh;
-    width: calc(100% - #{$sidebar-width});
+    // No establecer margin-left ni width aquí, se manejan con estilos inline
 
     // Navbar
     .app-navbar {
@@ -105,8 +89,8 @@ $navbar-height: 4rem;
     }
 
     .app-main {
-      margin-left: 0;
-      width: 100%;
+      margin-left: 0 !important;
+      width: 100% !important;
     }
   }
 }

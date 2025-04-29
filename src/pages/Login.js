@@ -22,6 +22,16 @@ const Login = () => {
         icon: "error",
         title: "Campos Vacíos",
         text: "Por favor ingrese la identificación y la contraseña.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#0D7F93",
+        background: "#fff",
+        iconColor: "#C25F48",
+        showClass: {
+          popup: "swal-animate-show",
+        },
+        hideClass: {
+          popup: "swal-animate-hide",
+        },
       });
       setIsLoading(false);
       return;
@@ -48,12 +58,6 @@ const Login = () => {
       if (response.ok) {
         const { token, user } = data;
 
-        Swal.fire({
-          icon: "success",
-          title: "Login Exitoso",
-          text: "Bienvenido a CIMOVE.",
-        });
-
         // Guarda el token en el localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("rol", user.tipo_usuario);
@@ -61,21 +65,43 @@ const Login = () => {
         localStorage.setItem("id_sede", user.sede);
         localStorage.setItem("email", user.email);
 
-        // Redirige a la página de inicio
+        // Redirige directamente a la página de inicio sin mostrar alerta
         navigate("/home");
       } else {
         Swal.fire({
           icon: "error",
           title: "Error de Autenticación",
-          text: data.error || "Contraseña incorrecta.",
+          text:
+            data.error ||
+            "Credenciales incorrectas. Por favor verifica tu correo y contraseña.",
+          confirmButtonText: "Intentar de nuevo",
+          confirmButtonColor: "#0D7F93",
+          background: "#fff",
+          iconColor: "#C25F48",
+          showClass: {
+            popup: "swal-animate-show",
+          },
+          hideClass: {
+            popup: "swal-animate-hide",
+          },
         });
       }
     } catch (error) {
       console.error("Error al hacer login:", error);
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: "Hubo un problema al intentar hacer login. Inténtalo de nuevo.",
+        title: "Error de Conexión",
+        text: "No se pudo conectar con el servidor. Por favor verifica tu conexión a internet e inténtalo de nuevo.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#0D7F93",
+        background: "#fff",
+        iconColor: "#C25F48",
+        showClass: {
+          popup: "swal-animate-show",
+        },
+        hideClass: {
+          popup: "swal-animate-hide",
+        },
       });
     } finally {
       setIsLoading(false);
