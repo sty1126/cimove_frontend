@@ -12,31 +12,78 @@ const Login = () => {
   const [contrasena, setContrasena] = useState("");
   const [recordarme, setRecordarme] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({ identificacion: "", contrasena: "" });
   const navigate = useNavigate();
-  console.log(API_URL);
+
+  // Validación de email
+  const validateEmail = (email) => {
+    // Expresión regular para validar email y prevenir caracteres peligrosos
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  // Validación de contraseña
+  const validatePassword = (password) => {
+    return password.length >= 6; // Mínimo 6 caracteres
+  };
+
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setIdentificacion(value);
+
+    if (value && !validateEmail(value)) {
+      setErrors((prev) => ({
+        ...prev,
+        identificacion: "Por favor ingresa un correo electrónico válido",
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, identificacion: "" }));
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setContrasena(value);
+
+    if (value && !validatePassword(value)) {
+      setErrors((prev) => ({
+        ...prev,
+        contrasena: "La contraseña debe tener al menos 6 caracteres",
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, contrasena: "" }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    if (!identificacion || !contrasena) {
-      Swal.fire({
-        icon: "error",
-        title: "Campos Vacíos",
-        text: "Por favor ingrese la identificación y la contraseña.",
-        confirmButtonText: "Entendido",
-        confirmButtonColor: "#0D7F93",
-        background: "#fff",
-        iconColor: "#C25F48",
-        showClass: { popup: "swal-animate-show" },
-        hideClass: { popup: "swal-animate-hide" },
-      });
-      setIsLoading(false);
+    // Validación final antes de enviar
+    const formErrors = {};
+    if (!identificacion) {
+      formErrors.identificacion = "El correo electrónico es requerido";
+    } else if (!validateEmail(identificacion)) {
+      formErrors.identificacion =
+        "Por favor ingresa un correo electrónico válido";
+    }
+
+    if (!contrasena) {
+      formErrors.contrasena = "La contraseña es requerida";
+    } else if (!validatePassword(contrasena)) {
+      formErrors.contrasena = "La contraseña debe tener al menos 6 caracteres";
+    }
+
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
       return;
     }
 
+    setIsLoading(true);
+
     try {
+      // Aquí podrías usar API_URL en lugar de la URL hardcodeada
       const response = await fetch(
-        "https://cimove-backend.onrender.com/api/usuario/check-password",
+        `https://cimove-backend.onrender.com/api/usuario/check-password`,
         {
           method: "POST",
           headers: {
@@ -49,10 +96,6 @@ const Login = () => {
         }
       );
 
-      console.log("Datos enviados al backend:", {
-        email_usuario: identificacion,
-        contrasena_ingresada: contrasena,
-      });
       // Evitar error si el backend no devuelve JSON válido
       const text = await response.text();
       let data;
@@ -61,8 +104,6 @@ const Login = () => {
       } catch (e) {
         throw new Error(`Respuesta inesperada del servidor: ${text}`);
       }
-
-      console.log("Datos de la respuesta:", data);
 
       if (response.ok) {
         const { token, user } = data;
@@ -108,6 +149,7 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="login-container">
       {/* Columna izquierda */}
@@ -140,14 +182,18 @@ const Login = () => {
               <div className="input-with-icon">
                 <FiMail className="input-icon" />
                 <input
-                  type="text"
+                  type="email"
                   id="identificacion"
                   value={identificacion}
-                  onChange={(e) => setIdentificacion(e.target.value)}
+                  onChange={handleEmailChange}
                   placeholder="Correo electrónico"
                   required
+                  maxLength={254} // Máximo estándar para correos
                 />
               </div>
+              {errors.identificacion && (
+                <span className="error-message">{errors.identificacion}</span>
+              )}
             </div>
 
             <div className="form-group">
@@ -158,11 +204,16 @@ const Login = () => {
                   type="password"
                   id="contrasena"
                   value={contrasena}
-                  onChange={(e) => setContrasena(e.target.value)}
+                  onChange={handlePasswordChange}
                   placeholder="Contraseña"
                   required
+                  minLength={6} // Mínimo 6 caracteres
+                  maxLength={72} // Máximo para bcrypt
                 />
               </div>
+              {errors.contrasena && (
+                <span className="error-message">{errors.contrasena}</span>
+              )}
             </div>
 
             <div className="form-options">

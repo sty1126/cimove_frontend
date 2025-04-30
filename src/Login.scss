@@ -418,3 +418,11 @@ $danger: #c25f48;
   margin: 1.5rem auto !important;
   border-width: 3px !important;
 }
+
+// Estilos para mensajes de error
+.error-message {
+  color: $danger;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}

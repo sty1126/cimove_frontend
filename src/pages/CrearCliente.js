@@ -34,9 +34,11 @@ import {
   ManOutlined,
   BuildOutlined,
   CheckCircleOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -51,7 +53,25 @@ const colors = {
   text: "#2A3033", // Texto oscuro
   success: "#4D8A52", // Verde más vibrante para éxito
   warning: "#E0A458", // Naranja apagado para advertencias
-  danger: "#C25F48", // Rojo más vibrante para peligro
+  danger: "#C25F48", // Rojo más vibrante para peligro,
+};
+
+// Patrones de validación
+const validationPatterns = {
+  // Solo letras y espacios (incluyendo acentos y ñ)
+  nombreApellido: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/,
+  // Solo números
+  soloNumeros: /^[0-9]+$/,
+  // Teléfono (7-10 dígitos)
+  telefono: /^[0-9]{7,10}$/,
+  // Correo electrónico
+  email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+  // Dirección (letras, números, #, -, espacios)
+  direccion: /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s#\-.,]{5,150}$/,
+  // Código postal (4-6 dígitos)
+  codigoPostal: /^[0-9]{4,6}$/,
+  // Dígito de verificación (0-9)
+  digitoVerificacion: /^[0-9]$/,
 };
 
 const CrearCliente = () => {
@@ -119,6 +139,23 @@ const CrearCliente = () => {
     }
   };
 
+  // Validar fecha de nacimiento
+  const validateBirthDate = (_, value) => {
+    if (!value) {
+      return Promise.reject("Por favor seleccione una fecha de nacimiento");
+    }
+
+    const birthDate = value.toDate();
+    const today = new Date();
+
+    // Verificar que no sea una fecha futura
+    if (birthDate > today) {
+      return Promise.reject("La fecha de nacimiento no puede ser futura");
+    }
+
+    return Promise.resolve();
+  };
+
   // Enviar formulario
   const handleSubmit = async (values) => {
     setLoading(true);
@@ -129,7 +166,10 @@ const CrearCliente = () => {
           values.fechanacimiento_cliente.format("YYYY-MM-DD");
       }
 
-      await axios.post("https://cimove-backend.onrender.com/api/clientes", values);
+      await axios.post(
+        "https://cimove-backend.onrender.com/api/clientes",
+        values
+      );
 
       // Mostrar modal de éxito
       setModalVisible(true);
@@ -168,6 +208,15 @@ const CrearCliente = () => {
       }}
     >
       <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        {/* Botón de volver */}
+        <Button
+          icon={<ArrowLeftOutlined />}
+          onClick={() => navigate("/clientes")}
+          style={{ marginBottom: "16px" }}
+        >
+          Volver a clientes
+        </Button>
+
         <Card
           bordered={false}
           style={{
@@ -240,9 +289,20 @@ const CrearCliente = () => {
                         required: true,
                         message: "Por favor ingrese el documento",
                       },
+                      {
+                        pattern: validationPatterns.soloNumeros,
+                        message: "El documento debe contener solo números",
+                      },
+                      {
+                        min: 5,
+                        message: "El documento debe tener al menos 5 dígitos",
+                      },
                     ]}
                   >
-                    <Input placeholder="Ingrese número de documento" maxLength={10} />
+                    <Input
+                      placeholder="Ingrese número de documento"
+                      maxLength={20}
+                    />
                   </Form.Item>
                 </Col>
 
@@ -292,6 +352,21 @@ const CrearCliente = () => {
                         required: true,
                         message: "Por favor seleccione el tipo de documento",
                       },
+                      {
+                        validator: (_, value) => {
+                          if (tipoCliente === "2" && value !== "5") {
+                            return Promise.reject(
+                              "Para cliente jurídico, el documento debe ser NIT"
+                            );
+                          }
+                          if (tipoCliente === "1" && value === "5") {
+                            return Promise.reject(
+                              "Para cliente natural, el documento no puede ser NIT"
+                            );
+                          }
+                          return Promise.resolve();
+                        },
+                      },
                     ]}
                   >
                     <Select
@@ -312,7 +387,7 @@ const CrearCliente = () => {
                         .map((doc) => (
                           <Option
                             key={doc.id_tipodocumento}
-                            value={doc.id_tipodocumento}
+                            value={doc.id_tipodocumento.toString()}
                           >
                             {doc.descripcion_tipodocumento}
                           </Option>
@@ -344,8 +419,16 @@ const CrearCliente = () => {
                       </Space>
                     }
                     name="telefono_cliente"
+                    rules={[
+                      {
+                        pattern: validationPatterns.telefono,
+                        message:
+                          "El teléfono debe contener entre 7 y 10 dígitos numéricos",
+                        warningOnly: true,
+                      },
+                    ]}
                   >
-                    <Input placeholder="Ingrese teléfono" maxLength={13} />
+                    <Input placeholder="Ingrese teléfono" maxLength={10} />
                   </Form.Item>
                 </Col>
 
@@ -360,12 +443,13 @@ const CrearCliente = () => {
                     name="email_cliente"
                     rules={[
                       {
-                        type: "email",
+                        pattern: validationPatterns.email,
                         message: "Por favor ingrese un email válido",
+                        warningOnly: true,
                       },
                     ]}
                   >
-                    <Input placeholder="Ingrese email" maxLength={30} />
+                    <Input placeholder="Ingrese email" maxLength={254} />
                   </Form.Item>
                 </Col>
 
@@ -406,8 +490,21 @@ const CrearCliente = () => {
                       </Space>
                     }
                     name="direccion_cliente"
+                    rules={[
+                      {
+                        min: 5,
+                        message:
+                          "La dirección debe tener al menos 5 caracteres",
+                        warningOnly: true,
+                      },
+                      {
+                        max: 150,
+                        message:
+                          "La dirección no puede exceder los 150 caracteres",
+                      },
+                    ]}
                   >
-                    <Input placeholder="Ingrese dirección" maxLength={30} />
+                    <Input placeholder="Ingrese dirección" maxLength={150} />
                   </Form.Item>
                 </Col>
 
@@ -422,8 +519,19 @@ const CrearCliente = () => {
                       </Space>
                     }
                     name="barrio_cliente"
+                    rules={[
+                      {
+                        min: 3,
+                        message: "El barrio debe tener al menos 3 caracteres",
+                        warningOnly: true,
+                      },
+                      {
+                        max: 50,
+                        message: "El barrio no puede exceder los 50 caracteres",
+                      },
+                    ]}
                   >
-                    <Input placeholder="Ingrese barrio" maxLength={15}/>
+                    <Input placeholder="Ingrese barrio" maxLength={50} />
                   </Form.Item>
                 </Col>
 
@@ -438,6 +546,14 @@ const CrearCliente = () => {
                       </Space>
                     }
                     name="codigopostal_cliente"
+                    rules={[
+                      {
+                        pattern: validationPatterns.codigoPostal,
+                        message:
+                          "El código postal debe contener entre 4 y 6 dígitos numéricos",
+                        warningOnly: true,
+                      },
+                    ]}
                   >
                     <Input placeholder="Ingrese código postal" maxLength={6} />
                   </Form.Item>
@@ -472,9 +588,14 @@ const CrearCliente = () => {
                           required: tipoCliente === "1",
                           message: "Por favor ingrese el nombre",
                         },
+                        {
+                          pattern: validationPatterns.nombreApellido,
+                          message:
+                            "El nombre debe contener solo letras y espacios (mínimo 2 caracteres)",
+                        },
                       ]}
                     >
-                      <Input placeholder="Ingrese nombre" />
+                      <Input placeholder="Ingrese nombre" maxLength={50} />
                     </Form.Item>
                   </Col>
 
@@ -492,9 +613,14 @@ const CrearCliente = () => {
                           required: tipoCliente === "1",
                           message: "Por favor ingrese el apellido",
                         },
+                        {
+                          pattern: validationPatterns.nombreApellido,
+                          message:
+                            "El apellido debe contener solo letras y espacios (mínimo 2 caracteres)",
+                        },
                       ]}
                     >
-                      <Input placeholder="Ingrese apellido" />
+                      <Input placeholder="Ingrese apellido" maxLength={50} />
                     </Form.Item>
                   </Col>
 
@@ -507,11 +633,24 @@ const CrearCliente = () => {
                         </Space>
                       }
                       name="fechanacimiento_cliente"
+                      rules={[
+                        {
+                          required: tipoCliente === "1",
+                          message:
+                            "Por favor seleccione una fecha de nacimiento",
+                        },
+                        {
+                          validator: validateBirthDate,
+                        },
+                      ]}
                     >
                       <DatePicker
                         style={{ width: "100%" }}
                         placeholder="Seleccione fecha"
                         format="YYYY-MM-DD"
+                        disabledDate={(current) =>
+                          current && current > dayjs().endOf("day")
+                        }
                       />
                     </Form.Item>
                   </Col>
@@ -525,6 +664,12 @@ const CrearCliente = () => {
                         </Space>
                       }
                       name="genero_cliente"
+                      rules={[
+                        {
+                          required: tipoCliente === "1",
+                          message: "Por favor seleccione un género",
+                        },
+                      ]}
                     >
                       <Select placeholder="Seleccione género">
                         <Option value="Masculino">Masculino</Option>
@@ -563,9 +708,17 @@ const CrearCliente = () => {
                           required: tipoCliente === "2",
                           message: "Por favor ingrese la razón social",
                         },
+                        {
+                          min: 3,
+                          message:
+                            "La razón social debe tener al menos 3 caracteres",
+                        },
                       ]}
                     >
-                      <Input placeholder="Ingrese razón social" />
+                      <Input
+                        placeholder="Ingrese razón social"
+                        maxLength={100}
+                      />
                     </Form.Item>
                   </Col>
 
@@ -579,7 +732,10 @@ const CrearCliente = () => {
                       }
                       name="nombrecomercial_cliente"
                     >
-                      <Input placeholder="Ingrese nombre comercial" />
+                      <Input
+                        placeholder="Ingrese nombre comercial"
+                        maxLength={100}
+                      />
                     </Form.Item>
                   </Col>
 
@@ -592,8 +748,22 @@ const CrearCliente = () => {
                         </Space>
                       }
                       name="representante_cliente"
+                      rules={[
+                        {
+                          required: tipoCliente === "2",
+                          message: "Por favor ingrese el representante legal",
+                        },
+                        {
+                          pattern: validationPatterns.nombreApellido,
+                          message:
+                            "El nombre del representante debe contener solo letras y espacios (mínimo 2 caracteres)",
+                        },
+                      ]}
                     >
-                      <Input placeholder="Ingrese representante legal" />
+                      <Input
+                        placeholder="Ingrese representante legal"
+                        maxLength={50}
+                      />
                     </Form.Item>
                   </Col>
 
@@ -606,6 +776,18 @@ const CrearCliente = () => {
                         </Space>
                       }
                       name="digitoverificacion_cliente"
+                      rules={[
+                        {
+                          required: tipoCliente === "2",
+                          message:
+                            "Por favor ingrese el dígito de verificación",
+                        },
+                        {
+                          pattern: validationPatterns.digitoVerificacion,
+                          message:
+                            "El dígito de verificación debe ser un número entre 0 y 9",
+                        },
+                      ]}
                     >
                       <Input placeholder="Ingrese dígito" maxLength={1} />
                     </Form.Item>

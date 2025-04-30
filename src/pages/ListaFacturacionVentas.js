@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Table,
@@ -8,13 +10,17 @@ import {
   Tabs,
   Tag,
   Typography,
-  Spin,
   Select,
   Row,
   Col,
   Statistic,
   Divider,
   Space,
+  Avatar,
+  Tooltip,
+  Popover,
+  List,
+  Empty,
 } from "antd";
 import {
   FileTextOutlined,
@@ -31,6 +37,12 @@ import {
   ExclamationCircleOutlined,
   CalendarOutlined,
   UserOutlined,
+  ShoppingOutlined,
+  InfoCircleOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  IdcardOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
@@ -79,7 +91,9 @@ const ListaFacturacionVentas = () => {
     setLoading(true);
     try {
       // Cargar facturas
-      const resFacturas = await fetch("https://cimove-backend.onrender.com/api/factura/");
+      const resFacturas = await fetch(
+        "https://cimove-backend.onrender.com/api/factura/"
+      );
       const dataFacturas = await resFacturas.json();
       setFacturas(Array.isArray(dataFacturas) ? dataFacturas : [dataFacturas]);
       setFilteredFacturas(
@@ -110,6 +124,11 @@ const ListaFacturacionVentas = () => {
         (factura.email_cliente &&
           factura.email_cliente
             .toLowerCase()
+            .includes(searchText.toLowerCase())) ||
+        (factura.cliente &&
+          factura.cliente.nombre_cliente &&
+          factura.cliente.nombre_cliente
+            .toLowerCase()
             .includes(searchText.toLowerCase()));
 
       const matchesEstado =
@@ -128,6 +147,10 @@ const ListaFacturacionVentas = () => {
         servicio.nombre_serviciotecnico
           .toLowerCase()
           .includes(searchText.toLowerCase()) ||
+        (servicio.nombre_cliente &&
+          servicio.nombre_cliente
+            .toLowerCase()
+            .includes(searchText.toLowerCase())) ||
         (servicio.email_cliente &&
           servicio.email_cliente
             .toLowerCase()
@@ -145,6 +168,7 @@ const ListaFacturacionVentas = () => {
 
   // Formatear fecha
   const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleDateString("es-CO", {
       year: "numeric",
@@ -155,6 +179,7 @@ const ListaFacturacionVentas = () => {
 
   // Formatear moneda
   const formatCurrency = (amount) => {
+    if (amount === null || amount === undefined) return "N/A";
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
@@ -192,17 +217,41 @@ const ListaFacturacionVentas = () => {
 
   // Obtener color de estado para servicios técnicos
   const getEstadoServicioColor = (estado) => {
+    if (!estado) return "default";
+
     switch (estado.toUpperCase()) {
+      case "D":
       case "EN_DIAGNOSTICO":
         return "processing";
+      case "C":
       case "COMPLETADO":
         return "success";
+      case "P":
       case "PENDIENTE":
         return "warning";
+      case "X":
       case "CANCELADO":
         return "error";
       default:
         return "default";
+    }
+  };
+
+  // Obtener texto de estado para servicios técnicos
+  const getEstadoServicioText = (estado) => {
+    if (!estado) return "Desconocido";
+
+    switch (estado.toUpperCase()) {
+      case "D":
+        return "En Diagnóstico";
+      case "C":
+        return "Completado";
+      case "P":
+        return "Pendiente";
+      case "X":
+        return "Cancelado";
+      default:
+        return estado;
     }
   };
 
@@ -225,7 +274,7 @@ const ListaFacturacionVentas = () => {
   const calcularEstadisticasFacturas = () => {
     const totalFacturas = filteredFacturas.length;
     const totalMonto = filteredFacturas.reduce(
-      (sum, factura) => sum + factura.total_factura,
+      (sum, factura) => sum + (factura.total_factura || 0),
       0
     );
     const facturasPendientes = filteredFacturas.filter(
@@ -253,10 +302,14 @@ const ListaFacturacionVentas = () => {
     const serviciosPendientes = filteredServicios.filter(
       (s) =>
         s.estadotecnico_serviciotecnico === "PENDIENTE" ||
-        s.estadotecnico_serviciotecnico === "EN_DIAGNOSTICO"
+        s.estadotecnico_serviciotecnico === "P" ||
+        s.estadotecnico_serviciotecnico === "EN_DIAGNOSTICO" ||
+        s.estadotecnico_serviciotecnico === "D"
     ).length;
     const serviciosCompletados = filteredServicios.filter(
-      (s) => s.estadotecnico_serviciotecnico === "COMPLETADO"
+      (s) =>
+        s.estadotecnico_serviciotecnico === "COMPLETADO" ||
+        s.estadotecnico_serviciotecnico === "C"
     ).length;
 
     return {
@@ -270,6 +323,90 @@ const ListaFacturacionVentas = () => {
   const estadisticasFacturas = calcularEstadisticasFacturas();
   const estadisticasServicios = calcularEstadisticasServicios();
 
+  // Renderizar detalles de productos
+  const renderDetallesProductos = (detalles) => {
+    if (!detalles || detalles.length === 0) {
+      return (
+        <Empty
+          description="No hay productos"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      );
+    }
+
+    return (
+      <List
+        size="small"
+        dataSource={detalles}
+        renderItem={(item) => (
+          <List.Item>
+            <List.Item.Meta
+              avatar={
+                <Avatar
+                  shape="square"
+                  icon={<ShoppingOutlined />}
+                  style={{ backgroundColor: colors.accent }}
+                />
+              }
+              title={
+                item.producto
+                  ? item.producto.nombre_producto
+                  : "Producto sin nombre"
+              }
+              description={
+                <Space direction="vertical" size={0}>
+                  <Text type="secondary">
+                    Cantidad: <Text strong>{item.cantidad}</Text>
+                  </Text>
+                  <Text type="secondary">
+                    Precio:{" "}
+                    <Text strong>{formatCurrency(item.precio_unitario)}</Text>
+                  </Text>
+                </Space>
+              }
+            />
+            <div>
+              <Text strong>
+                {formatCurrency(item.precio_unitario * item.cantidad)}
+              </Text>
+            </div>
+          </List.Item>
+        )}
+      />
+    );
+  };
+
+  // Renderizar información del cliente
+  const renderInfoCliente = (cliente) => {
+    if (!cliente) {
+      return <Text type="secondary">Cliente no especificado</Text>;
+    }
+
+    return (
+      <Space direction="vertical" size={0}>
+        <Text strong>{cliente.nombre_cliente}</Text>
+        {cliente.email_cliente && (
+          <Text type="secondary">
+            <MailOutlined style={{ marginRight: 4 }} />
+            {cliente.email_cliente}
+          </Text>
+        )}
+        {cliente.telefono_cliente && (
+          <Text type="secondary">
+            <PhoneOutlined style={{ marginRight: 4 }} />
+            {cliente.telefono_cliente}
+          </Text>
+        )}
+        {cliente.id_cliente && (
+          <Text type="secondary">
+            <IdcardOutlined style={{ marginRight: 4 }} />
+            ID: {cliente.id_cliente}
+          </Text>
+        )}
+      </Space>
+    );
+  };
+
   // Columnas para la tabla de facturas
   const columnasFacturas = [
     {
@@ -280,7 +417,7 @@ const ListaFacturacionVentas = () => {
       width: 70,
       render: (id) => (
         <Text strong style={{ color: colors.primary }}>
-          {id}
+          #{id}
         </Text>
       ),
     },
@@ -298,24 +435,84 @@ const ListaFacturacionVentas = () => {
     },
     {
       title: "Cliente",
-      dataIndex: "email_cliente",
-      key: "email_cliente",
-      render: (email, record) => (
-        <div>
-          <div>{email || `Cliente ID: ${record.id_cliente_factura}`}</div>
-          <div style={{ fontSize: "12px", color: "rgba(0, 0, 0, 0.45)" }}>
-            <UserOutlined style={{ marginRight: "4px" }} />
-            ID: {record.id_cliente_factura}
-          </div>
-        </div>
-      ),
+      dataIndex: "cliente",
+      key: "cliente",
+      render: (cliente, record) => {
+        if (cliente) {
+          return (
+            <Tooltip title="Ver detalles del cliente">
+              <div style={{ cursor: "pointer" }}>
+                <Text strong>{cliente.nombre_cliente}</Text>
+                <div style={{ fontSize: "12px", color: "rgba(0, 0, 0, 0.45)" }}>
+                  <UserOutlined style={{ marginRight: "4px" }} />
+                  ID: {cliente.id_cliente}
+                </div>
+              </div>
+            </Tooltip>
+          );
+        } else {
+          return (
+            <div>
+              <Text type="secondary">Cliente no especificado</Text>
+              {record.id_cliente_factura && (
+                <div style={{ fontSize: "12px", color: "rgba(0, 0, 0, 0.45)" }}>
+                  <UserOutlined style={{ marginRight: "4px" }} />
+                  ID: {record.id_cliente_factura}
+                </div>
+              )}
+            </div>
+          );
+        }
+      },
     },
     {
-      title: "Producto",
-      dataIndex: "nombre_producto",
-      key: "nombre_producto",
-      ellipsis: true,
-      render: (nombre) => nombre || "Múltiples productos",
+      title: "Productos",
+      key: "productos",
+      render: (_, record) => {
+        const detalles = record.detalles || [];
+        const cantidadProductos = detalles.length;
+
+        if (cantidadProductos === 0) {
+          return <Text type="secondary">Sin productos</Text>;
+        }
+
+        return (
+          <Popover
+            content={renderDetallesProductos(detalles)}
+            title="Detalle de productos"
+            trigger="click"
+            placement="right"
+            overlayStyle={{ width: 300 }}
+          >
+            <Button
+              type="text"
+              size="small"
+              icon={<ShoppingOutlined />}
+              style={{ color: colors.primary }}
+            >
+              {cantidadProductos}{" "}
+              {cantidadProductos === 1 ? "producto" : "productos"}
+            </Button>
+          </Popover>
+        );
+      },
+    },
+    {
+      title: "Resumen",
+      key: "resumen",
+      render: (_, record) => {
+        return (
+          <Space direction="vertical" size={0}>
+            <Text>
+              Subtotal:{" "}
+              <Text strong>{formatCurrency(record.subtotal_factura)}</Text>
+            </Text>
+            <Text>
+              IVA: <Text strong>{formatCurrency(record.iva_factura)}</Text>
+            </Text>
+          </Space>
+        );
+      },
     },
     {
       title: "Total",
@@ -324,7 +521,7 @@ const ListaFacturacionVentas = () => {
       align: "right",
       sorter: (a, b) => a.total_factura - b.total_factura,
       render: (total) => (
-        <Text strong style={{ color: colors.secondary }}>
+        <Text strong style={{ color: colors.secondary, fontSize: "16px" }}>
           {formatCurrency(total)}
         </Text>
       ),
@@ -366,6 +563,17 @@ const ListaFacturacionVentas = () => {
           />
           <Button
             type="primary"
+            icon={<EditOutlined />}
+            size="small"
+            onClick={() => navigate(`/editar-venta/${record.id_factura}`)}
+            style={{
+              backgroundColor: colors.secondary,
+              borderColor: colors.secondary,
+            }}
+            title="Editar"
+          />
+          <Button
+            type="primary"
             icon={<FilePdfOutlined />}
             size="small"
             onClick={() => generarPDF(record.id_factura, "factura")}
@@ -390,71 +598,146 @@ const ListaFacturacionVentas = () => {
       width: 70,
       render: (id) => (
         <Text strong style={{ color: colors.primary }}>
-          {id}
+          #{id}
         </Text>
       ),
     },
     {
-      title: "Fecha",
-      dataIndex: "fecha_serviciotecnico",
-      key: "fecha_serviciotecnico",
-      width: 100,
-      render: (fecha) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-          <CalendarOutlined style={{ fontSize: "12px", color: colors.text }} />
-          {formatDate(fecha)}
-        </div>
+      title: "Fechas",
+      key: "fechas",
+      width: 150,
+      render: (_, record) => (
+        <Space direction="vertical" size={0}>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <Tooltip title="Fecha de ingreso">
+              <CalendarOutlined
+                style={{ fontSize: "12px", color: colors.primary }}
+              />
+            </Tooltip>
+            {formatDate(record.fecha_serviciotecnico)}
+          </div>
+          {record.fecha_entrega_serviciotecnico && (
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <Tooltip title="Fecha de entrega estimada">
+                <CalendarOutlined
+                  style={{ fontSize: "12px", color: colors.warning }}
+                />
+              </Tooltip>
+              {formatDate(record.fecha_entrega_serviciotecnico)}
+            </div>
+          )}
+        </Space>
       ),
     },
     {
-      title: "Nombre",
-      dataIndex: "nombre_serviciotecnico",
-      key: "nombre_serviciotecnico",
-      ellipsis: true,
-      render: (nombre, record) => (
-        <div>
-          <div style={{ fontWeight: "500" }}>{nombre}</div>
+      title: "Servicio",
+      key: "servicio",
+      render: (_, record) => (
+        <Space direction="vertical" size={0}>
+          <Text strong>{record.nombre_serviciotecnico}</Text>
           {record.descripcion_serviciotecnico && (
-            <div style={{ fontSize: "12px", color: "rgba(0, 0, 0, 0.45)" }}>
+            <Text type="secondary" style={{ fontSize: "12px" }}>
               {record.descripcion_serviciotecnico}
-            </div>
+            </Text>
           )}
-        </div>
+          {record.tipo_dano_serviciotecnico && (
+            <Tag
+              color={
+                record.tipo_dano_serviciotecnico === "normal" ? "blue" : "red"
+              }
+            >
+              {record.tipo_dano_serviciotecnico.toUpperCase()}
+            </Tag>
+          )}
+        </Space>
       ),
     },
     {
       title: "Cliente",
-      dataIndex: "nombre_cliente",
-      key: "nombre_cliente",
-      render: (nombre, record) => (
-        <div>
-          <div>
-            {nombre || `Cliente ID: ${record.id_cliente_serviciotecnico}`}
-          </div>
-          {record.email_cliente && (
-            <div style={{ fontSize: "12px", color: "rgba(0, 0, 0, 0.45)" }}>
-              <UserOutlined style={{ marginRight: "4px" }} />
+      key: "cliente",
+      render: (_, record) => {
+        const clienteInfo = [];
+
+        if (record.nombre_cliente) {
+          clienteInfo.push(
+            <Text key="nombre" strong>
+              {record.nombre_cliente}
+            </Text>
+          );
+        }
+
+        if (record.email_cliente) {
+          clienteInfo.push(
+            <Text key="email" type="secondary" style={{ fontSize: "12px" }}>
+              <MailOutlined style={{ marginRight: 4 }} />
               {record.email_cliente}
-            </div>
-          )}
-        </div>
-      ),
+            </Text>
+          );
+        }
+
+        if (record.telefono_cliente) {
+          clienteInfo.push(
+            <Text key="telefono" type="secondary" style={{ fontSize: "12px" }}>
+              <PhoneOutlined style={{ marginRight: 4 }} />
+              {record.telefono_cliente}
+            </Text>
+          );
+        }
+
+        if (record.nombre_sede) {
+          clienteInfo.push(
+            <Text key="sede" type="secondary" style={{ fontSize: "12px" }}>
+              <ShopOutlined style={{ marginRight: 4 }} />
+              {record.nombre_sede}
+            </Text>
+          );
+        }
+
+        if (clienteInfo.length === 0) {
+          return <Text type="secondary">Cliente no especificado</Text>;
+        }
+
+        return (
+          <Space direction="vertical" size={0}>
+            {clienteInfo}
+          </Space>
+        );
+      },
     },
     {
-      title: "Costo",
-      dataIndex: "costo_serviciotecnico",
-      key: "costo_serviciotecnico",
-      align: "right",
-      sorter: (a, b) =>
-        (a.costo_serviciotecnico || 0) - (b.costo_serviciotecnico || 0),
-      render: (costo) =>
-        costo ? (
-          <Text strong style={{ color: colors.secondary }}>
-            {formatCurrency(costo)}
-          </Text>
+      title: "Proveedor",
+      dataIndex: "nombre_proveedor",
+      key: "nombre_proveedor",
+      render: (proveedor) =>
+        proveedor ? (
+          <Text>{proveedor}</Text>
         ) : (
-          "N/A"
+          <Text type="secondary">No asignado</Text>
         ),
+    },
+    {
+      title: "Financiero",
+      key: "financiero",
+      render: (_, record) => (
+        <Space direction="vertical" size={0}>
+          <Text>
+            Costo:{" "}
+            <Text strong>{formatCurrency(record.costo_serviciotecnico)}</Text>
+          </Text>
+          <Text>
+            Abono:{" "}
+            <Text strong>{formatCurrency(record.abono_serviciotecnico)}</Text>
+          </Text>
+          {record.costo_serviciotecnico && record.abono_serviciotecnico && (
+            <Text type="secondary">
+              Saldo:{" "}
+              {formatCurrency(
+                record.costo_serviciotecnico - record.abono_serviciotecnico
+              )}
+            </Text>
+          )}
+        </Space>
+      ),
     },
     {
       title: "Estado",
@@ -462,13 +745,15 @@ const ListaFacturacionVentas = () => {
       key: "estadotecnico_serviciotecnico",
       width: 120,
       render: (estado) => (
-        <Tag color={getEstadoServicioColor(estado)}>{estado}</Tag>
+        <Tag color={getEstadoServicioColor(estado)}>
+          {getEstadoServicioText(estado)}
+        </Tag>
       ),
       filters: [
-        { text: "En Diagnóstico", value: "EN_DIAGNOSTICO" },
-        { text: "Completado", value: "COMPLETADO" },
-        { text: "Pendiente", value: "PENDIENTE" },
-        { text: "Cancelado", value: "CANCELADO" },
+        { text: "En Diagnóstico", value: "D" },
+        { text: "Completado", value: "C" },
+        { text: "Pendiente", value: "P" },
+        { text: "Cancelado", value: "X" },
       ],
       onFilter: (value, record) =>
         record.estadotecnico_serviciotecnico === value,
@@ -710,8 +995,77 @@ const ListaFacturacionVentas = () => {
               loading={loading}
               onChange={handleTableChange}
               pagination={tableParams.pagination}
-              scroll={{ x: 800 }}
+              scroll={{ x: 1200 }}
               size="middle"
+              expandable={{
+                expandedRowRender: (record) => (
+                  <Card
+                    size="small"
+                    bordered={false}
+                    style={{ backgroundColor: "#f9f9f9" }}
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col span={24} md={12}>
+                        <Card
+                          size="small"
+                          title={
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <ShoppingOutlined
+                                style={{
+                                  marginRight: 8,
+                                  color: colors.primary,
+                                }}
+                              />
+                              <span>Productos</span>
+                            </div>
+                          }
+                          style={{ height: "100%" }}
+                        >
+                          {renderDetallesProductos(record.detalles)}
+                        </Card>
+                      </Col>
+                      <Col span={24} md={12}>
+                        <Card
+                          size="small"
+                          title={
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <UserOutlined
+                                style={{
+                                  marginRight: 8,
+                                  color: colors.primary,
+                                }}
+                              />
+                              <span>Información del Cliente</span>
+                            </div>
+                          }
+                          style={{ height: "100%" }}
+                        >
+                          {renderInfoCliente(record.cliente)}
+                        </Card>
+                      </Col>
+                    </Row>
+                  </Card>
+                ),
+                expandIcon: ({ expanded, onExpand, record }) =>
+                  expanded ? (
+                    <Button
+                      type="text"
+                      icon={<InfoCircleOutlined />}
+                      onClick={(e) => onExpand(record, e)}
+                      style={{ color: colors.primary }}
+                    />
+                  ) : (
+                    <Button
+                      type="text"
+                      icon={<InfoCircleOutlined />}
+                      onClick={(e) => onExpand(record, e)}
+                    />
+                  ),
+              }}
             />
           </TabPane>
 
@@ -829,10 +1183,10 @@ const ListaFacturacionVentas = () => {
                   allowClear
                   size="middle"
                 >
-                  <Option value="EN_DIAGNOSTICO">En diagnóstico</Option>
-                  <Option value="COMPLETADO">Completado</Option>
-                  <Option value="PENDIENTE">Pendiente</Option>
-                  <Option value="CANCELADO">Cancelado</Option>
+                  <Option value="D">En diagnóstico</Option>
+                  <Option value="C">Completado</Option>
+                  <Option value="P">Pendiente</Option>
+                  <Option value="X">Cancelado</Option>
                 </Select>
               </Col>
             </Row>
@@ -845,8 +1199,150 @@ const ListaFacturacionVentas = () => {
               loading={loading}
               onChange={handleTableChange}
               pagination={tableParams.pagination}
-              scroll={{ x: 900 }}
+              scroll={{ x: 1200 }}
               size="middle"
+              expandable={{
+                expandedRowRender: (record) => (
+                  <Card
+                    size="small"
+                    bordered={false}
+                    style={{ backgroundColor: "#f9f9f9" }}
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col span={24} md={12}>
+                        <Card
+                          size="small"
+                          title={
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <ToolOutlined
+                                style={{
+                                  marginRight: 8,
+                                  color: colors.primary,
+                                }}
+                              />
+                              <span>Detalles del Servicio</span>
+                            </div>
+                          }
+                          style={{ height: "100%" }}
+                        >
+                          <Space direction="vertical" size={8}>
+                            {record.descripcion_serviciotecnico && (
+                              <div>
+                                <Text strong>Descripción:</Text>
+                                <div>{record.descripcion_serviciotecnico}</div>
+                              </div>
+                            )}
+                            {record.tipo_dano_serviciotecnico && (
+                              <div>
+                                <Text strong>Tipo de daño:</Text>
+                                <div>
+                                  <Tag
+                                    color={
+                                      record.tipo_dano_serviciotecnico ===
+                                      "normal"
+                                        ? "blue"
+                                        : "red"
+                                    }
+                                  >
+                                    {record.tipo_dano_serviciotecnico.toUpperCase()}
+                                  </Tag>
+                                </div>
+                              </div>
+                            )}
+                            <div>
+                              <Text strong>Autorizado:</Text>
+                              <div>
+                                <Tag
+                                  color={
+                                    record.autorizado_serviciotecnico
+                                      ? "green"
+                                      : "red"
+                                  }
+                                >
+                                  {record.autorizado_serviciotecnico
+                                    ? "SÍ"
+                                    : "NO"}
+                                </Tag>
+                              </div>
+                            </div>
+                          </Space>
+                        </Card>
+                      </Col>
+                      <Col span={24} md={12}>
+                        <Card
+                          size="small"
+                          title={
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <DollarOutlined
+                                style={{
+                                  marginRight: 8,
+                                  color: colors.primary,
+                                }}
+                              />
+                              <span>Información Financiera</span>
+                            </div>
+                          }
+                          style={{ height: "100%" }}
+                        >
+                          <Space direction="vertical" size={8}>
+                            <div>
+                              <Text strong>Costo del servicio:</Text>
+                              <div>
+                                {formatCurrency(record.costo_serviciotecnico)}
+                              </div>
+                            </div>
+                            <div>
+                              <Text strong>Abono:</Text>
+                              <div>
+                                {formatCurrency(record.abono_serviciotecnico)}
+                              </div>
+                            </div>
+                            {record.costo_serviciotecnico &&
+                              record.abono_serviciotecnico && (
+                                <div>
+                                  <Text strong>Saldo pendiente:</Text>
+                                  <div>
+                                    {formatCurrency(
+                                      record.costo_serviciotecnico -
+                                        record.abono_serviciotecnico
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            {record.total_factura && (
+                              <div>
+                                <Text strong>Total factura:</Text>
+                                <div>
+                                  {formatCurrency(record.total_factura)}
+                                </div>
+                              </div>
+                            )}
+                          </Space>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </Card>
+                ),
+                expandIcon: ({ expanded, onExpand, record }) =>
+                  expanded ? (
+                    <Button
+                      type="text"
+                      icon={<InfoCircleOutlined />}
+                      onClick={(e) => onExpand(record, e)}
+                      style={{ color: colors.primary }}
+                    />
+                  ) : (
+                    <Button
+                      type="text"
+                      icon={<InfoCircleOutlined />}
+                      onClick={(e) => onExpand(record, e)}
+                    />
+                  ),
+              }}
             />
           </TabPane>
         </Tabs>

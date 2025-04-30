@@ -26,8 +26,23 @@ $navbar-height: 4rem;
     top: 0;
     left: 0;
     z-index: 10;
+    width: $sidebar-width;
+    transition: transform 0.3s ease, width 0.3s ease;
 
-    // No establecer width aquí, dejar que el componente Sider lo maneje
+    &.collapsed {
+      width: $sidebar-collapsed-width;
+    }
+  }
+
+  // Overlay para cerrar el sidebar en móviles
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9;
   }
 
   // Contenedor principal
@@ -45,6 +60,32 @@ $navbar-height: 4rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       z-index: 5;
       width: 100%;
+      position: relative;
+
+      // Botón de hamburguesa integrado en el navbar
+      .navbar-menu-button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: $navbar-height;
+        width: $navbar-height;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: $primary;
+        color: white;
+        border: none;
+        cursor: pointer;
+        z-index: 6;
+
+        &:hover {
+          background-color: darken($primary, 5%);
+        }
+
+        &:focus {
+          outline: none;
+        }
+      }
     }
 
     // Contenido
@@ -82,6 +123,7 @@ $navbar-height: 4rem;
     .app-sidebar {
       transform: translateX(-100%);
       transition: transform 0.3s ease;
+      width: $sidebar-width !important; // Forzar ancho completo en móviles
 
       &.open {
         transform: translateX(0);
@@ -91,6 +133,10 @@ $navbar-height: 4rem;
     .app-main {
       margin-left: 0 !important;
       width: 100% !important;
+
+      .app-navbar {
+        padding-left: $navbar-height; // Espacio exacto para el botón de hamburguesa
+      }
     }
   }
 }

@@ -100,7 +100,7 @@ const DetallesServicioTecnico = () => {
       try {
         const [sedesRes, proveedoresRes, servicioRes] = await Promise.all([
           axios.get("https://cimove-backend.onrender.com/api/sedes/"),
-          axios.get("https://cimove-backend.onrender.com/proveedores/all"),
+          axios.get("https://cimove-backend.onrender.com/api/proveedores/all"),
           axios.get(
             `https://cimove-backend.onrender.com/api/serviciotecnico/${id}`
           ),

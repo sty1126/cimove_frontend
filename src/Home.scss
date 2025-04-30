@@ -1,0 +1,238 @@
+/* Estilos para el fondo con gradiente */
+.gradient-background {
+  background: linear-gradient(135deg, #e8eaec 0%, #ffffff 100%);
+  border-radius: 12px;
+  padding: 24px;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.gradient-background::before {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(13, 127, 147, 0.1);
+  z-index: 0;
+}
+
+.gradient-background::after {
+  content: "";
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(77, 138, 82, 0.1);
+  z-index: 0;
+}
+
+.simple-background {
+  background: #f5f7f9;
+  border-radius: 8px;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+/* Animación para el título */
+.animated-title {
+  position: relative;
+  display: inline-block;
+}
+
+.animated-title::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 3px;
+  bottom: 0;
+  left: 0;
+  background-color: #0d7f93;
+  transition: width 0.3s ease;
+}
+
+.animated-title:hover::after {
+  width: 100%;
+}
+
+/* Animaciones para las tarjetas */
+.animated-card {
+  transition: all 0.3s ease-in-out;
+}
+
+.animated-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.animated-card:hover .card-accent {
+  width: 10px;
+}
+
+.animated-card .icon-container {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.animated-card:hover .icon-container {
+  transform: scale(1.1);
+}
+
+.animated-card .card-icon {
+  font-size: 40px;
+  transition: all 0.3s ease;
+}
+
+.animated-card:hover .card-icon {
+  animation: pulse 1s infinite ease-in-out;
+}
+
+.animated-card .card-title {
+  transition: all 0.3s ease;
+}
+
+.animated-card:hover .card-title {
+  transform: scale(1.05);
+}
+
+.animated-card .card-description {
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.animated-card:hover .card-description {
+  opacity: 1;
+}
+
+/* Animaciones para las tarjetas - más sutiles */
+.simple-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.simple-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+.simple-card .icon-container {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.simple-card:hover .icon-container {
+  transform: scale(1.05);
+}
+
+/* Animaciones para las tarjetas de estadísticas */
+.stats-card {
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+}
+
+.stats-card:hover .stats-icon {
+  animation: float 2s infinite ease-in-out;
+}
+
+.stats-card:hover .stats-value {
+  transform: scale(1.1);
+}
+
+/* Animaciones para las tarjetas de notificaciones */
+.notification-card {
+  transition: all 0.3s ease;
+}
+
+.notification-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.notification-card:hover .notification-icon {
+  transform: scale(1.1);
+}
+
+.notification-card:hover .bell-icon {
+  animation: rotate 1s ease-in-out;
+}
+
+/* Animaciones para las notificaciones */
+.simple-notification {
+  transition: all 0.2s ease;
+}
+
+.simple-notification:hover {
+  transform: translateX(3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Animación de entrada */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Keyframes para animaciones */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

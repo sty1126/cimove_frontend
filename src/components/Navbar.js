@@ -156,7 +156,7 @@ const Navbar = () => {
     <nav style={styles.navbar} className="navbar navbar-expand-lg">
       <a
         className="navbar-brand"
-        href="/"
+        href="/home"
         style={{
           ...styles.brand,
           ...(brandHovered ? styles.brandHover : {}),

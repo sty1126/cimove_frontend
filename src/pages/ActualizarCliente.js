@@ -53,6 +53,33 @@ const colors = {
   danger: "#C25F48", // Rojo más vibrante para peligro
 };
 
+// Patrones de validación
+const validationPatterns = {
+  // Solo letras y espacios (incluyendo acentos y ñ)
+  nombreApellido: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{1,50}$/,
+  // Solo números
+  telefono: /^[0-9]{7,15}$/,
+  // Correo electrónico
+  email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+  // Dirección (letras, números, #, -, espacios)
+  direccion: /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s#\-.,]{1,150}$/,
+  // Barrio (letras, espacios, números, guiones)
+  barrio: /^[\w\sáéíóúÁÉÍÓÚñÑ-]{1,50}$/,
+  // Código postal (solo números)
+  codigoPostal: /^[0-9]{4,10}$/,
+};
+
+// Función para escapar HTML para prevenir XSS
+const escapeHtml = (unsafe) => {
+  if (!unsafe) return "";
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
 const ActualizarCliente = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -111,6 +138,41 @@ const ActualizarCliente = () => {
     fetchData();
   }, [id, form]);
 
+  // Validar fecha de nacimiento
+  const validateBirthDate = (_, value) => {
+    if (!value) {
+      return Promise.resolve();
+    }
+
+    const birthDate = value.toDate();
+    const today = new Date();
+
+    // Verificar que no sea una fecha futura
+    if (birthDate > today) {
+      return Promise.reject("La fecha de nacimiento no puede ser futura");
+    }
+
+    // Calcular edad
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    const adjustedAge =
+      m < 0 || (m === 0 && today.getDate() < birthDate.getDate())
+        ? age - 1
+        : age;
+
+    // Verificar edad razonable (mayor a 12 años)
+    if (adjustedAge < 12) {
+      return Promise.reject("La edad debe ser mayor a 12 años");
+    }
+
+    // Verificar que no sea demasiado antigua (150 años)
+    if (adjustedAge > 150) {
+      return Promise.reject("La fecha de nacimiento no es válida");
+    }
+
+    return Promise.resolve();
+  };
+
   // Enviar formulario
   const handleSubmit = async (values) => {
     setSubmitting(true);
@@ -119,6 +181,34 @@ const ActualizarCliente = () => {
       if (values.fechanacimiento_cliente) {
         values.fechanacimiento_cliente =
           values.fechanacimiento_cliente.format("YYYY-MM-DD");
+      }
+
+      // Sanitizar datos para prevenir XSS
+      if (values.nombre_cliente) {
+        values.nombre_cliente = escapeHtml(values.nombre_cliente);
+      }
+      if (values.apellido_cliente) {
+        values.apellido_cliente = escapeHtml(values.apellido_cliente);
+      }
+      if (values.email_cliente) {
+        values.email_cliente = escapeHtml(values.email_cliente);
+      }
+      if (values.direccion_cliente) {
+        values.direccion_cliente = escapeHtml(values.direccion_cliente);
+      }
+      if (values.barrio_cliente) {
+        values.barrio_cliente = escapeHtml(values.barrio_cliente);
+      }
+      if (values.razonsocial_cliente) {
+        values.razonsocial_cliente = escapeHtml(values.razonsocial_cliente);
+      }
+      if (values.nombrecomercial_cliente) {
+        values.nombrecomercial_cliente = escapeHtml(
+          values.nombrecomercial_cliente
+        );
+      }
+      if (values.representante_cliente) {
+        values.representante_cliente = escapeHtml(values.representante_cliente);
       }
 
       const response = await fetch(
@@ -248,11 +338,22 @@ const ActualizarCliente = () => {
                           required: true,
                           message: "Por favor ingrese el nombre",
                         },
+                        {
+                          pattern: validationPatterns.nombreApellido,
+                          message:
+                            "El nombre solo debe contener letras y espacios",
+                        },
+                        {
+                          max: 50,
+                          message:
+                            "El nombre no puede exceder los 50 caracteres",
+                        },
                       ]}
                     >
                       <Input
                         placeholder="Ingrese nombre"
                         disabled={submitting}
+                        maxLength={50}
                       />
                     </Form.Item>
                   </Col>
@@ -270,11 +371,22 @@ const ActualizarCliente = () => {
                           required: true,
                           message: "Por favor ingrese el apellido",
                         },
+                        {
+                          pattern: validationPatterns.nombreApellido,
+                          message:
+                            "El apellido solo debe contener letras y espacios",
+                        },
+                        {
+                          max: 50,
+                          message:
+                            "El apellido no puede exceder los 50 caracteres",
+                        },
                       ]}
                     >
                       <Input
                         placeholder="Ingrese apellido"
                         disabled={submitting}
+                        maxLength={50}
                       />
                     </Form.Item>
                   </Col>
@@ -290,12 +402,20 @@ const ActualizarCliente = () => {
                         </Space>
                       }
                       name="fechanacimiento_cliente"
+                      rules={[
+                        {
+                          validator: validateBirthDate,
+                        },
+                      ]}
                     >
                       <DatePicker
                         style={{ width: "100%" }}
                         format="YYYY-MM-DD"
                         placeholder="Seleccione fecha"
                         disabled={submitting}
+                        disabledDate={(current) =>
+                          current && current > dayjs().endOf("day")
+                        }
                       />
                     </Form.Item>
                   </Col>
@@ -308,6 +428,12 @@ const ActualizarCliente = () => {
                         </Space>
                       }
                       name="genero_cliente"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Por favor seleccione un género",
+                        },
+                      ]}
                     >
                       <Select
                         placeholder="Seleccione género"
@@ -339,11 +465,17 @@ const ActualizarCliente = () => {
                           required: true,
                           message: "Por favor ingrese la razón social",
                         },
+                        {
+                          max: 100,
+                          message:
+                            "La razón social no puede exceder los 100 caracteres",
+                        },
                       ]}
                     >
                       <Input
                         placeholder="Ingrese razón social"
                         disabled={submitting}
+                        maxLength={100}
                       />
                     </Form.Item>
                   </Col>
@@ -356,10 +488,18 @@ const ActualizarCliente = () => {
                         </Space>
                       }
                       name="nombrecomercial_cliente"
+                      rules={[
+                        {
+                          max: 100,
+                          message:
+                            "El nombre comercial no puede exceder los 100 caracteres",
+                        },
+                      ]}
                     >
                       <Input
                         placeholder="Ingrese nombre comercial"
                         disabled={submitting}
+                        maxLength={100}
                       />
                     </Form.Item>
                   </Col>
@@ -373,10 +513,23 @@ const ActualizarCliente = () => {
                     </Space>
                   }
                   name="representante_cliente"
+                  rules={[
+                    {
+                      pattern: validationPatterns.nombreApellido,
+                      message:
+                        "El nombre del representante solo debe contener letras y espacios",
+                    },
+                    {
+                      max: 50,
+                      message:
+                        "El nombre del representante no puede exceder los 50 caracteres",
+                    },
+                  ]}
                 >
                   <Input
                     placeholder="Ingrese representante legal"
                     disabled={submitting}
+                    maxLength={50}
                   />
                 </Form.Item>
               </>
@@ -398,9 +551,18 @@ const ActualizarCliente = () => {
                       required: true,
                       message: "Por favor ingrese el teléfono",
                     },
+                    {
+                      pattern: validationPatterns.telefono,
+                      message:
+                        "El teléfono debe contener solo números (7-15 dígitos)",
+                    },
                   ]}
                 >
-                  <Input placeholder="Ingrese teléfono" disabled={submitting} />
+                  <Input
+                    placeholder="Ingrese teléfono"
+                    disabled={submitting}
+                    maxLength={15}
+                  />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
@@ -414,14 +576,19 @@ const ActualizarCliente = () => {
                   name="email_cliente"
                   rules={[
                     {
-                      type: "email",
+                      pattern: validationPatterns.email,
                       message: "Por favor ingrese un correo electrónico válido",
+                    },
+                    {
+                      max: 254,
+                      message: "El correo no puede exceder los 254 caracteres",
                     },
                   ]}
                 >
                   <Input
                     placeholder="Ingrese correo electrónico"
                     disabled={submitting}
+                    maxLength={254}
                   />
                 </Form.Item>
               </Col>
@@ -435,8 +602,22 @@ const ActualizarCliente = () => {
                 </Space>
               }
               name="direccion_cliente"
+              rules={[
+                {
+                  pattern: validationPatterns.direccion,
+                  message: "La dirección contiene caracteres no permitidos",
+                },
+                {
+                  max: 150,
+                  message: "La dirección no puede exceder los 150 caracteres",
+                },
+              ]}
             >
-              <Input placeholder="Ingrese dirección" disabled={submitting} />
+              <Input
+                placeholder="Ingrese dirección"
+                disabled={submitting}
+                maxLength={150}
+              />
             </Form.Item>
 
             <Row gutter={24}>
@@ -449,8 +630,22 @@ const ActualizarCliente = () => {
                     </Space>
                   }
                   name="barrio_cliente"
+                  rules={[
+                    {
+                      pattern: validationPatterns.barrio,
+                      message: "El barrio contiene caracteres no permitidos",
+                    },
+                    {
+                      max: 50,
+                      message: "El barrio no puede exceder los 50 caracteres",
+                    },
+                  ]}
                 >
-                  <Input placeholder="Ingrese barrio" disabled={submitting} />
+                  <Input
+                    placeholder="Ingrese barrio"
+                    disabled={submitting}
+                    maxLength={50}
+                  />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
@@ -462,10 +657,18 @@ const ActualizarCliente = () => {
                     </Space>
                   }
                   name="codigopostal_cliente"
+                  rules={[
+                    {
+                      pattern: validationPatterns.codigoPostal,
+                      message:
+                        "El código postal debe contener solo números (4-10 dígitos)",
+                    },
+                  ]}
                 >
                   <Input
                     placeholder="Ingrese código postal"
                     disabled={submitting}
+                    maxLength={10}
                   />
                 </Form.Item>
               </Col>
@@ -479,6 +682,12 @@ const ActualizarCliente = () => {
                 </Space>
               }
               name="id_sede_cliente"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor seleccione una sede",
+                },
+              ]}
             >
               <Select placeholder="Seleccione una sede" disabled={submitting}>
                 {sedes.map((sede) => (

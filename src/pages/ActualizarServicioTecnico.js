@@ -510,7 +510,7 @@ const ActualizarServicioTecnico = () => {
                       <Space>
                         <DollarOutlined style={{ color: colors.primary }} />
                         <Tooltip title="El abono no puede ser mayor al costo estimado">
-                          Abono ($)
+                          Abono Total ($)
                         </Tooltip>
                       </Space>
                     }
