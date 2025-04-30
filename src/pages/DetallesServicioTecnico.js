@@ -99,9 +99,11 @@ const DetallesServicioTecnico = () => {
     const fetchData = async () => {
       try {
         const [sedesRes, proveedoresRes, servicioRes] = await Promise.all([
-          axios.get("http://localhost:4000/api/sedes/"),
-          axios.get("http://localhost:4000/api/proveedores/all"),
-          axios.get(`http://localhost:4000/api/serviciotecnico/${id}`),
+          axios.get("https://cimove-backend.onrender.com/api/sedes/"),
+          axios.get("https://cimove-backend.onrender.com/proveedores/all"),
+          axios.get(
+            `https://cimove-backend.onrender.com/api/serviciotecnico/${id}`
+          ),
         ]);
 
         setServicio(servicioRes.data);

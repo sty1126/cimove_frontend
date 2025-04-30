@@ -95,7 +95,9 @@ const ActualizarCliente = () => {
         form.setFieldsValue(clienteInfo);
 
         // Obtener sedes
-        const sedesRes = await fetch("https://cimove-backend.onrender.com/api/sedes");
+        const sedesRes = await fetch(
+          "https://cimove-backend.onrender.com/api/sedes"
+        );
         const sedesData = await sedesRes.json();
         setSedes(sedesData);
       } catch (error) {
@@ -119,11 +121,14 @@ const ActualizarCliente = () => {
           values.fechanacimiento_cliente.format("YYYY-MM-DD");
       }
 
-      const response = await fetch(`https://cimove-backend.onrender.com/api/clientes/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+      const response = await fetch(
+        `https://cimove-backend.onrender.com/api/clientes/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Error al actualizar el cliente");

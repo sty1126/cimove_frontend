@@ -86,9 +86,11 @@ const ActualizarServicioTecnico = () => {
       try {
         setDataLoading(true);
         const [sedesRes, proveedoresRes, servicioRes] = await Promise.all([
-          axios.get("http://localhost:4000/api/sedes/"),
-          axios.get("http://localhost:4000/api/proveedores/all"),
-          axios.get(`http://localhost:4000/api/serviciotecnico/${id}`),
+          axios.get("https://cimove-backend.onrender.com/api/sedes/"),
+          axios.get("https://cimove-backend.onrender.com/api/proveedores/all"),
+          axios.get(
+            `https://cimove-backend.onrender.com/api/serviciotecnico/${id}`
+          ),
         ]);
 
         setSedes(sedesRes.data);
@@ -203,7 +205,7 @@ const ActualizarServicioTecnico = () => {
       };
 
       await axios.put(
-        `http://localhost:4000/api/serviciotecnico/${id}`,
+        `https://cimove-backend.onrender.com/api/serviciotecnico/${id}`,
         payload
       );
       setModalExitoVisible(true);

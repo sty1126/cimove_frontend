@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import {
   Form,
   Input,
@@ -22,7 +22,7 @@ import {
   InputNumber,
   Alert,
   Tooltip,
-} from "antd"
+} from "antd";
 import {
   ToolOutlined,
   CalendarOutlined,
@@ -39,13 +39,13 @@ import {
   SaveOutlined,
   ClockCircleOutlined,
   SafetyCertificateOutlined,
-} from "@ant-design/icons"
-import dayjs from "dayjs"
-import SeleccionarClientePorSede from "./SeleccionarClientePorSede"
+} from "@ant-design/icons";
+import dayjs from "dayjs";
+import SeleccionarClientePorSede from "./SeleccionarClientePorSede";
 
-const { Title, Text } = Typography
-const { Option } = Select
-const { TextArea } = Input
+const { Title, Text } = Typography;
+const { Option } = Select;
+const { TextArea } = Input;
 
 // Paleta de colores personalizada
 const colors = {
@@ -58,71 +58,75 @@ const colors = {
   success: "#4D8A52", // Verde más vibrante para éxito
   warning: "#E0A458", // Naranja apagado para advertencias
   danger: "#C25F48", // Rojo más vibrante para peligro
-}
+};
 
 const CrearServicioTecnico = () => {
-  const [form] = Form.useForm()
-  const [sedes, setSedes] = useState([])
-  const [proveedores, setProveedores] = useState([])
-  const [selectedSede, setSelectedSede] = useState(null)
-  const [showModalCliente, setShowModalCliente] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [dataLoading, setDataLoading] = useState(true)
-  const [clienteSeleccionado, setClienteSeleccionado] = useState(null)
-  const [aplicaProveedor, setAplicaProveedor] = useState(false)
-  const [aplicaGarantia, setAplicaGarantia] = useState(false)
-  const [costoEstimado, setCostoEstimado] = useState(0)
-  const [abono, setAbono] = useState(0)
-  const [modalExitoVisible, setModalExitoVisible] = useState(false)
+  const [form] = Form.useForm();
+  const [sedes, setSedes] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
+  const [selectedSede, setSelectedSede] = useState(null);
+  const [showModalCliente, setShowModalCliente] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
+  const [aplicaProveedor, setAplicaProveedor] = useState(false);
+  const [aplicaGarantia, setAplicaGarantia] = useState(false);
+  const [costoEstimado, setCostoEstimado] = useState(0);
+  const [abono, setAbono] = useState(0);
+  const [modalExitoVisible, setModalExitoVisible] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://cimove-backend.onrender.com/api/sedes/")
-        setSedes(response.data)
+        const response = await axios.get(
+          "https://cimove-backend.onrender.com/api/sedes/"
+        );
+        setSedes(response.data);
 
-        setDataLoading(true)
+        setDataLoading(true);
         const [resSedes, resProveedores] = await Promise.all([
-          axios.get("http://localhost:4000/api/sedes/"),
-          axios.get("http://localhost:4000/api/proveedores/all"),
-        ])
-        setSedes(resSedes.data)
-        setProveedores(resProveedores.data)
+          axios.get("https://cimove-backend.onrender.com/api/sedes/"),
+          axios.get("https://cimove-backend.onrender.com/api/proveedores/all"),
+        ]);
+        setSedes(resSedes.data);
+        setProveedores(resProveedores.data);
       } catch (error) {
-        console.error("Error cargando datos:", error)
-        message.error("Error al cargar datos iniciales")
+        console.error("Error cargando datos:", error);
+        message.error("Error al cargar datos iniciales");
       } finally {
-        setDataLoading(false)
+        setDataLoading(false);
       }
-    }
+    };
 
     const fetchProveedores = async () => {
       try {
-        const response = await axios.get("https://cimove-backend.onrender.com/api/proveedores/all")
-        setProveedores(response.data)
+        const response = await axios.get(
+          "https://cimove-backend.onrender.com/api/proveedores/all"
+        );
+        setProveedores(response.data);
       } catch (error) {
-        console.error("Error cargando proveedores:", error)
+        console.error("Error cargando proveedores:", error);
       }
-    }
+    };
 
-    fetchProveedores()
+    fetchProveedores();
 
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   // Función para manejar la selección de cliente
   const handleClienteSeleccionado = (cliente) => {
     if (cliente) {
-      setClienteSeleccionado(cliente)
+      setClienteSeleccionado(cliente);
       form.setFieldsValue({
         idCliente: cliente.id_cliente,
-      })
+      });
     }
-    setShowModalCliente(false)
-  }
+    setShowModalCliente(false);
+  };
 
   // Función para manejar el cambio de sede
   const handleSedeChange = (value) => {
@@ -131,7 +135,8 @@ const CrearServicioTecnico = () => {
       Modal.confirm({
         title: "Cambio de sede",
         icon: <WarningOutlined style={{ color: colors.warning }} />,
-        content: "Cambiar la sede eliminará el cliente seleccionado. ¿Desea continuar?",
+        content:
+          "Cambiar la sede eliminará el cliente seleccionado. ¿Desea continuar?",
         okText: "Sí, cambiar",
         cancelText: "Cancelar",
         okButtonProps: {
@@ -141,69 +146,80 @@ const CrearServicioTecnico = () => {
           },
         },
         onOk: () => {
-          setSelectedSede(value)
-          setClienteSeleccionado(null)
-          form.setFieldsValue({ idCliente: null })
+          setSelectedSede(value);
+          setClienteSeleccionado(null);
+          form.setFieldsValue({ idCliente: null });
         },
-      })
+      });
     } else {
-      setSelectedSede(value)
+      setSelectedSede(value);
     }
-  }
+  };
 
   // Función para validar que el abono no sea mayor al costo
   const validateAbono = (_, value) => {
     if (value > costoEstimado) {
-      return Promise.reject(new Error("El abono no puede ser mayor al costo estimado"))
+      return Promise.reject(
+        new Error("El abono no puede ser mayor al costo estimado")
+      );
     }
-    return Promise.resolve()
-  }
+    return Promise.resolve();
+  };
 
   // Función para validar que la fecha no sea anterior a hoy
   const disabledDate = (current) => {
-    return current && current < dayjs().startOf("day")
-  }
+    return current && current < dayjs().startOf("day");
+  };
 
   // Función para enviar el formulario
   const handleSubmit = async (values) => {
     try {
-      setLoading(true)
+      setLoading(true);
 
       const payload = {
         id_cliente: values.idCliente,
         id_sede: values.idSede,
-        id_proveedor: values.aplicaProveedor ? values.idProveedor : "PROV_TEMP_123",
+        id_proveedor: values.aplicaProveedor
+          ? values.idProveedor
+          : "PROV_TEMP_123",
         nombre_servicio: values.nombreServicio,
         descripcion_servicio: values.descripcionServicio,
         fecha_servicio: values.fechaServicio.format("YYYY-MM-DD"),
-        fecha_entrega: values.fechaEntrega ? values.fechaEntrega.format("YYYY-MM-DD") : null,
+        fecha_entrega: values.fechaEntrega
+          ? values.fechaEntrega.format("YYYY-MM-DD")
+          : null,
         tipo_dano: values.tipoDano,
         clave_dispositivo: values.claveDispositivo || "",
         costo: Number(values.costo),
         abono: Number(values.abono),
         garantia_aplica: values.garantiaAplica,
         fecha_garantia:
-          values.garantiaAplica && values.fechaGarantia ? values.fechaGarantia.format("YYYY-MM-DD") : null,
+          values.garantiaAplica && values.fechaGarantia
+            ? values.fechaGarantia.format("YYYY-MM-DD")
+            : null,
         numero_contacto_alternativo: values.numeroContactoAlternativo || "",
         autorizado: values.autorizado,
-      }
+      };
 
-      await axios.post("http://localhost:4000/api/serviciotecnico", payload)
-      setModalExitoVisible(true)
+      await axios.post(
+        "https://cimove-backend.onrender.com/api/serviciotecnico",
+        payload
+      );
+      setModalExitoVisible(true);
     } catch (error) {
-      console.error("Error creando servicio técnico:", error)
-      message.error("Error al crear el servicio técnico")
+      console.error("Error creando servicio técnico:", error);
+      message.error("Error al crear el servicio técnico");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Obtener nombre de sede
   const obtenerNombreSede = (id) => {
-    if (!id) return ""
-    const sede = sedes.find((s) => s.id_sede === Number.parseInt(id))
-    return sede ? sede.nombre_sede : ""
-  }
+    if (!id) return "";
+    const sede = sedes.find((s) => s.id_sede === Number.parseInt(id));
+    return sede ? sede.nombre_sede : "";
+  };
 
   if (dataLoading) {
     return (
@@ -217,7 +233,7 @@ const CrearServicioTecnico = () => {
       >
         <Spin size="large" tip="Cargando datos iniciales..." />
       </div>
-    )
+    );
   }
 
   return (
@@ -242,10 +258,14 @@ const CrearServicioTecnico = () => {
               <ToolOutlined style={{ marginRight: "12px" }} />
               Crear Servicio Técnico
             </Title>
-            <Text type="secondary">Complete el formulario para registrar un nuevo servicio técnico</Text>
+            <Text type="secondary">
+              Complete el formulario para registrar un nuevo servicio técnico
+            </Text>
           </div>
 
-          <Divider style={{ margin: "12px 0 24px", borderColor: colors.light }} />
+          <Divider
+            style={{ margin: "12px 0 24px", borderColor: colors.light }}
+          />
 
           <Form
             form={form}
@@ -331,7 +351,11 @@ const CrearServicioTecnico = () => {
                         </Button>
                       }
                       placeholder="Seleccione un cliente"
-                      value={clienteSeleccionado ? `${clienteSeleccionado.id_cliente}` : ""}
+                      value={
+                        clienteSeleccionado
+                          ? `${clienteSeleccionado.id_cliente}`
+                          : ""
+                      }
                     />
                   </Form.Item>
                 </Col>
@@ -344,7 +368,8 @@ const CrearServicioTecnico = () => {
                       <InfoCircleOutlined />
                       <span>
                         Cliente seleccionado: {clienteSeleccionado.id_cliente} -{" "}
-                        {clienteSeleccionado.nombre_cliente || clienteSeleccionado.razonsocial_cliente}
+                        {clienteSeleccionado.nombre_cliente ||
+                          clienteSeleccionado.razonsocial_cliente}
                       </span>
                     </Space>
                   }
@@ -383,7 +408,10 @@ const CrearServicioTecnico = () => {
                       },
                     ]}
                   >
-                    <Input placeholder="Ej: Reparación de pantalla" maxLength={50} />
+                    <Input
+                      placeholder="Ej: Reparación de pantalla"
+                      maxLength={50}
+                    />
                   </Form.Item>
                 </Col>
 
@@ -460,7 +488,10 @@ const CrearServicioTecnico = () => {
                     }
                     name="numeroContactoAlternativo"
                   >
-                    <Input placeholder="Número de contacto alternativo" maxLength={15} />
+                    <Input
+                      placeholder="Número de contacto alternativo"
+                      maxLength={15}
+                    />
                   </Form.Item>
                 </Col>
               </Row>
@@ -498,7 +529,9 @@ const CrearServicioTecnico = () => {
                       style={{ width: "100%" }}
                       min={0}
                       step={1000}
-                      formatter={(value) => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      formatter={(value) =>
+                        `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       onChange={(value) => setCostoEstimado(value || 0)}
                     />
@@ -510,11 +543,16 @@ const CrearServicioTecnico = () => {
                     label={
                       <Space>
                         <DollarOutlined style={{ color: colors.primary }} />
-                        <Tooltip title="El abono no puede ser mayor al costo estimado">Abono ($)</Tooltip>
+                        <Tooltip title="El abono no puede ser mayor al costo estimado">
+                          Abono ($)
+                        </Tooltip>
                       </Space>
                     }
                     name="abono"
-                    rules={[{ required: true, message: "Por favor ingrese el abono" }, { validator: validateAbono }]}
+                    rules={[
+                      { required: true, message: "Por favor ingrese el abono" },
+                      { validator: validateAbono },
+                    ]}
                     dependencies={["costo"]}
                   >
                     <InputNumber
@@ -522,7 +560,9 @@ const CrearServicioTecnico = () => {
                       min={0}
                       max={costoEstimado}
                       step={1000}
-                      formatter={(value) => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      formatter={(value) =>
+                        `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       onChange={(value) => setAbono(value || 0)}
                     />
@@ -559,7 +599,11 @@ const CrearServicioTecnico = () => {
                       },
                     ]}
                   >
-                    <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" disabledDate={disabledDate} />
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      format="YYYY-MM-DD"
+                      disabledDate={disabledDate}
+                    />
                   </Form.Item>
                 </Col>
 
@@ -567,13 +611,19 @@ const CrearServicioTecnico = () => {
                   <Form.Item
                     label={
                       <Space>
-                        <ClockCircleOutlined style={{ color: colors.primary }} />
+                        <ClockCircleOutlined
+                          style={{ color: colors.primary }}
+                        />
                         Fecha de Entrega Estimada
                       </Space>
                     }
                     name="fechaEntrega"
                   >
-                    <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" disabledDate={disabledDate} />
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      format="YYYY-MM-DD"
+                      disabledDate={disabledDate}
+                    />
                   </Form.Item>
                 </Col>
               </Row>
@@ -593,7 +643,9 @@ const CrearServicioTecnico = () => {
               <Row gutter={24}>
                 <Col xs={24} md={8}>
                   <Form.Item name="aplicaProveedor" valuePropName="checked">
-                    <Checkbox onChange={(e) => setAplicaProveedor(e.target.checked)}>
+                    <Checkbox
+                      onChange={(e) => setAplicaProveedor(e.target.checked)}
+                    >
                       <Space>
                         <ShopOutlined style={{ color: colors.primary }} />
                         ¿Aplica proveedor?
@@ -604,9 +656,13 @@ const CrearServicioTecnico = () => {
 
                 <Col xs={24} md={8}>
                   <Form.Item name="garantiaAplica" valuePropName="checked">
-                    <Checkbox onChange={(e) => setAplicaGarantia(e.target.checked)}>
+                    <Checkbox
+                      onChange={(e) => setAplicaGarantia(e.target.checked)}
+                    >
                       <Space>
-                        <SafetyCertificateOutlined style={{ color: colors.primary }} />
+                        <SafetyCertificateOutlined
+                          style={{ color: colors.primary }}
+                        />
                         ¿Aplica garantía?
                       </Space>
                     </Checkbox>
@@ -617,7 +673,9 @@ const CrearServicioTecnico = () => {
                   <Form.Item name="autorizado" valuePropName="checked">
                     <Checkbox defaultChecked>
                       <Space>
-                        <CheckCircleOutlined style={{ color: colors.primary }} />
+                        <CheckCircleOutlined
+                          style={{ color: colors.primary }}
+                        />
                         Autorizado
                       </Space>
                     </Checkbox>
@@ -667,7 +725,11 @@ const CrearServicioTecnico = () => {
                     },
                   ]}
                 >
-                  <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" disabledDate={disabledDate} />
+                  <DatePicker
+                    style={{ width: "100%" }}
+                    format="YYYY-MM-DD"
+                    disabledDate={disabledDate}
+                  />
                 </Form.Item>
               )}
             </Card>
@@ -721,7 +783,9 @@ const CrearServicioTecnico = () => {
           maskClosable={false}
         >
           <div style={{ padding: "20px 0", textAlign: "center" }}>
-            <p style={{ fontSize: "16px", marginBottom: "20px" }}>El servicio técnico se ha creado correctamente.</p>
+            <p style={{ fontSize: "16px", marginBottom: "20px" }}>
+              El servicio técnico se ha creado correctamente.
+            </p>
             <Button
               type="primary"
               style={{
@@ -729,8 +793,8 @@ const CrearServicioTecnico = () => {
                 borderColor: colors.success,
               }}
               onClick={() => {
-                setModalExitoVisible(false)
-                navigate("/facturacion-ventas")
+                setModalExitoVisible(false);
+                navigate("/facturacion-ventas");
               }}
             >
               Aceptar
@@ -739,7 +803,7 @@ const CrearServicioTecnico = () => {
         </Modal>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CrearServicioTecnico
+export default CrearServicioTecnico;
