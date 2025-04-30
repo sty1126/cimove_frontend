@@ -179,7 +179,7 @@ const Ventas = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:4000/api/inventariolocal/sede/${sede.id_sede}`
+        `https://cimove-backend.onrender.com/api/inventariolocal/sede/${sede.id_sede}`
       );
       const inventario = res.data;
 
@@ -286,7 +286,7 @@ const Ventas = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:4000/api/productos/${codigoInput}`
+        `https://cimove-backend.onrender.com/api/productos/${codigoInput}`
       );
 
       const producto = res.data;

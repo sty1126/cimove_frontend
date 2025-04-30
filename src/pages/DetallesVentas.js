@@ -13,7 +13,7 @@ const DetallesFactura = () => {
     const cargarFactura = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:4000/api/factura/${ventasId}`
+          `https://cimove-backend.onrender.com/api/factura/${ventasId}`
         );
 
         if (Array.isArray(response.data) && response.data.length > 0) {
