@@ -726,6 +726,7 @@ const Inventario = () => {
         <Input
           placeholder="Nombre de la nueva categoría"
           value={newCategory}
+          maxLength={35}
           onChange={(e) => setNewCategory(e.target.value)}
           prefix={<TagsOutlined style={{ color: "#bfbfbf" }} />}
           style={{ marginTop: "16px" }}
