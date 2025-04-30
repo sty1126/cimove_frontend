@@ -207,6 +207,7 @@ const RegistrarProducto = () => {
                   <InputNumber
                     style={{ width: "100%" }}
                     placeholder="Ingrese el ID del producto"
+                    maxLength={13}
                     min={1}
                     precision={0}
                   />
@@ -258,7 +259,7 @@ const RegistrarProducto = () => {
                 },
               ]}
             >
-              <Input placeholder="Ingrese el nombre del producto" />
+              <Input placeholder="Ingrese el nombre del producto" maxLength={35}/>
             </Form.Item>
 
             <Form.Item
