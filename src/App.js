@@ -39,17 +39,14 @@ import CrearFacturaServicioTecnico from "./pages/CrearFacturaServicioTecnico";
 import Login from "./pages/Login";
 import Estadisticas from "./pages/Estadisticas";
 
-import { disableReactDevTools } from '@fvilers/disable-react-devtools';
+import { disableReactDevTools } from "@fvilers/disable-react-devtools";
 
-import DetallesVentas from "./pages/DetallesVentas";
 import DetallesServicioTecnico from "./pages/DetallesServicioTecnico";
 import ActualizarServicioTecnico from "./pages/ActualizarServicioTecnico";
 
-
 import { CartProvider } from "./context/CartContext";
 
-
-if (process.env.NODE_ENV === 'production') disableReactDevTools()
+if (process.env.NODE_ENV === "production") disableReactDevTools();
 
 function App() {
   return (
@@ -195,10 +192,6 @@ function App() {
             <Route
               path="estadisticas"
               element={<PrivateRoute element={<Estadisticas />} />}
-            />
-            <Route
-              path="detalles-ventas/:ventasId"
-              element={<PrivateRoute element={<DetallesVentas />} />}
             />
             <Route
               path="detalles-servicio/:id"

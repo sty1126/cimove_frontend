@@ -66,8 +66,10 @@ const validationPatterns = {
   telefono: /^[0-9]{7,10}$/,
   // Correo electrónico
   email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-  // Dirección (letras, números, #, -, espacios)
-  direccion: /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s#\-.,]{5,150}$/,
+  // Dirección (letras, números, #, -, espacios) - excluyendo <> [] {} ;
+  direccion: /^[^<>[\]{};]*$/,
+  // Barrio (letras, espacios, números) - excluyendo <> [] {} ;
+  barrio: /^[^<>[\]{};]*$/,
   // Código postal (4-6 dígitos)
   codigoPostal: /^[0-9]{4,6}$/,
   // Dígito de verificación (0-9)
@@ -502,6 +504,11 @@ const CrearCliente = () => {
                         message:
                           "La dirección no puede exceder los 150 caracteres",
                       },
+                      {
+                        pattern: validationPatterns.direccion,
+                        message:
+                          "La dirección no puede contener los caracteres <> [] {} ;",
+                      },
                     ]}
                   >
                     <Input placeholder="Ingrese dirección" maxLength={150} />
@@ -528,6 +535,11 @@ const CrearCliente = () => {
                       {
                         max: 50,
                         message: "El barrio no puede exceder los 50 caracteres",
+                      },
+                      {
+                        pattern: validationPatterns.barrio,
+                        message:
+                          "El barrio no puede contener los caracteres <> [] {} ;",
                       },
                     ]}
                   >
