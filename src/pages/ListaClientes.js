@@ -75,7 +75,9 @@ const ListaClientes = () => {
   const fetchClientes = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://cimove-backend.onrender.com/api/clientes");
+      const response = await fetch(
+        "https://cimove-backend.onrender.com/api/clientes"
+      );
       const data = await response.json();
       setClientes(data);
     } catch (error) {
@@ -208,6 +210,7 @@ const ListaClientes = () => {
         </Text>
       ),
       width: 80,
+      responsive: ["md"],
     },
     {
       title: "Cliente",
@@ -231,7 +234,7 @@ const ListaClientes = () => {
                 backgroundColor: getAvatarColor(record),
                 color: "#fff",
               }}
-              size={40}
+              size={{ xs: 32, sm: 40 }}
             >
               {getInitials(record)}
             </Avatar>
@@ -426,10 +429,11 @@ const ListaClientes = () => {
   return (
     <div
       style={{
-        padding: "24px",
+        padding: "12px",
         backgroundColor: colors.background,
         minHeight: "100vh",
       }}
+      className="px-3 sm:px-6 md:px-8 lg:px-24"
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
         <Card
@@ -482,12 +486,13 @@ const ListaClientes = () => {
 
           {/* Tarjetas de estadísticas */}
           <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
-            <Col xs={24} sm={8}>
+            <Col xs={24} sm={12} md={8}>
               <Card
                 size="small"
                 style={{
                   borderLeft: `4px solid ${colors.primary}`,
                   borderRadius: "4px",
+                  height: "100%",
                 }}
               >
                 <Statistic
@@ -498,12 +503,13 @@ const ListaClientes = () => {
                 />
               </Card>
             </Col>
-            <Col xs={24} sm={8}>
+            <Col xs={24} sm={12} md={8}>
               <Card
                 size="small"
                 style={{
                   borderLeft: `4px solid ${colors.secondary}`,
                   borderRadius: "4px",
+                  height: "100%",
                 }}
               >
                 <Statistic
@@ -514,12 +520,13 @@ const ListaClientes = () => {
                 />
               </Card>
             </Col>
-            <Col xs={24} sm={8}>
+            <Col xs={24} sm={12} md={8}>
               <Card
                 size="small"
                 style={{
                   borderLeft: `4px solid ${colors.accent}`,
                   borderRadius: "4px",
+                  height: "100%",
                 }}
               >
                 <Statistic
@@ -534,7 +541,7 @@ const ListaClientes = () => {
 
           {/* Filtros */}
           <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
-            <Col xs={24} md={16}>
+            <Col xs={24} lg={16}>
               <Input
                 placeholder="Buscar por ID, nombre o razón social..."
                 prefix={<SearchOutlined style={{ color: colors.primary }} />}
@@ -545,7 +552,7 @@ const ListaClientes = () => {
                 style={{ width: "100%" }}
               />
             </Col>
-            <Col xs={24} md={8}>
+            <Col xs={24} lg={8}>
               <Radio.Group
                 value={tipoActivo}
                 onChange={(e) => setTipoActivo(e.target.value)}
@@ -582,9 +589,13 @@ const ListaClientes = () => {
             rowKey="id_cliente"
             loading={loading}
             onChange={handleTableChange}
-            pagination={tableParams.pagination}
-            scroll={{ x: 1000 }}
-            size="middle"
+            pagination={{
+              ...tableParams.pagination,
+              size: "small",
+              responsive: true,
+            }}
+            scroll={{ x: "max-content" }}
+            size="small"
             locale={{ emptyText: "No se encontraron clientes" }}
             rowClassName={() => "table-row-hover"}
           />

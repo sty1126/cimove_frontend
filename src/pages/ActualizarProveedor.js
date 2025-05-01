@@ -56,6 +56,19 @@ const colors = {
   danger: "#C25F48", // Rojo más vibrante para peligro
 };
 
+// Validaciones con expresiones regulares
+const validations = {
+  idProveedor: /^\d{5,15}$/,
+  digitoVerificacion: /^[0-9]$/,
+  nombreProveedor: /^[\w\sáéíóúÁÉÍÓÚñÑ&\-.]{3,50}$/,
+  representante: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.]{0,50}$/,
+  direccion: /^[\w\s#\-.áéíóúÁÉÍÓÚñÑ]{3,100}$/,
+  telefono: /^\d{7,10}$/,
+  email: /^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/,
+  saldo: /^\d+(\.\d{1,2})?$/,
+  caracteresProhibidos: /[<>;,{}:]/,
+};
+
 const ActualizarProveedor = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -67,6 +80,24 @@ const ActualizarProveedor = () => {
   const [loadingProveedor, setLoadingProveedor] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [digitoVerificacion, setDigitoVerificacion] = useState("");
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Detectar cambios en el tamaño de la pantalla
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  // Verificar caracteres prohibidos
+  const contieneCaracteresProhibidos = (texto) => {
+    return validations.caracteresProhibidos.test(texto);
+  };
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -77,7 +108,9 @@ const ActualizarProveedor = () => {
           await Promise.all([
             axios.get("https://cimove-backend.onrender.com/tipos"),
             axios.get("https://cimove-backend.onrender.com/ciudades"),
-            axios.get(`https://cimove-backend.onrender.com/api/proveedores/${id}`),
+            axios.get(
+              `https://cimove-backend.onrender.com/api/proveedores/${id}`
+            ),
           ]);
 
         setTiposProveedor(tiposResponse.data);
@@ -119,6 +152,58 @@ const ActualizarProveedor = () => {
 
   // Enviar formulario
   const handleSubmit = async (values) => {
+    // Verificar que el nombre del proveedor cumpla con el formato
+    if (!validations.nombreProveedor.test(values.nombre_proveedor)) {
+      message.error({
+        content: "El nombre del proveedor contiene caracteres no permitidos",
+        style: { marginTop: "20px" },
+      });
+      return;
+    }
+
+    // Verificar representante si existe
+    if (
+      values.representante_proveedor &&
+      !validations.representante.test(values.representante_proveedor)
+    ) {
+      message.error({
+        content:
+          "El nombre del representante contiene caracteres no permitidos",
+        style: { marginTop: "20px" },
+      });
+      return;
+    }
+
+    // Verificar dirección
+    if (!validations.direccion.test(values.direccion_proveedor)) {
+      message.error({
+        content: "La dirección contiene caracteres no permitidos",
+        style: { marginTop: "20px" },
+      });
+      return;
+    }
+
+    // Verificar teléfono
+    if (!validations.telefono.test(values.telefono_proveedor)) {
+      message.error({
+        content: "El teléfono debe contener entre 7 y 10 dígitos numéricos",
+        style: { marginTop: "20px" },
+      });
+      return;
+    }
+
+    // Verificar email si existe
+    if (
+      values.email_proveedor &&
+      !validations.email.test(values.email_proveedor)
+    ) {
+      message.error({
+        content: "El formato del email no es válido",
+        style: { marginTop: "20px" },
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
       // Formatear fecha
@@ -127,7 +212,10 @@ const ActualizarProveedor = () => {
           values.fecharegistro_proveedor.format("YYYY-MM-DD");
       }
 
-      await axios.put(`https://cimove-backend.onrender.com/api/proveedores/${id}`, values);
+      await axios.put(
+        `https://cimove-backend.onrender.com/api/proveedores/${id}`,
+        values
+      );
       message.success({
         content: "Proveedor actualizado exitosamente",
         icon: <CheckCircleIcon />,
@@ -176,7 +264,7 @@ const ActualizarProveedor = () => {
   return (
     <div
       style={{
-        padding: "24px",
+        padding: isMobile ? "12px" : "24px",
         backgroundColor: colors.background,
         minHeight: "100vh",
       }}
@@ -200,7 +288,14 @@ const ActualizarProveedor = () => {
           }}
         >
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
-            <Title level={2} style={{ color: colors.primary, margin: 0 }}>
+            <Title
+              level={2}
+              style={{
+                color: colors.primary,
+                margin: 0,
+                fontSize: isMobile ? "20px" : "24px",
+              }}
+            >
               <EditOutlined style={{ marginRight: "12px" }} />
               Actualizar Proveedor
             </Title>
@@ -238,7 +333,7 @@ const ActualizarProveedor = () => {
                 digitoverificacion_proveedor: "",
               }}
             >
-              <Row gutter={24}>
+              <Row gutter={[16, 8]}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     label={
@@ -255,7 +350,11 @@ const ActualizarProveedor = () => {
                       },
                     ]}
                   >
-                    <Input placeholder="ID/NIT" maxLength={9} disabled={true} />
+                    <Input
+                      placeholder="ID/NIT"
+                      maxLength={15}
+                      disabled={true}
+                    />
                   </Form.Item>
                 </Col>
 
@@ -284,7 +383,7 @@ const ActualizarProveedor = () => {
                 </Col>
               </Row>
 
-              <Row gutter={24}>
+              <Row gutter={[16, 8]}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     label={
@@ -299,11 +398,27 @@ const ActualizarProveedor = () => {
                         required: true,
                         message: "Por favor ingrese el nombre del proveedor",
                       },
+                      {
+                        pattern: validations.nombreProveedor,
+                        message: "El nombre contiene caracteres no permitidos",
+                      },
+                      {
+                        validator: (_, value) => {
+                          if (!value || !contieneCaracteresProhibidos(value)) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(
+                            new Error(
+                              "El nombre contiene caracteres prohibidos como < > ; , } { :"
+                            )
+                          );
+                        },
+                      },
                     ]}
                   >
                     <Input
                       placeholder="Ingrese nombre"
-                      maxLength={25}
+                      maxLength={50}
                       disabled={submitting}
                     />
                   </Form.Item>
@@ -318,17 +433,36 @@ const ActualizarProveedor = () => {
                       </Space>
                     }
                     name="representante_proveedor"
+                    rules={[
+                      {
+                        pattern: validations.representante,
+                        message:
+                          "El representante contiene caracteres no permitidos",
+                      },
+                      {
+                        validator: (_, value) => {
+                          if (!value || !contieneCaracteresProhibidos(value)) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(
+                            new Error(
+                              "El representante contiene caracteres prohibidos como < > ; , } { :"
+                            )
+                          );
+                        },
+                      },
+                    ]}
                   >
                     <Input
                       placeholder="Ingrese representante"
-                      maxLength={25}
+                      maxLength={50}
                       disabled={submitting}
                     />
                   </Form.Item>
                 </Col>
               </Row>
 
-              <Row gutter={24}>
+              <Row gutter={[16, 8]}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     label={
@@ -401,16 +535,32 @@ const ActualizarProveedor = () => {
                 name="direccion_proveedor"
                 rules={[
                   { required: true, message: "Por favor ingrese la dirección" },
+                  {
+                    pattern: validations.direccion,
+                    message: "La dirección contiene caracteres no permitidos",
+                  },
+                  {
+                    validator: (_, value) => {
+                      if (!value || !contieneCaracteresProhibidos(value)) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(
+                        new Error(
+                          "La dirección contiene caracteres prohibidos como < > ; , } { :"
+                        )
+                      );
+                    },
+                  },
                 ]}
               >
                 <Input
                   placeholder="Ingrese dirección"
-                  maxLength={30}
+                  maxLength={100}
                   disabled={submitting}
                 />
               </Form.Item>
 
-              <Row gutter={24}>
+              <Row gutter={[16, 8]}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     label={
@@ -425,12 +575,18 @@ const ActualizarProveedor = () => {
                         required: true,
                         message: "Por favor ingrese el teléfono",
                       },
+                      {
+                        pattern: validations.telefono,
+                        message:
+                          "El teléfono debe contener entre 7 y 10 dígitos numéricos",
+                      },
                     ]}
                   >
                     <Input
                       placeholder="Ingrese teléfono"
-                      maxLength={13}
+                      maxLength={10}
                       disabled={submitting}
+                      inputMode="numeric"
                     />
                   </Form.Item>
                 </Col>
@@ -449,18 +605,34 @@ const ActualizarProveedor = () => {
                         type: "email",
                         message: "Por favor ingrese un email válido",
                       },
+                      {
+                        pattern: validations.email,
+                        message: "El formato del email no es válido",
+                      },
+                      {
+                        validator: (_, value) => {
+                          if (!value || !contieneCaracteresProhibidos(value)) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(
+                            new Error(
+                              "El email contiene caracteres prohibidos como < > ; , } { :"
+                            )
+                          );
+                        },
+                      },
                     ]}
                   >
                     <Input
                       placeholder="Ingrese email"
-                      maxLength={25}
+                      maxLength={50}
                       disabled={submitting}
                     />
                   </Form.Item>
                 </Col>
               </Row>
 
-              <Row gutter={24}>
+              <Row gutter={[16, 8]}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     label={
@@ -503,6 +675,7 @@ const ActualizarProveedor = () => {
                       precision={2}
                       disabled={submitting}
                       prefix="$"
+                      inputMode="decimal"
                     />
                   </Form.Item>
                 </Col>
@@ -515,6 +688,7 @@ const ActualizarProveedor = () => {
               <div
                 style={{
                   display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
                   justifyContent: "center",
                   gap: "16px",
                 }}
@@ -528,7 +702,8 @@ const ActualizarProveedor = () => {
                   style={{
                     backgroundColor: colors.primary,
                     borderColor: colors.primary,
-                    minWidth: "180px",
+                    minWidth: isMobile ? "100%" : "180px",
+                    marginBottom: isMobile ? "10px" : "0",
                   }}
                 >
                   Guardar Cambios
@@ -538,7 +713,9 @@ const ActualizarProveedor = () => {
                   icon={<CloseOutlined />}
                   size="large"
                   onClick={() => navigate("/proveedores")}
-                  style={{ minWidth: "120px" }}
+                  style={{
+                    minWidth: isMobile ? "100%" : "120px",
+                  }}
                   disabled={submitting}
                 >
                   Cancelar

@@ -122,6 +122,9 @@ const ProcesarPedido = () => {
 
   // Manejar cambio de cantidad
   const handleCantidadChange = (idProducto, idProveedor, cantidad) => {
+    // Ensure cantidad is a non-negative integer
+    const cantidadInt = Math.max(0, Number.parseInt(cantidad) || 0);
+
     setProductosConProveedores((prev) =>
       prev.map((prod) =>
         prod.id_producto === idProducto
@@ -129,7 +132,7 @@ const ProcesarPedido = () => {
               ...prod,
               proveedores: prod.proveedores.map((prov) =>
                 prov.id_proveedor === idProveedor
-                  ? { ...prov, cantidad: Number(cantidad) }
+                  ? { ...prov, cantidad: cantidadInt }
                   : prov
               ),
             }
@@ -166,9 +169,12 @@ const ProcesarPedido = () => {
 
     setSubmitting(true);
     try {
-      await axios.post("https://cimove-backend.onrender.com/api/ordenes/procesar-pedido", {
-        productos: payload,
-      });
+      await axios.post(
+        "https://cimove-backend.onrender.com/api/ordenes/procesar-pedido",
+        {
+          productos: payload,
+        }
+      );
 
       message.success({
         content: "Pedido procesado con éxito",
@@ -434,6 +440,14 @@ const ProcesarPedido = () => {
                             }
                             style={{ width: "100px" }}
                             disabled={submitting}
+                            precision={0}
+                            step={1}
+                            parser={(value) => {
+                              return value ? value.replace(/[^\d]/g, "") : "";
+                            }}
+                            formatter={(value) => {
+                              return `${value}`.replace(/[^\d]/g, "");
+                            }}
                           />
                         </Space>
                       </Card>

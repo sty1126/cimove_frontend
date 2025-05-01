@@ -69,7 +69,9 @@ const AnadirStock = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const sedesRes = await axios.get("https://cimove-backend.onrender.com/api/sedes");
+        const sedesRes = await axios.get(
+          "https://cimove-backend.onrender.com/api/sedes"
+        );
         setSedes(sedesRes.data);
       } catch (error) {
         console.error("Error al obtener sedes:", error);
@@ -135,6 +137,91 @@ const AnadirStock = () => {
 
   // Actualizar cantidad o stock mínimo/máximo
   const actualizarCantidad = (key, campo, valor) => {
+    // Si el campo es cantidad, validar que esté dentro de los límites
+    if (campo === "cantidad") {
+      const item = stockPorSede.find((item) => item.key === key);
+
+      // Validar que no sea mayor a 5000
+      if (valor > 5000) {
+        message.warning("La cantidad no puede ser mayor a 5.000 unidades");
+        valor = 5000;
+      }
+
+      // Si el producto ya existe en la sede, solo validamos que sea mayor a 1
+      if (item.existe) {
+        if (valor < 1) {
+          message.warning("La cantidad debe ser al menos 1");
+          valor = 1;
+        }
+      } else {
+        // Para productos nuevos, validar contra stock mínimo y máximo
+        const stockMin =
+          item.stockMinimo !== null ? Number(item.stockMinimo) : 0;
+        const stockMax =
+          item.stockMaximo !== null ? Number(item.stockMaximo) : 5000;
+
+        if (valor < Math.max(1, stockMin)) {
+          message.warning(
+            `La cantidad debe ser al menos ${Math.max(1, stockMin)}`
+          );
+          valor = Math.max(1, stockMin);
+        }
+
+        if (valor > stockMax) {
+          message.warning(
+            `La cantidad no puede ser mayor al stock máximo (${stockMax})`
+          );
+          valor = stockMax;
+        }
+      }
+    }
+
+    // Si el campo es stockMinimo, validar que sea menor o igual al stockMaximo
+    if (campo === "stockMinimo") {
+      const item = stockPorSede.find((item) => item.key === key);
+
+      // Validar que no sea mayor a 5000
+      if (valor > 5000) {
+        message.warning("El stock mínimo no puede ser mayor a 5.000 unidades");
+        valor = 5000;
+      }
+
+      // Validar que no sea mayor al stock máximo si existe
+      if (item.stockMaximo !== null && valor > Number(item.stockMaximo)) {
+        message.warning("El stock mínimo no puede ser mayor al stock máximo");
+        valor = item.stockMaximo;
+      }
+
+      // Actualizar la cantidad si es menor al stock mínimo
+      if (item.cantidad !== "" && Number(item.cantidad) < valor) {
+        actualizarCantidad(key, "cantidad", valor);
+        message.info(`La cantidad ha sido ajustada al stock mínimo (${valor})`);
+      }
+    }
+
+    // Si el campo es stockMaximo, validar que sea mayor o igual al stockMinimo
+    if (campo === "stockMaximo") {
+      const item = stockPorSede.find((item) => item.key === key);
+
+      // Validar que no sea mayor a 5000
+      if (valor > 5000) {
+        message.warning("El stock máximo no puede ser mayor a 5.000 unidades");
+        valor = 5000;
+      }
+
+      // Validar que no sea menor al stock mínimo si existe
+      if (item.stockMinimo !== null && valor < Number(item.stockMinimo)) {
+        message.warning("El stock máximo no puede ser menor al stock mínimo");
+        valor = item.stockMinimo;
+      }
+
+      // Actualizar la cantidad si es mayor al stock máximo
+      if (item.cantidad !== "" && Number(item.cantidad) > valor) {
+        actualizarCantidad(key, "cantidad", valor);
+        message.info(`La cantidad ha sido ajustada al stock máximo (${valor})`);
+      }
+    }
+
     setStockPorSede(
       stockPorSede.map((item) =>
         item.key === key ? { ...item, [campo]: valor } : item
@@ -168,6 +255,37 @@ const AnadirStock = () => {
 
     if (camposIncompletos) {
       message.warning("Complete todos los campos requeridos");
+      return;
+    }
+
+    // Validar que las cantidades estén dentro de los límites
+    const cantidadesInvalidas = stockPorSede.some((s) => {
+      // Validar que la cantidad sea al menos 1
+      if (Number(s.cantidad) < 1) return true;
+
+      // Validar que la cantidad no sea mayor a 5000
+      if (Number(s.cantidad) > 5000) return true;
+
+      // Para productos nuevos, validar contra stock mínimo y máximo
+      if (!s.existe) {
+        const stockMin = s.stockMinimo !== null ? Number(s.stockMinimo) : 0;
+        const stockMax = s.stockMaximo !== null ? Number(s.stockMaximo) : 5000;
+
+        // Validar que la cantidad esté entre el stock mínimo y máximo
+        if (Number(s.cantidad) < stockMin) return true;
+        if (Number(s.cantidad) > stockMax) return true;
+
+        // Validar que el stock mínimo sea menor o igual al stock máximo
+        if (stockMin > stockMax) return true;
+      }
+
+      return false;
+    });
+
+    if (cantidadesInvalidas) {
+      message.error(
+        "Hay cantidades que no cumplen con los límites establecidos"
+      );
       return;
     }
 
@@ -264,7 +382,8 @@ const AnadirStock = () => {
       render: (text, record) => (
         <InputNumber
           style={{ width: "100%" }}
-          min={0}
+          min={record.existe ? 1 : record.stockMinimo || 1}
+          max={record.existe ? 5000 : record.stockMaximo || 5000}
           value={text}
           onChange={(value) =>
             actualizarCantidad(record.key, "cantidad", value)
@@ -292,6 +411,7 @@ const AnadirStock = () => {
           <InputNumber
             style={{ width: "100%" }}
             min={0}
+            max={5000}
             value={text}
             onChange={(value) =>
               actualizarCantidad(record.key, "stockMinimo", value)
@@ -320,6 +440,7 @@ const AnadirStock = () => {
           <InputNumber
             style={{ width: "100%" }}
             min={1}
+            max={5000}
             value={text}
             onChange={(value) =>
               actualizarCantidad(record.key, "stockMaximo", value)

@@ -91,7 +91,10 @@ const CrearEmpleado = () => {
         telefono_usuario: values.telefono_empleado, // Usar el mismo teléfono para usuario
       };
 
-      await axios.post("https://cimove-backend.onrender.com/api/empleados", data);
+      await axios.post(
+        "https://cimove-backend.onrender.com/api/empleados",
+        data
+      );
 
       messageApi.success("Empleado creado correctamente");
 
@@ -128,10 +131,11 @@ const CrearEmpleado = () => {
   return (
     <div
       style={{
-        padding: "24px",
+        padding: "12px",
         backgroundColor: colors.background,
         minHeight: "100vh",
       }}
+      className="px-3 sm:px-6"
     >
       {contextHolder}
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
@@ -142,9 +146,14 @@ const CrearEmpleado = () => {
             borderRadius: "8px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
           }}
+          className="p-3 sm:p-6"
         >
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
-            <Title level={2} style={{ color: colors.primary, margin: 0 }}>
+            <Title
+              level={2}
+              style={{ color: colors.primary, margin: 0 }}
+              className="text-xl sm:text-2xl"
+            >
               <TeamOutlined style={{ marginRight: "12px" }} />
               Crear Empleado
             </Title>
@@ -185,8 +194,9 @@ const CrearEmpleado = () => {
               }
               style={{ marginBottom: "24px", borderRadius: "8px" }}
               headStyle={{ backgroundColor: "#f5f5f5" }}
+              className="p-3 sm:p-5"
             >
-              <Row gutter={24}>
+              <Row gutter={[24, 16]}>
                 <Col xs={24} md={8}>
                   <Form.Item
                     label={
@@ -200,6 +210,10 @@ const CrearEmpleado = () => {
                       {
                         required: true,
                         message: "Por favor ingrese el ID del empleado",
+                      },
+                      {
+                        pattern: /^\d+$/,
+                        message: "Solo se permiten números",
                       },
                     ]}
                   >
@@ -274,8 +288,9 @@ const CrearEmpleado = () => {
               }
               style={{ marginBottom: "24px", borderRadius: "8px" }}
               headStyle={{ backgroundColor: "#f5f5f5" }}
+              className="p-3 sm:p-5"
             >
-              <Row gutter={24}>
+              <Row gutter={[24, 16]}>
                 <Col xs={24} md={8}>
                   <Form.Item
                     label={
@@ -289,6 +304,15 @@ const CrearEmpleado = () => {
                       {
                         required: true,
                         message: "Por favor ingrese el nombre del empleado",
+                      },
+                      {
+                        pattern: /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/,
+                        message: "Solo se permiten letras, espacios y acentos",
+                      },
+                      {
+                        pattern: /^[^<>{};,:]+$/,
+                        message:
+                          "No se permiten caracteres especiales como < > ; , { } :",
                       },
                     ]}
                   >
@@ -310,6 +334,10 @@ const CrearEmpleado = () => {
                         required: true,
                         message: "Por favor ingrese el teléfono",
                       },
+                      {
+                        pattern: /^\d{7,10}$/,
+                        message: "El teléfono debe tener entre 7 y 10 dígitos",
+                      },
                     ]}
                   >
                     <Input placeholder="Ingrese teléfono" />
@@ -330,6 +358,11 @@ const CrearEmpleado = () => {
                         type: "email",
                         message: "Por favor ingrese un email válido",
                       },
+                      {
+                        pattern: /^[^<>{};,:]+$/,
+                        message:
+                          "No se permiten caracteres especiales como < > ; , { } :",
+                      },
                     ]}
                   >
                     <Input placeholder="Ingrese email personal" />
@@ -337,7 +370,7 @@ const CrearEmpleado = () => {
                 </Col>
               </Row>
 
-              <Row gutter={24}>
+              <Row gutter={[24, 16]}>
                 <Col xs={24} md={8}>
                   <Form.Item
                     label={
@@ -347,6 +380,13 @@ const CrearEmpleado = () => {
                       </Space>
                     }
                     name="cargo_empleado"
+                    rules={[
+                      {
+                        pattern: /^[^<>{};,:]+$/,
+                        message:
+                          "No se permiten caracteres especiales como < > ; , { } :",
+                      },
+                    ]}
                   >
                     <Input placeholder="Ingrese cargo" />
                   </Form.Item>
@@ -364,8 +404,9 @@ const CrearEmpleado = () => {
               }
               style={{ marginBottom: "24px", borderRadius: "8px" }}
               headStyle={{ backgroundColor: "#f5f5f5" }}
+              className="p-3 sm:p-5"
             >
-              <Row gutter={24}>
+              <Row gutter={[24, 16]}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     label={
@@ -383,6 +424,11 @@ const CrearEmpleado = () => {
                       {
                         type: "email",
                         message: "Por favor ingrese un email válido",
+                      },
+                      {
+                        pattern: /^[^<>{};,:]+$/,
+                        message:
+                          "No se permiten caracteres especiales como < > ; , { } :",
                       },
                     ]}
                   >
@@ -431,8 +477,9 @@ const CrearEmpleado = () => {
               }
               style={{ marginBottom: "24px", borderRadius: "8px" }}
               headStyle={{ backgroundColor: "#f5f5f5" }}
+              className="p-3 sm:p-5"
             >
-              <Row gutter={24}>
+              <Row gutter={[24, 16]}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     label={
@@ -489,7 +536,7 @@ const CrearEmpleado = () => {
               </Row>
             </Card>
 
-            <div style={{ textAlign: "center", marginTop: "24px" }}>
+            <div className="text-center mt-6 px-3 sm:px-0">
               <Button
                 type="primary"
                 htmlType="submit"
@@ -499,8 +546,8 @@ const CrearEmpleado = () => {
                 style={{
                   backgroundColor: colors.primary,
                   borderColor: colors.primary,
-                  minWidth: "200px",
                 }}
+                className="w-full sm:w-auto sm:min-w-[200px]"
               >
                 Crear Empleado
               </Button>

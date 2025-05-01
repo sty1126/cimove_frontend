@@ -66,13 +66,15 @@ const ActualizarEmpleado = () => {
       try {
         // Obtener datos del empleado y opciones para los selects
         const [empleadoRes, tiposRes, sedesRes] = await Promise.all([
-          fetch(`https://cimove-backend.onrender.com/api/empleados/${id}`).then((res) =>
+          fetch(`https://cimove-backend.onrender.com/api/empleados/${id}`).then(
+            (res) => res.json()
+          ),
+          fetch("https://cimove-backend.onrender.com/api/tipousuario").then(
+            (res) => res.json()
+          ),
+          fetch("https://cimove-backend.onrender.com/api/sedes").then((res) =>
             res.json()
           ),
-          fetch("https://cimove-backend.onrender.com/api/tipousuario").then((res) =>
-            res.json()
-          ),
-          fetch("https://cimove-backend.onrender.com/api/sedes").then((res) => res.json()),
         ]);
 
         // Procesar datos del empleado
@@ -151,10 +153,11 @@ const ActualizarEmpleado = () => {
   return (
     <div
       style={{
-        padding: "24px",
+        padding: "12px",
         backgroundColor: colors.background,
         minHeight: "100vh",
       }}
+      className="px-3 sm:px-6"
     >
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         {/* Botón de volver */}
@@ -173,9 +176,14 @@ const ActualizarEmpleado = () => {
             borderRadius: "8px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
           }}
+          className="p-3 sm:p-6"
         >
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
-            <Title level={2} style={{ color: colors.primary, margin: 0 }}>
+            <Title
+              level={2}
+              style={{ color: colors.primary, margin: 0 }}
+              className="text-xl sm:text-2xl"
+            >
               <EditOutlined style={{ marginRight: "12px" }} />
               Actualizar Empleado
             </Title>
@@ -189,7 +197,7 @@ const ActualizarEmpleado = () => {
           />
 
           <Form form={form} layout="vertical" onFinish={handleSubmit}>
-            <Row gutter={24}>
+            <Row gutter={[24, 16]}>
               <Col xs={24} md={12}>
                 <Form.Item
                   label={
@@ -203,6 +211,15 @@ const ActualizarEmpleado = () => {
                     {
                       required: true,
                       message: "Por favor ingrese el nombre del empleado",
+                    },
+                    {
+                      pattern: /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/,
+                      message: "Solo se permiten letras, espacios y acentos",
+                    },
+                    {
+                      pattern: /^[^<>{};,:]+$/,
+                      message:
+                        "No se permiten caracteres especiales como < > ; , { } :",
                     },
                   ]}
                 >
@@ -227,6 +244,11 @@ const ActualizarEmpleado = () => {
                       required: true,
                       message: "Por favor ingrese el cargo",
                     },
+                    {
+                      pattern: /^[^<>{};,:]+$/,
+                      message:
+                        "No se permiten caracteres especiales como < > ; , { } :",
+                    },
                   ]}
                 >
                   <Input placeholder="Ingrese cargo" disabled={submitting} />
@@ -234,7 +256,7 @@ const ActualizarEmpleado = () => {
               </Col>
             </Row>
 
-            <Row gutter={24}>
+            <Row gutter={[24, 16]}>
               <Col xs={24} md={12}>
                 <Form.Item
                   label={
@@ -248,6 +270,10 @@ const ActualizarEmpleado = () => {
                     {
                       required: true,
                       message: "Por favor ingrese el teléfono",
+                    },
+                    {
+                      pattern: /^\d{7,10}$/,
+                      message: "El teléfono debe tener entre 7 y 10 dígitos",
                     },
                   ]}
                 >
@@ -273,6 +299,11 @@ const ActualizarEmpleado = () => {
                       required: true,
                       message: "Por favor ingrese el email",
                     },
+                    {
+                      pattern: /^[^<>{};,:]+$/,
+                      message:
+                        "No se permiten caracteres especiales como < > ; , { } :",
+                    },
                   ]}
                 >
                   <Input placeholder="Ingrese email" disabled={submitting} />
@@ -280,7 +311,7 @@ const ActualizarEmpleado = () => {
               </Col>
             </Row>
 
-            <Row gutter={24}>
+            <Row gutter={[24, 16]}>
               <Col xs={24} md={12}>
                 <Form.Item
                   label={
@@ -298,6 +329,11 @@ const ActualizarEmpleado = () => {
                     {
                       required: true,
                       message: "Por favor ingrese el email de usuario",
+                    },
+                    {
+                      pattern: /^[^<>{};,:]+$/,
+                      message:
+                        "No se permiten caracteres especiales como < > ; , { } :",
                     },
                   ]}
                 >
@@ -322,6 +358,10 @@ const ActualizarEmpleado = () => {
                       required: true,
                       message: "Por favor ingrese el teléfono de usuario",
                     },
+                    {
+                      pattern: /^\d{7,10}$/,
+                      message: "El teléfono debe tener entre 7 y 10 dígitos",
+                    },
                   ]}
                 >
                   <Input
@@ -332,7 +372,7 @@ const ActualizarEmpleado = () => {
               </Col>
             </Row>
 
-            <Row gutter={24}>
+            <Row gutter={[24, 16]}>
               <Col xs={24} md={12}>
                 <Form.Item
                   label={
@@ -392,7 +432,7 @@ const ActualizarEmpleado = () => {
               </Col>
             </Row>
 
-            <Row gutter={24}>
+            <Row gutter={[24, 16]}>
               <Col xs={24} md={12}>
                 <Form.Item
                   label={
@@ -452,9 +492,7 @@ const ActualizarEmpleado = () => {
               style={{ margin: "12px 0 24px", borderColor: colors.light }}
             />
 
-            <div
-              style={{ display: "flex", justifyContent: "center", gap: "16px" }}
-            >
+            <div className="flex flex-col sm:flex-row justify-center gap-4 w-full max-w-md mx-auto">
               <Button
                 type="primary"
                 htmlType="submit"
@@ -464,8 +502,8 @@ const ActualizarEmpleado = () => {
                 style={{
                   backgroundColor: colors.primary,
                   borderColor: colors.primary,
-                  minWidth: "180px",
                 }}
+                className="w-full"
               >
                 Guardar Cambios
               </Button>
@@ -474,8 +512,8 @@ const ActualizarEmpleado = () => {
                 icon={<CloseOutlined />}
                 size="large"
                 onClick={() => navigate("/empleados")}
-                style={{ minWidth: "120px" }}
                 disabled={submitting}
+                className="w-full"
               >
                 Cancelar
               </Button>

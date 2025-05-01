@@ -51,6 +51,35 @@ const colors = {
   danger: "#C25F48", // Rojo más vibrante para peligro
 };
 
+// Validaciones para campos numéricos
+const validations = {
+  precioVenta: {
+    min: 100,
+    max: 50000000,
+    message: {
+      min: "El precio de venta no puede ser menor a $100",
+      max: "El precio de venta no puede superar $50.000.000",
+      lessThanCost: "El precio de venta no puede ser menor al costo de venta",
+    },
+  },
+  costoVenta: {
+    min: 0.01,
+    max: 50000000,
+    message: {
+      min: "El costo de venta debe ser mayor a $0",
+      max: "El costo de venta no puede superar $50.000.000",
+    },
+  },
+  iva: {
+    min: 0,
+    max: 100,
+    message: {
+      min: "El IVA no puede ser negativo",
+      max: "El IVA no puede ser mayor a 100%",
+    },
+  },
+};
+
 const ActualizarProducto = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -61,6 +90,19 @@ const ActualizarProducto = () => {
   const [margenUtilidad, setMargenUtilidad] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [producto, setProducto] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Detectar cambios en el tamaño de la pantalla
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -129,23 +171,114 @@ const ActualizarProducto = () => {
   // Manejar cambios en precio o costo
   const handlePrecioChange = (value) => {
     const costoVenta = form.getFieldValue("costoventa_producto") || 0;
+
+    // Validar que el precio no sea menor al costo
+    if (value < costoVenta) {
+      message.warning(validations.precioVenta.message.lessThanCost);
+    }
+
     calcularMargen(value || 0, costoVenta);
   };
 
   const handleCostoChange = (value) => {
     const precioVenta = form.getFieldValue("precioventaact_producto") || 0;
+
+    // Validar que el costo no sea mayor al precio
+    if (value > precioVenta && precioVenta > 0) {
+      message.warning(validations.precioVenta.message.lessThanCost);
+    }
+
     calcularMargen(precioVenta, value || 0);
+  };
+
+  // Validar precio de venta
+  const validarPrecioVenta = (_, value) => {
+    if (value === undefined || value === null) {
+      return Promise.reject(new Error("El precio de venta es requerido"));
+    }
+
+    if (typeof value !== "number") {
+      return Promise.reject(new Error("El precio de venta debe ser un número"));
+    }
+
+    if (value < validations.precioVenta.min) {
+      return Promise.reject(new Error(validations.precioVenta.message.min));
+    }
+
+    if (value > validations.precioVenta.max) {
+      return Promise.reject(new Error(validations.precioVenta.message.max));
+    }
+
+    const costoVenta = form.getFieldValue("costoventa_producto");
+    if (costoVenta && value < costoVenta) {
+      return Promise.reject(
+        new Error(validations.precioVenta.message.lessThanCost)
+      );
+    }
+
+    return Promise.resolve();
+  };
+
+  // Validar costo de venta
+  const validarCostoVenta = (_, value) => {
+    if (value === undefined || value === null) {
+      return Promise.reject(new Error("El costo de venta es requerido"));
+    }
+
+    if (typeof value !== "number") {
+      return Promise.reject(new Error("El costo de venta debe ser un número"));
+    }
+
+    if (value < validations.costoVenta.min) {
+      return Promise.reject(new Error(validations.costoVenta.message.min));
+    }
+
+    if (value > validations.costoVenta.max) {
+      return Promise.reject(new Error(validations.costoVenta.message.max));
+    }
+
+    return Promise.resolve();
+  };
+
+  // Validar IVA
+  const validarIVA = (_, value) => {
+    if (value === undefined || value === null) {
+      return Promise.reject(new Error("El IVA es requerido"));
+    }
+
+    if (typeof value !== "number") {
+      return Promise.reject(new Error("El IVA debe ser un número"));
+    }
+
+    if (value < validations.iva.min) {
+      return Promise.reject(new Error(validations.iva.message.min));
+    }
+
+    if (value > validations.iva.max) {
+      return Promise.reject(new Error(validations.iva.message.max));
+    }
+
+    return Promise.resolve();
   };
 
   // Enviar formulario
   const handleSubmit = async (values) => {
+    // Validar que el precio sea mayor al costo
+    if (values.precioventaact_producto < values.costoventa_producto) {
+      message.error(validations.precioVenta.message.lessThanCost);
+      return;
+    }
+
     setSubmitting(true);
     try {
       // Convertir IVA de porcentaje a decimal
       values.valoriva_producto = values.valoriva_producto / 100;
 
       // Enviar actualización
-      await axios.put(`https://cimove-backend.onrender.com/api/productos/${id}`, values);
+      await axios.put(
+        `https://cimove-backend.onrender.com/api/productos/${id}`,
+        values
+      );
 
       // Mostrar modal de éxito
       setModalVisible(true);
@@ -181,7 +314,7 @@ const ActualizarProducto = () => {
   return (
     <div
       style={{
-        padding: "24px",
+        padding: isMobile ? "12px" : "24px",
         backgroundColor: colors.background,
         minHeight: "100vh",
       }}
@@ -205,7 +338,14 @@ const ActualizarProducto = () => {
           }}
         >
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
-            <Title level={2} style={{ color: colors.primary, margin: 0 }}>
+            <Title
+              level={2}
+              style={{
+                color: colors.primary,
+                margin: 0,
+                fontSize: isMobile ? "20px" : "24px",
+              }}
+            >
               <ShoppingOutlined style={{ marginRight: "12px" }} />
               Actualizar Producto
             </Title>
@@ -219,7 +359,7 @@ const ActualizarProducto = () => {
           />
 
           <Form form={form} layout="vertical" onFinish={handleSubmit}>
-            <Row gutter={24}>
+            <Row gutter={[16, 8]}>
               <Col xs={24} md={12}>
                 <Form.Item
                   label={
@@ -234,11 +374,16 @@ const ActualizarProducto = () => {
                       required: true,
                       message: "Por favor ingrese el nombre del producto",
                     },
+                    {
+                      max: 35,
+                      message: "El nombre no puede exceder los 35 caracteres",
+                    },
                   ]}
                 >
                   <Input
                     placeholder="Ingrese el nombre del producto"
                     disabled={submitting}
+                    maxLength={35}
                   />
                 </Form.Item>
               </Col>
@@ -298,7 +443,7 @@ const ActualizarProducto = () => {
               />
             </Form.Item>
 
-            <Row gutter={24}>
+            <Row gutter={[16, 8]}>
               <Col xs={24} md={8}>
                 <Form.Item
                   label={
@@ -313,16 +458,26 @@ const ActualizarProducto = () => {
                       required: true,
                       message: "Por favor ingrese el precio de venta",
                     },
+                    {
+                      validator: validarPrecioVenta,
+                    },
                   ]}
+                  tooltip="Debe ser mayor a $100 y no puede superar $50.000.000. Debe ser mayor al costo de venta."
                 >
                   <InputNumber
                     style={{ width: "100%" }}
                     placeholder="Precio de venta"
-                    min={0}
+                    min={validations.precioVenta.min}
+                    max={validations.precioVenta.max}
                     precision={2}
                     prefix="$"
                     onChange={handlePrecioChange}
                     disabled={submitting}
+                    inputMode="decimal"
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                   />
                 </Form.Item>
               </Col>
@@ -341,16 +496,26 @@ const ActualizarProducto = () => {
                       required: true,
                       message: "Por favor ingrese el costo de venta",
                     },
+                    {
+                      validator: validarCostoVenta,
+                    },
                   ]}
+                  tooltip="Debe ser mayor a $0 y no puede superar $50.000.000"
                 >
                   <InputNumber
                     style={{ width: "100%" }}
                     placeholder="Costo de venta"
-                    min={0}
+                    min={validations.costoVenta.min}
+                    max={validations.costoVenta.max}
                     precision={2}
                     prefix="$"
                     onChange={handleCostoChange}
                     disabled={submitting}
+                    inputMode="decimal"
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                   />
                 </Form.Item>
               </Col>
@@ -373,6 +538,10 @@ const ActualizarProducto = () => {
                     prefix="$"
                     value={margenUtilidad}
                     precision={2}
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                   />
                 </Form.Item>
               </Col>
@@ -391,16 +560,21 @@ const ActualizarProducto = () => {
                   required: true,
                   message: "Por favor ingrese el valor del IVA",
                 },
+                {
+                  validator: validarIVA,
+                },
               ]}
+              tooltip="Debe estar entre 0% y 100%"
             >
               <InputNumber
                 style={{ width: "100%" }}
                 placeholder="Ingrese el porcentaje de IVA"
-                min={0}
-                max={100}
-                precision={2}
+                min={validations.iva.min}
+                max={validations.iva.max}
+                precision={0}
                 suffix="%"
                 disabled={submitting}
+                inputMode="numeric"
               />
             </Form.Item>
 
@@ -409,7 +583,12 @@ const ActualizarProducto = () => {
             />
 
             <div
-              style={{ display: "flex", justifyContent: "center", gap: "16px" }}
+              style={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+                justifyContent: "center",
+                gap: "16px",
+              }}
             >
               <Button
                 type="primary"
@@ -420,7 +599,8 @@ const ActualizarProducto = () => {
                 style={{
                   backgroundColor: colors.primary,
                   borderColor: colors.primary,
-                  minWidth: "150px",
+                  minWidth: isMobile ? "100%" : "150px",
+                  marginBottom: isMobile ? "10px" : "0",
                 }}
               >
                 Guardar Cambios
@@ -430,7 +610,9 @@ const ActualizarProducto = () => {
                 icon={<CloseOutlined />}
                 size="large"
                 onClick={() => navigate("/inventario")}
-                style={{ minWidth: "120px" }}
+                style={{
+                  minWidth: isMobile ? "100%" : "120px",
+                }}
                 disabled={submitting}
               >
                 Cancelar

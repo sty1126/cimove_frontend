@@ -65,8 +65,6 @@ const colors = {
   danger: "#C25F48", // Rojo más vibrante para peligro
 };
 
-
-
 const FacturacionProveedor = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("facturas");
@@ -118,7 +116,9 @@ const FacturacionProveedor = () => {
   const fetchOrdenes = async () => {
     setLoadingOrdenes(true);
     try {
-      const res = await axios.get("https://cimove-backend.onrender.com/api/ordenes");
+      const res = await axios.get(
+        "https://cimove-backend.onrender.com/api/ordenes"
+      );
       setOrdenes(res.data);
     } catch (error) {
       console.error("Error al obtener órdenes de compra:", error);
@@ -131,7 +131,9 @@ const FacturacionProveedor = () => {
   // Obtener proveedores
   const fetchProveedores = async () => {
     try {
-      const res = await axios.get("https://cimove-backend.onrender.com/api/proveedores/all");
+      const res = await axios.get(
+        "https://cimove-backend.onrender.com/api/proveedores/all"
+      );
       setProveedores(res.data);
     } catch (error) {
       console.error("Error al obtener proveedores:", error);
@@ -141,10 +143,9 @@ const FacturacionProveedor = () => {
 
   //Crear nueva factura
 
-    const handleNewFactura = () => {
-      navigate("/nueva-Factura-proveedor");  
-    };
-  
+  const handleNewFactura = () => {
+    navigate("/nueva-Factura-proveedor");
+  };
 
   // Formatear moneda
   const formatCurrency = (value) => {
@@ -423,19 +424,36 @@ const FacturacionProveedor = () => {
               }}
             />
           </Tooltip>
-          <Tooltip title="Registrar abono">
-  <Button
-    type="primary"
-    shape="circle"
-    icon={<DollarOutlined />}
-    size="small"
-    onClick={() => navigate(`/registro-abono/${record.id_facturaproveedor}`)}
-    style={{
-      backgroundColor: colors.success,
-      borderColor: colors.success,
-    }}
-  />
-</Tooltip>
+          <Tooltip
+            title={
+              record.monto_facturaproveedor - record.total_abonado <= 0
+                ? "Factura completamente pagada"
+                : "Registrar abono"
+            }
+          >
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<DollarOutlined />}
+              size="small"
+              onClick={() =>
+                navigate(`/registro-abono/${record.id_facturaproveedor}`)
+              }
+              style={{
+                backgroundColor:
+                  record.monto_facturaproveedor - record.total_abonado <= 0
+                    ? "#d9d9d9"
+                    : colors.success,
+                borderColor:
+                  record.monto_facturaproveedor - record.total_abonado <= 0
+                    ? "#d9d9d9"
+                    : colors.success,
+              }}
+              disabled={
+                record.monto_facturaproveedor - record.total_abonado <= 0
+              }
+            />
+          </Tooltip>
 
           <Tooltip title="Generar PDF">
             <Button
@@ -612,7 +630,7 @@ const FacturacionProveedor = () => {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={handleNewFactura} 
+              onClick={handleNewFactura}
               style={{
                 backgroundColor: colors.primary,
                 borderColor: colors.primary,

@@ -33,7 +33,6 @@ import {
   BankOutlined,
   TeamOutlined,
   IdcardOutlined,
-  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
@@ -82,7 +81,9 @@ const ListaEmpleados = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("https://cimove-backend.onrender.com/api/empleados/");
+      const res = await axios.get(
+        "https://cimove-backend.onrender.com/api/empleados/"
+      );
       setEmpleados(res.data);
       setFilteredData(res.data);
 
@@ -224,12 +225,13 @@ const ListaEmpleados = () => {
       title: "ID",
       dataIndex: "id_empleado",
       sorter: (a, b) => a.id_empleado - b.id_empleado,
-      width: 100,
+      width: 80,
       render: (id) => (
         <Text strong style={{ color: colors.primary }}>
-          {id}
+          #{id}
         </Text>
       ),
+      responsive: ["md"],
     },
     {
       title: "Empleado",
@@ -240,8 +242,9 @@ const ListaEmpleados = () => {
           <Avatar
             style={{
               backgroundColor: getRoleColor(record.descripcion_tipousuario),
-              marginRight: 12,
+              marginRight: 8,
             }}
+            size={{ xs: 32, sm: 40 }}
           >
             {getInitials(text)}
           </Avatar>
@@ -411,10 +414,11 @@ const ListaEmpleados = () => {
   return (
     <div
       style={{
-        padding: "24px",
+        padding: "12px",
         backgroundColor: colors.background,
         minHeight: "100vh",
       }}
+      className="px-3 sm:px-6 md:px-8 lg:px-24"
     >
       <Card
         bordered={false}
@@ -457,12 +461,15 @@ const ListaEmpleados = () => {
             flexWrap: "wrap",
             gap: "12px",
             marginBottom: "24px",
+            width: "100%",
           }}
         >
           <Card
             size="small"
             style={{
-              width: "220px",
+              width: "100%",
+              maxWidth: "220px",
+              flex: "1 1 220px",
               borderRadius: "8px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
               borderLeft: `4px solid ${colors.primary}`,
@@ -513,14 +520,14 @@ const ListaEmpleados = () => {
 
         <div style={{ marginBottom: 16 }}>
           <Row gutter={[16, 16]}>
-            <Col xs={24} sm={12} md={6}>
+            <Col xs={24} sm={12} md={6} lg={6}>
               <Input
                 placeholder="Buscar por ID"
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
                 allowClear
                 prefix={<FilterOutlined style={{ color: colors.primary }} />}
-                style={{ borderRadius: "6px" }}
+                style={{ borderRadius: "6px", width: "100%" }}
               />
             </Col>
             <Col xs={24} sm={12} md={6}>
@@ -611,9 +618,12 @@ const ListaEmpleados = () => {
           pagination={{
             ...tableParams.pagination,
             style: { marginRight: "16px" },
+            size: "small",
+            responsive: true,
           }}
-          scroll={{ x: 1000 }}
+          scroll={{ x: "max-content" }}
           style={{ marginTop: "0" }}
+          size="small"
         />
       </Card>
     </div>

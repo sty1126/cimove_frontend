@@ -82,12 +82,13 @@ const Inventario = () => {
       title: "ID",
       dataIndex: "id_producto",
       sorter: (a, b) => a.id_producto - b.id_producto,
-      width: 80,
+      width: 70,
       render: (id) => (
         <Text strong style={{ color: colors.primary }}>
           #{id}
         </Text>
       ),
+      responsive: ["md"],
     },
     {
       title: "Categoría",
@@ -117,14 +118,15 @@ const Inventario = () => {
       title: "Nombre",
       dataIndex: "nombre_producto",
       sorter: (a, b) => a.nombre_producto.localeCompare(b.nombre_producto),
+      ellipsis: true,
       render: (text, record) => (
         <div style={{ display: "flex", alignItems: "center" }}>
           <Avatar
             shape="square"
-            size={40}
+            size={{ xs: 32, sm: 40 }}
             style={{
               backgroundColor: getProductColor(record.id_producto),
-              marginRight: 12,
+              marginRight: 8,
             }}
             icon={<InboxOutlined style={{ color: "#fff" }} />}
           />
@@ -134,8 +136,8 @@ const Inventario = () => {
             </Text>
             <div>
               <Text type="secondary" style={{ fontSize: "12px" }}>
-                {record.descripcion_producto?.substring(0, 30)}
-                {record.descripcion_producto?.length > 30 ? "..." : ""}
+                {record.descripcion_producto?.substring(0, 20)}
+                {record.descripcion_producto?.length > 20 ? "..." : ""}
               </Text>
             </div>
           </div>
@@ -444,10 +446,11 @@ const Inventario = () => {
   return (
     <div
       style={{
-        padding: "24px",
+        padding: "12px",
         backgroundColor: colors.background,
         minHeight: "100vh",
       }}
+      className="px-3 sm:px-6 md:px-8 lg:px-24"
     >
       <Card
         bordered={false}
@@ -491,12 +494,15 @@ const Inventario = () => {
             flexWrap: "wrap",
             gap: "12px",
             marginBottom: "24px",
+            width: "100%",
           }}
         >
           <Card
             size="small"
             style={{
-              width: "220px",
+              width: "100%",
+              maxWidth: "220px",
+              flex: "1 1 220px",
               borderRadius: "8px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
               borderLeft: `4px solid ${colors.primary}`,
@@ -512,7 +518,9 @@ const Inventario = () => {
           <Card
             size="small"
             style={{
-              width: "220px",
+              width: "100%",
+              maxWidth: "220px",
+              flex: "1 1 220px",
               borderRadius: "8px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
               borderLeft: `4px solid ${colors.secondary}`,
@@ -528,7 +536,9 @@ const Inventario = () => {
           <Card
             size="small"
             style={{
-              width: "220px",
+              width: "100%",
+              maxWidth: "220px",
+              flex: "1 1 220px",
               borderRadius: "8px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
               borderLeft: `4px solid ${colors.warning}`,
@@ -544,7 +554,9 @@ const Inventario = () => {
           <Card
             size="small"
             style={{
-              width: "220px",
+              width: "100%",
+              maxWidth: "220px",
+              flex: "1 1 220px",
               borderRadius: "8px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
               borderLeft: `4px solid ${colors.accent}`,
@@ -565,17 +577,18 @@ const Inventario = () => {
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: "16px",
+            gap: "12px",
             justifyContent: "space-between",
+            marginBottom: "16px",
           }}
         >
           <div
             style={{
               display: "flex",
               flexWrap: "wrap",
-              gap: "12px",
-              flex: "1 1 500px",
-              maxWidth: "800px",
+              gap: "8px",
+              flex: "1 1 300px",
+              maxWidth: "100%",
             }}
           >
             <Select
@@ -625,7 +638,15 @@ const Inventario = () => {
             />
           </div>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "8px",
+              marginTop: "8px",
+              justifyContent: "flex-end",
+            }}
+          >
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -691,11 +712,13 @@ const Inventario = () => {
           pagination={{
             ...tableParams.pagination,
             style: { marginRight: "16px" },
+            responsive: true,
+            size: "small",
           }}
-          scroll={{ x: 1000 }}
+          scroll={{ x: "max-content" }}
           expandable={{
             expandedRowRender: (record) => (
-              <div style={{ padding: "12px 24px" }}>
+              <div style={{ padding: "12px 0" }}>
                 <Text type="secondary" style={{ fontSize: "14px" }}>
                   {record.descripcion_producto || "Sin descripción disponible"}
                 </Text>
@@ -704,6 +727,7 @@ const Inventario = () => {
             expandRowByClick: true,
           }}
           style={{ marginTop: "0" }}
+          size="small"
         />
       </Card>
 

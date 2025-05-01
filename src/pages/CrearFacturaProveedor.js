@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import {
   Form,
   InputNumber,
@@ -25,7 +27,9 @@ const CrearFacturaProveedor = () => {
 
   useEffect(() => {
     const fetchOrdenes = async () => {
-      const res = await axios.get("https://cimove-backend.onrender.com/api/ordenes");
+      const res = await axios.get(
+        "https://cimove-backend.onrender.com/api/ordenes"
+      );
       setOrdenes(res.data);
     };
     fetchOrdenes();
@@ -100,6 +104,7 @@ const CrearFacturaProveedor = () => {
     {
       title: "Producto",
       dataIndex: "nombre_producto",
+      ellipsis: true,
     },
     {
       title: "Cantidad",
@@ -108,9 +113,8 @@ const CrearFacturaProveedor = () => {
         <InputNumber
           min={1}
           value={record.cantidad}
-          onChange={(value) =>
-            handleProductoChange(value, record, "cantidad")
-          }
+          onChange={(value) => handleProductoChange(value, record, "cantidad")}
+          style={{ width: "100%" }}
         />
       ),
     },
@@ -121,9 +125,12 @@ const CrearFacturaProveedor = () => {
         <InputNumber
           min={0}
           value={record.precio_unitario}
-          onChange={(value) =>
-            handleProductoChange(value, record, "precio_unitario")
+          disabled={true}
+          formatter={(value) =>
+            `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
           }
+          parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+          style={{ width: "100%" }}
         />
       ),
     },
@@ -135,48 +142,73 @@ const CrearFacturaProveedor = () => {
   ];
 
   return (
-    <Card title="Crear Factura de Proveedor">
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
-        <Form.Item label="Orden de Compra" name="id_ordencompra" rules={[{ required: true }]}>
-          <Select
-            placeholder="Selecciona una orden"
-            onChange={handleOrdenSelect}
-            options={ordenes.map((orden) => ({
-              label: `OC-${orden.id_ordencompra} | ${orden.nombre_proveedor} | ${dayjs(orden.fecha_ordencompra).format("DD/MM/YYYY")}`,
-              value: orden.id_ordencompra,
-            }))}
-          />
-        </Form.Item>
-
-        <Form.Item label="Fecha de Factura" name="fecha_facturaproveedor" initialValue={fechaFactura}>
-          <DatePicker
-            format="YYYY-MM-DD"
-            value={fechaFactura}
-            onChange={(date) => setFechaFactura(date)}
-          />
-        </Form.Item>
-
-        {productos.length > 0 && (
-          <>
-            <Table
-              dataSource={productos}
-              columns={columns}
-              rowKey="id_producto"
-              pagination={false}
+    <div style={{ padding: "10px", maxWidth: "100%" }}>
+      <Card
+        title="Crear Factura de Proveedor"
+        style={{ width: "100%", overflowX: "auto" }}
+      >
+        <Form form={form} layout="vertical" onFinish={handleFinish}>
+          <Form.Item
+            label="Orden de Compra"
+            name="id_ordencompra"
+            rules={[{ required: true }]}
+          >
+            <Select
+              placeholder="Selecciona una orden"
+              onChange={handleOrdenSelect}
+              options={ordenes.map((orden) => ({
+                label: `OC-${orden.id_ordencompra} | ${
+                  orden.nombre_proveedor
+                } | ${dayjs(orden.fecha_ordencompra).format("DD/MM/YYYY")}`,
+                value: orden.id_ordencompra,
+              }))}
+              style={{ width: "100%" }}
             />
-            <h3 style={{ textAlign: "right", marginTop: "1rem" }}>
-              Total: ${totalFactura.toFixed(2)}
-            </h3>
-          </>
-        )}
+          </Form.Item>
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            Registrar Factura
-          </Button>
-        </Form.Item>
-      </Form>
-    </Card>
+          <Form.Item
+            label="Fecha de Factura"
+            name="fecha_facturaproveedor"
+            initialValue={fechaFactura}
+          >
+            <DatePicker
+              format="YYYY-MM-DD"
+              value={fechaFactura}
+              onChange={(date) => setFechaFactura(date)}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+
+          {productos.length > 0 && (
+            <div style={{ overflowX: "auto" }}>
+              <Table
+                dataSource={productos}
+                columns={columns}
+                rowKey="id_producto"
+                pagination={false}
+                scroll={{ x: "max-content" }}
+                size="small"
+                style={{ marginBottom: "20px" }}
+              />
+              <h3 style={{ textAlign: "right", marginTop: "1rem" }}>
+                Total: ${totalFactura.toFixed(2)}
+              </h3>
+            </div>
+          )}
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              style={{ width: "100%", maxWidth: "200px" }}
+            >
+              Registrar Factura
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
+    </div>
   );
 };
 

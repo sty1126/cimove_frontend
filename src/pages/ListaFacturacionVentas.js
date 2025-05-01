@@ -376,6 +376,47 @@ const ListaFacturacionVentas = () => {
     );
   };
 
+  // Renderizar métodos de pago
+  const renderMetodosPago = (metodos) => {
+    if (!metodos || metodos.length === 0) {
+      return (
+        <Empty
+          description="No hay métodos de pago"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      );
+    }
+
+    return (
+      <List
+        size="small"
+        dataSource={metodos}
+        renderItem={(item) => (
+          <List.Item>
+            <List.Item.Meta
+              avatar={
+                <Avatar
+                  shape="square"
+                  icon={<DollarOutlined />}
+                  style={{ backgroundColor: colors.accent }}
+                />
+              }
+              title={item.nombre_tipo_metodo_pago || "Método sin nombre"}
+              description={
+                <Text type="secondary">
+                  ID: <Text strong>{item.id_tipo_metodo_pago}</Text>
+                </Text>
+              }
+            />
+            <div>
+              <Text strong>{formatCurrency(item.monto)}</Text>
+            </div>
+          </List.Item>
+        )}
+      />
+    );
+  };
+
   // Renderizar información del cliente
   const renderInfoCliente = (cliente) => {
     if (!cliente) {
@@ -420,6 +461,7 @@ const ListaFacturacionVentas = () => {
           #{id}
         </Text>
       ),
+      responsive: ["md"],
     },
     {
       title: "Fecha",
@@ -432,6 +474,7 @@ const ListaFacturacionVentas = () => {
           {formatDate(fecha)}
         </div>
       ),
+      responsive: ["sm"],
     },
     {
       title: "Cliente",
@@ -542,6 +585,37 @@ const ListaFacturacionVentas = () => {
         { text: "Pendiente", value: "P" },
       ],
       onFilter: (value, record) => record.estado_factura === value,
+    },
+    {
+      title: "Métodos de Pago",
+      key: "metodos_pago",
+      render: (_, record) => {
+        const metodos = record.metodos_pago || [];
+        const cantidadMetodos = metodos.length;
+
+        if (cantidadMetodos === 0) {
+          return <Text type="secondary">Sin métodos de pago</Text>;
+        }
+
+        return (
+          <Popover
+            content={renderMetodosPago(metodos)}
+            title="Métodos de pago"
+            trigger="click"
+            placement="right"
+            overlayStyle={{ width: 300 }}
+          >
+            <Button
+              type="text"
+              size="small"
+              icon={<DollarOutlined />}
+              style={{ color: colors.primary }}
+            >
+              {cantidadMetodos} {cantidadMetodos === 1 ? "método" : "métodos"}
+            </Button>
+          </Popover>
+        );
+      },
     },
     {
       title: "Acciones",
@@ -808,7 +882,14 @@ const ListaFacturacionVentas = () => {
   ];
 
   return (
-    <div style={{ padding: "16px", backgroundColor: "#f0f2f5" }}>
+    <div
+      style={{
+        padding: "8px",
+        backgroundColor: "#f0f2f5",
+        minHeight: "100vh",
+      }}
+      className="px-2 sm:px-4 md:px-6 lg:px-16"
+    >
       <Card
         bordered={false}
         style={{
@@ -875,7 +956,7 @@ const ListaFacturacionVentas = () => {
             key="facturas"
           >
             {/* Tarjetas de resumen para Facturas */}
-            <Row gutter={[12, 12]} style={{ marginBottom: "16px" }}>
+            <Row gutter={[8, 8]} style={{ marginBottom: "16px" }}>
               <Col xs={12} sm={6}>
                 <Card
                   size="small"
@@ -884,6 +965,7 @@ const ListaFacturacionVentas = () => {
                     borderRadius: "6px",
                     boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
                     borderLeft: `3px solid ${colors.primary}`,
+                    height: "100%",
                   }}
                 >
                   <Statistic
@@ -904,6 +986,7 @@ const ListaFacturacionVentas = () => {
                     borderRadius: "6px",
                     boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
                     borderLeft: `3px solid ${colors.secondary}`,
+                    height: "100%",
                   }}
                 >
                   <Statistic
@@ -924,6 +1007,7 @@ const ListaFacturacionVentas = () => {
                     borderRadius: "6px",
                     boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
                     borderLeft: `3px solid ${colors.warning}`,
+                    height: "100%",
                   }}
                 >
                   <Statistic
@@ -944,6 +1028,7 @@ const ListaFacturacionVentas = () => {
                     borderRadius: "6px",
                     boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
                     borderLeft: `3px solid ${colors.success}`,
+                    height: "100%",
                   }}
                 >
                   <Statistic
@@ -959,7 +1044,7 @@ const ListaFacturacionVentas = () => {
             </Row>
 
             {/* Filtros para Facturas */}
-            <Row gutter={[12, 12]} style={{ marginBottom: "16px" }}>
+            <Row gutter={[8, 8]} style={{ marginBottom: "16px" }}>
               <Col xs={24} md={16}>
                 <Input
                   placeholder="Buscar por ID, cliente o email..."
@@ -994,18 +1079,22 @@ const ListaFacturacionVentas = () => {
               rowKey="id_factura"
               loading={loading}
               onChange={handleTableChange}
-              pagination={tableParams.pagination}
-              scroll={{ x: 1200 }}
-              size="middle"
+              pagination={{
+                ...tableParams.pagination,
+                size: "small",
+                responsive: true,
+              }}
+              scroll={{ x: "max-content" }}
+              size="small"
               expandable={{
                 expandedRowRender: (record) => (
                   <Card
                     size="small"
                     bordered={false}
-                    style={{ backgroundColor: "#f9f9f9" }}
+                    style={{ backgroundColor: "#f9f9f9", padding: "8px" }}
                   >
-                    <Row gutter={[16, 16]}>
-                      <Col span={24} md={12}>
+                    <Row gutter={[8, 16]}>
+                      <Col span={24} md={8}>
                         <Card
                           size="small"
                           title={
@@ -1026,7 +1115,28 @@ const ListaFacturacionVentas = () => {
                           {renderDetallesProductos(record.detalles)}
                         </Card>
                       </Col>
-                      <Col span={24} md={12}>
+                      <Col span={24} md={8}>
+                        <Card
+                          size="small"
+                          title={
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <DollarOutlined
+                                style={{
+                                  marginRight: 8,
+                                  color: colors.primary,
+                                }}
+                              />
+                              <span>Métodos de Pago</span>
+                            </div>
+                          }
+                          style={{ height: "100%" }}
+                        >
+                          {renderMetodosPago(record.metodos_pago)}
+                        </Card>
+                      </Col>
+                      <Col span={24} md={8}>
                         <Card
                           size="small"
                           title={

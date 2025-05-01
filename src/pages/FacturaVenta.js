@@ -130,6 +130,27 @@ const FacturaVenta = () => {
     setMetodosSeleccionados(nuevosMetodos);
   };
 
+  // Función para validar que solo se ingresen números
+  const validateNumberInput = (e) => {
+    const keyCode = e.keyCode || e.which;
+    const keyValue = String.fromCharCode(keyCode);
+    // Permitir solo dígitos (0-9)
+    if (!/^\d+$/.test(keyValue)) {
+      e.preventDefault();
+      return false;
+    }
+  };
+
+  // Función para manejar cambios en los campos de entrada numérica
+  const handleNumberInputChange = (e, index, field) => {
+    const value = e.target.value;
+    // Eliminar cualquier carácter que no sea un dígito
+    const cleanValue = value.replace(/[^\d]/g, "");
+
+    // Actualizar el estado con el valor limpio
+    handleMetodoChange(index, field, cleanValue);
+  };
+
   const handleMetodoChange = (index, field, value) => {
     const updatedMetodos = [...metodosSeleccionados];
     updatedMetodos[index][field] =
@@ -172,6 +193,7 @@ const FacturaVenta = () => {
 
     try {
       setLoading(true);
+
       const venta = {
         idCliente: clienteSeleccionado?.id_cliente || null,
         subtotal,
@@ -196,6 +218,9 @@ const FacturaVenta = () => {
             ? fechaGarantia.format("YYYY-MM-DD")
             : null,
       };
+
+      // 🔹 Aquí imprimes lo que se envía
+      console.log("Datos de la venta:", venta);
 
       const response = await axios.post(
         "https://cimove-backend.onrender.com/api/factura",
@@ -461,14 +486,16 @@ const FacturaVenta = () => {
                       style={{ marginBottom: 0 }}
                     >
                       <Input
-                        type="number"
                         value={metodo.monto}
                         onChange={(e) =>
-                          handleMetodoChange(index, "monto", e.target.value)
+                          handleNumberInputChange(e, index, "monto")
                         }
+                        onKeyPress={validateNumberInput}
                         prefix={<DollarOutlined />}
                         placeholder="Monto"
                         min={0}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                       />
                     </Form.Item>
                   </Col>
