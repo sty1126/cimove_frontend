@@ -22,6 +22,7 @@ import {
   InputNumber,
   Alert,
   Tooltip,
+  Statistic,
 } from "antd";
 import {
   ToolOutlined,
@@ -39,6 +40,10 @@ import {
   SaveOutlined,
   ClockCircleOutlined,
   SafetyCertificateOutlined,
+  PlusOutlined,
+  MinusCircleOutlined,
+  CloseCircleOutlined,
+  CreditCardOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import SeleccionarClientePorSede from "./SeleccionarClientePorSede";
@@ -60,6 +65,17 @@ const colors = {
   danger: "#C25F48", // Rojo más vibrante para peligro
 };
 
+// Validation utility functions
+const validarTextoSeguro = (texto) => {
+  if (!texto) return true;
+  return !/[<>{};]/.test(texto);
+};
+
+const validarNumeroTelefono = (numero) => {
+  if (!numero) return true;
+  return /^[0-9]{7,10}$/.test(numero);
+};
+
 const CrearServicioTecnico = () => {
   const [form] = Form.useForm();
   const [sedes, setSedes] = useState([]);
@@ -75,24 +91,27 @@ const CrearServicioTecnico = () => {
   const [abono, setAbono] = useState(0);
   const [modalExitoVisible, setModalExitoVisible] = useState(false);
 
+  // Estados para métodos de pago
+  const [metodosPago, setMetodosPago] = useState([]);
+  const [metodosSeleccionados, setMetodosSeleccionados] = useState([]);
+  const [pagoCompleto, setPagoCompleto] = useState(false);
+  const [faltante, setFaltante] = useState(0);
+
   const navigate = useNavigate();
 
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "https://cimove-backend.onrender.com/api/sedes/"
-        );
-        setSedes(response.data);
-
         setDataLoading(true);
-        const [resSedes, resProveedores] = await Promise.all([
+        const [resSedes, resProveedores, resMetodosPago] = await Promise.all([
           axios.get("https://cimove-backend.onrender.com/api/sedes/"),
           axios.get("https://cimove-backend.onrender.com/api/proveedores/all"),
+          axios.get("https://cimove-backend.onrender.com/api/tipometodopago"),
         ]);
         setSedes(resSedes.data);
         setProveedores(resProveedores.data);
+        setMetodosPago(resMetodosPago.data);
       } catch (error) {
         console.error("Error cargando datos:", error);
         message.error("Error al cargar datos iniciales");
@@ -101,21 +120,27 @@ const CrearServicioTecnico = () => {
       }
     };
 
-    const fetchProveedores = async () => {
-      try {
-        const response = await axios.get(
-          "https://cimove-backend.onrender.com/api/proveedores/all"
-        );
-        setProveedores(response.data);
-      } catch (error) {
-        console.error("Error cargando proveedores:", error);
-      }
-    };
-
-    fetchProveedores();
-
     fetchData();
   }, []);
+
+  // Calcular abono total a partir de los métodos de pago
+  useEffect(() => {
+    const montoTotalIngresado = metodosSeleccionados.reduce(
+      (acc, m) => acc + Number.parseFloat(m.monto || 0),
+      0
+    );
+    setAbono(montoTotalIngresado);
+
+    // Verificar si el abono es válido (no mayor al costo)
+    if (montoTotalIngresado > costoEstimado) {
+      message.warning("El abono no puede ser mayor al costo estimado");
+    }
+
+    // Calcular faltante para mostrar en la UI
+    const nuevoFaltante = 0; // Ya no hay faltante porque el abono es igual a la suma de métodos
+    setFaltante(nuevoFaltante);
+    setPagoCompleto(montoTotalIngresado <= costoEstimado); // Solo está completo si el abono no excede el costo
+  }, [metodosSeleccionados, costoEstimado]);
 
   // Función para manejar la selección de cliente
   const handleClienteSeleccionado = (cliente) => {
@@ -156,23 +181,108 @@ const CrearServicioTecnico = () => {
     }
   };
 
-  // Función para validar que el abono no sea mayor al costo
-  const validateAbono = (_, value) => {
-    if (value > costoEstimado) {
-      return Promise.reject(
-        new Error("El abono no puede ser mayor al costo estimado")
-      );
-    }
-    return Promise.resolve();
-  };
-
   // Función para validar que la fecha no sea anterior a hoy
   const disabledDate = (current) => {
     return current && current < dayjs().startOf("day");
   };
 
+  // Funciones para métodos de pago
+  const agregarMetodoPago = () => {
+    // Verificar que no haya más de 2 métodos de pago
+    if (metodosSeleccionados.length >= 2) {
+      message.warning("Solo se permiten hasta dos métodos de pago");
+      return;
+    }
+
+    setMetodosSeleccionados([
+      ...metodosSeleccionados,
+      { id: "", monto: 0, id_tipo: "", nombre: "" },
+    ]);
+  };
+
+  const eliminarMetodoPago = (index) => {
+    const nuevosMetodos = [...metodosSeleccionados];
+    nuevosMetodos.splice(index, 1);
+    setMetodosSeleccionados(nuevosMetodos);
+  };
+
+  // Función para validar que solo se ingresen números
+  const validateNumberInput = (e) => {
+    const keyCode = e.keyCode || e.which;
+    const keyValue = String.fromCharCode(keyCode);
+    // Permitir solo dígitos (0-9)
+    if (!/^\d+$/.test(keyValue)) {
+      e.preventDefault();
+      return false;
+    }
+  };
+
+  // Función para manejar cambios en los campos de entrada numérica
+  const handleNumberInputChange = (e, index, field) => {
+    const value = e.target.value;
+    // Eliminar cualquier carácter que no sea un dígito
+    const cleanValue = value.replace(/[^\d]/g, "");
+
+    // Verificar si el valor ha cambiado para evitar un bucle infinito
+    if (value !== cleanValue) {
+      e.target.value = cleanValue;
+    }
+
+    // Actualizar el estado con el valor limpio
+    handleMetodoChange(index, field, cleanValue);
+  };
+
+  const handleMetodoChange = (index, field, value) => {
+    const updatedMetodos = [...metodosSeleccionados];
+
+    if (field === "id") {
+      updatedMetodos[index].id = value;
+      updatedMetodos[index].id_tipo = value;
+
+      // Establecer el nombre del método de pago
+      const metodoPago = metodosPago.find(
+        (m) => m.id_tipometodopago === Number.parseInt(value)
+      );
+      if (metodoPago) {
+        updatedMetodos[index].nombre = metodoPago.nombre_tipometodopago;
+      }
+    } else {
+      updatedMetodos[index][field] = value;
+    }
+
+    setMetodosSeleccionados(updatedMetodos);
+  };
+
   // Función para enviar el formulario
   const handleSubmit = async (values) => {
+    // Validar que haya un abono
+    if (abono <= 0) {
+      message.error(
+        "Debe registrar al menos un método de pago con abono para crear el servicio técnico"
+      );
+      return;
+    }
+
+    // Validar métodos de pago
+    if (abono > 0) {
+      // Verificar que haya al menos un método de pago
+      if (metodosSeleccionados.length === 0) {
+        message.error(
+          "Debe registrar al menos un método de pago para el abono"
+        );
+        return;
+      }
+
+      // Verificar que todos los métodos tengan un tipo seleccionado
+      const metodosSinTipo = metodosSeleccionados.some((m) => !m.id_tipo);
+      if (metodosSinTipo) {
+        message.error(
+          "Todos los métodos de pago deben tener un tipo seleccionado"
+        );
+        return;
+      }
+    }
+
     try {
       setLoading(true);
 
@@ -199,6 +309,13 @@ const CrearServicioTecnico = () => {
             : null,
         numero_contacto_alternativo: values.numeroContactoAlternativo || "",
         autorizado: values.autorizado,
+        metodos_pago:
+          abono > 0
+            ? metodosSeleccionados.map((metodo) => ({
+                id_tipo: Number(metodo.id_tipo),
+                monto: Number(metodo.monto),
+              }))
+            : [],
       };
 
       await axios.post(
@@ -208,7 +325,10 @@ const CrearServicioTecnico = () => {
       setModalExitoVisible(true);
     } catch (error) {
       console.error("Error creando servicio técnico:", error);
-      message.error("Error al crear el servicio técnico");
+      message.error(
+        "Error al crear el servicio técnico: " +
+          (error.response?.data?.error || error.message)
+      );
     } finally {
       setLoading(false);
     }
@@ -219,6 +339,15 @@ const CrearServicioTecnico = () => {
     if (!id) return "";
     const sede = sedes.find((s) => s.id_sede === Number.parseInt(id));
     return sede ? sede.nombre_sede : "";
+  };
+
+  // Formatear moneda
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0,
+    }).format(value);
   };
 
   if (dataLoading) {
@@ -277,7 +406,6 @@ const CrearServicioTecnico = () => {
               aplicaProveedor: false,
               garantiaAplica: false,
               costo: 0,
-              abono: 0,
             }}
           >
             {/* Sección de Cliente y Sede */}
@@ -406,11 +534,26 @@ const CrearServicioTecnico = () => {
                         required: true,
                         message: "Por favor ingrese el nombre del servicio",
                       },
+                      {
+                        validator: (_, value) =>
+                          validarTextoSeguro(value)
+                            ? Promise.resolve()
+                            : Promise.reject(
+                                new Error(
+                                  "No se permiten símbolos como <, >, {, }, ;"
+                                )
+                              ),
+                      },
+                      {
+                        max: 100,
+                        message:
+                          "El nombre no puede exceder los 100 caracteres",
+                      },
                     ]}
                   >
                     <Input
                       placeholder="Ej: Reparación de pantalla"
-                      maxLength={50}
+                      maxLength={100}
                     />
                   </Form.Item>
                 </Col>
@@ -453,6 +596,16 @@ const CrearServicioTecnico = () => {
                     required: true,
                     message: "Por favor ingrese la descripción del servicio",
                   },
+                  {
+                    validator: (_, value) =>
+                      validarTextoSeguro(value)
+                        ? Promise.resolve()
+                        : Promise.reject(
+                            new Error(
+                              "No se permiten símbolos como <, >, {, }, ;"
+                            )
+                          ),
+                  },
                 ]}
               >
                 <TextArea
@@ -473,6 +626,18 @@ const CrearServicioTecnico = () => {
                       </Space>
                     }
                     name="claveDispositivo"
+                    rules={[
+                      {
+                        validator: (_, value) =>
+                          validarTextoSeguro(value)
+                            ? Promise.resolve()
+                            : Promise.reject(
+                                new Error(
+                                  "No se permiten símbolos como <, >, {, }, ;"
+                                )
+                              ),
+                      },
+                    ]}
                   >
                     <Input.Password placeholder="Clave del dispositivo (opcional)" />
                   </Form.Item>
@@ -487,10 +652,29 @@ const CrearServicioTecnico = () => {
                       </Space>
                     }
                     name="numeroContactoAlternativo"
+                    rules={[
+                      {
+                        validator: (_, value) =>
+                          !value || validarNumeroTelefono(value)
+                            ? Promise.resolve()
+                            : Promise.reject(
+                                new Error(
+                                  "El número debe tener entre 7 y 10 dígitos numéricos"
+                                )
+                              ),
+                      },
+                    ]}
                   >
                     <Input
                       placeholder="Número de contacto alternativo"
-                      maxLength={15}
+                      maxLength={10}
+                      onKeyPress={(e) => {
+                        const keyCode = e.keyCode || e.which;
+                        const keyValue = String.fromCharCode(keyCode);
+                        if (!/^\d+$/.test(keyValue)) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </Form.Item>
                 </Col>
@@ -536,39 +720,204 @@ const CrearServicioTecnico = () => {
                       onChange={(value) => setCostoEstimado(value || 0)}
                     />
                   </Form.Item>
+                  {costoEstimado > 0 && (
+                    <Alert
+                      message="Recomendación de abono"
+                      description={`Se recomienda un abono de al menos ${formatCurrency(
+                        costoEstimado * 0.5
+                      )} (50% del costo estimado).`}
+                      type="info"
+                      showIcon
+                      style={{ marginBottom: 16 }}
+                    />
+                  )}
                 </Col>
 
                 <Col xs={24} md={12}>
-                  <Form.Item
-                    label={
+                  <Statistic
+                    title={
                       <Space>
                         <DollarOutlined style={{ color: colors.primary }} />
-                        <Tooltip title="El abono no puede ser mayor al costo estimado">
-                          Abono ($)
+                        <Tooltip title="El abono se calcula automáticamente a partir de los métodos de pago">
+                          Abono Total
                         </Tooltip>
                       </Space>
                     }
-                    name="abono"
-                    rules={[
-                      { required: true, message: "Por favor ingrese el abono" },
-                      { validator: validateAbono },
-                    ]}
-                    dependencies={["costo"]}
-                  >
-                    <InputNumber
-                      style={{ width: "100%" }}
-                      min={0}
-                      max={costoEstimado}
-                      step={1000}
-                      formatter={(value) =>
-                        `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
-                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      onChange={(value) => setAbono(value || 0)}
-                    />
-                  </Form.Item>
+                    value={abono}
+                    precision={0}
+                    formatter={(value) => formatCurrency(value)}
+                    valueStyle={{
+                      color: abono > 0 ? colors.success : colors.text,
+                    }}
+                  />
                 </Col>
               </Row>
+
+              {/* Sección de Métodos de Pago */}
+              <div style={{ marginTop: "16px" }}>
+                <Divider orientation="left">
+                  <Space>
+                    <CreditCardOutlined style={{ color: colors.primary }} />
+                    Métodos de Pago
+                  </Space>
+                </Divider>
+
+                {metodosSeleccionados.length === 0 && (
+                  <Alert
+                    message="No hay métodos de pago seleccionados"
+                    description="Agregue al menos un método de pago para registrar un abono."
+                    type="info"
+                    showIcon
+                    style={{ marginBottom: 16 }}
+                  />
+                )}
+
+                {metodosSeleccionados.map((metodo, index) => (
+                  <div key={index} style={{ marginBottom: 16 }}>
+                    <Row gutter={16} align="middle">
+                      <Col span={10}>
+                        <Form.Item
+                          label="Tipo de pago"
+                          validateStatus={!metodo.id ? "error" : ""}
+                          help={!metodo.id ? "Seleccione un método" : ""}
+                          style={{ marginBottom: 0 }}
+                        >
+                          <Select
+                            value={metodo.id || undefined}
+                            onChange={(value) =>
+                              handleMetodoChange(index, "id", value)
+                            }
+                            placeholder="Seleccione un método"
+                            style={{ width: "100%" }}
+                          >
+                            {metodosPago.map((metodoPago) => {
+                              const yaSeleccionado = metodosSeleccionados.some(
+                                (m, i) =>
+                                  m.id === metodoPago.id_tipometodopago &&
+                                  i !== index
+                              );
+                              return (
+                                <Option
+                                  key={metodoPago.id_tipometodopago}
+                                  value={metodoPago.id_tipometodopago}
+                                  disabled={yaSeleccionado}
+                                >
+                                  {metodoPago.nombre_tipometodopago}
+                                </Option>
+                              );
+                            })}
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                      <Col span={10}>
+                        <Form.Item
+                          label="Monto"
+                          validateStatus={!metodo.monto ? "error" : ""}
+                          help={!metodo.monto ? "Ingrese un monto" : ""}
+                          style={{ marginBottom: 0 }}
+                        >
+                          <Input
+                            value={metodo.monto}
+                            onChange={(e) =>
+                              handleNumberInputChange(e, index, "monto")
+                            }
+                            onKeyPress={validateNumberInput}
+                            prefix={<DollarOutlined />}
+                            placeholder="Monto"
+                            min={0}
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={4} style={{ textAlign: "right" }}>
+                        <Button
+                          type="text"
+                          danger
+                          icon={<MinusCircleOutlined />}
+                          onClick={() => eliminarMetodoPago(index)}
+                        >
+                          Eliminar
+                        </Button>
+                      </Col>
+                    </Row>
+                  </div>
+                ))}
+
+                <Button
+                  type="dashed"
+                  onClick={agregarMetodoPago}
+                  style={{ width: "100%", marginTop: 16 }}
+                  icon={<PlusOutlined />}
+                  disabled={metodosSeleccionados.length >= 2}
+                >
+                  Agregar método de pago
+                </Button>
+
+                {/* Resumen de pago */}
+                <Row gutter={24} style={{ marginTop: 16 }}>
+                  <Col xs={24} md={8}>
+                    <Statistic
+                      title="Abono total"
+                      value={abono}
+                      precision={0}
+                      formatter={(value) => formatCurrency(value)}
+                    />
+                  </Col>
+                  <Col xs={24} md={8}>
+                    <Statistic
+                      title="Total ingresado"
+                      value={metodosSeleccionados.reduce(
+                        (sum, m) => sum + Number(m.monto || 0),
+                        0
+                      )}
+                      precision={0}
+                      valueStyle={{
+                        color: pagoCompleto ? colors.success : colors.danger,
+                      }}
+                      formatter={(value) => formatCurrency(value)}
+                    />
+                  </Col>
+                  <Col xs={24} md={8}>
+                    <Statistic
+                      title="Faltante"
+                      value={faltante}
+                      precision={0}
+                      valueStyle={{
+                        color: pagoCompleto ? colors.success : colors.danger,
+                      }}
+                      formatter={(value) => formatCurrency(value)}
+                      suffix={
+                        pagoCompleto ? (
+                          <CheckCircleOutlined />
+                        ) : (
+                          <CloseCircleOutlined />
+                        )
+                      }
+                    />
+                  </Col>
+                </Row>
+
+                {!pagoCompleto && metodosSeleccionados.length > 0 && (
+                  <Alert
+                    message="Pago incompleto"
+                    description="La suma de los métodos de pago no coincide con el valor del abono."
+                    type="warning"
+                    showIcon
+                    style={{ marginTop: 16 }}
+                  />
+                )}
+
+                {metodosSeleccionados.length > 0 && pagoCompleto && (
+                  <Alert
+                    message="Pago completo"
+                    description="El pago está listo para ser procesado."
+                    type="success"
+                    showIcon
+                    style={{ marginTop: 16 }}
+                  />
+                )}
+              </div>
             </Card>
 
             {/* Sección de Fechas */}
@@ -734,6 +1083,16 @@ const CrearServicioTecnico = () => {
               )}
             </Card>
 
+            {abono > costoEstimado && (
+              <Alert
+                message="Error en el abono"
+                description="El abono no puede ser mayor al costo estimado del servicio."
+                type="error"
+                showIcon
+                style={{ marginTop: 16, marginBottom: 16 }}
+              />
+            )}
+
             <div style={{ textAlign: "center", marginTop: "24px" }}>
               <Button
                 type="primary"
@@ -746,6 +1105,11 @@ const CrearServicioTecnico = () => {
                   borderColor: colors.primary,
                   minWidth: "200px",
                 }}
+                disabled={
+                  abono <= 0 ||
+                  (abono > 0 && metodosSeleccionados.length === 0) ||
+                  abono > costoEstimado
+                }
               >
                 Crear Servicio Técnico
               </Button>

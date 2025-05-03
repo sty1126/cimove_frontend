@@ -792,26 +792,34 @@ const ListaFacturacionVentas = () => {
     {
       title: "Financiero",
       key: "financiero",
-      render: (_, record) => (
-        <Space direction="vertical" size={0}>
-          <Text>
-            Costo:{" "}
-            <Text strong>{formatCurrency(record.costo_serviciotecnico)}</Text>
-          </Text>
-          <Text>
-            Abono:{" "}
-            <Text strong>{formatCurrency(record.abono_serviciotecnico)}</Text>
-          </Text>
-          {record.costo_serviciotecnico && record.abono_serviciotecnico && (
-            <Text type="secondary">
-              Saldo:{" "}
-              {formatCurrency(
-                record.costo_serviciotecnico - record.abono_serviciotecnico
-              )}
+      render: (_, record) => {
+        // Calculate total abono from payment methods
+        const totalAbono =
+          record.metodos_pago && record.metodos_pago.length > 0
+            ? record.metodos_pago.reduce(
+                (sum, metodo) => sum + (metodo.monto || 0),
+                0
+              )
+            : record.abono_serviciotecnico || 0;
+
+        return (
+          <Space direction="vertical" size={0}>
+            <Text>
+              Costo:{" "}
+              <Text strong>{formatCurrency(record.costo_serviciotecnico)}</Text>
             </Text>
-          )}
-        </Space>
-      ),
+            <Text>
+              Abono: <Text strong>{formatCurrency(totalAbono)}</Text>
+            </Text>
+            {record.costo_serviciotecnico && (
+              <Text type="secondary">
+                Saldo:{" "}
+                {formatCurrency(record.costo_serviciotecnico - totalAbono)}
+              </Text>
+            )}
+          </Space>
+        );
+      },
     },
     {
       title: "Estado",
@@ -1408,21 +1416,34 @@ const ListaFacturacionVentas = () => {
                             <div>
                               <Text strong>Abono:</Text>
                               <div>
-                                {formatCurrency(record.abono_serviciotecnico)}
+                                {formatCurrency(
+                                  record.metodos_pago &&
+                                    record.metodos_pago.length > 0
+                                    ? record.metodos_pago.reduce(
+                                        (sum, metodo) =>
+                                          sum + (metodo.monto || 0),
+                                        0
+                                      )
+                                    : record.abono_serviciotecnico || 0
+                                )}
                               </div>
                             </div>
-                            {record.costo_serviciotecnico &&
-                              record.abono_serviciotecnico && (
-                                <div>
-                                  <Text strong>Saldo pendiente:</Text>
-                                  <div>
-                                    {formatCurrency(
-                                      record.costo_serviciotecnico -
-                                        record.abono_serviciotecnico
-                                    )}
-                                  </div>
-                                </div>
-                              )}
+                            <div>
+                              <Text strong>Saldo pendiente:</Text>
+                              <div>
+                                {formatCurrency(
+                                  record.costo_serviciotecnico -
+                                    (record.metodos_pago &&
+                                    record.metodos_pago.length > 0
+                                      ? record.metodos_pago.reduce(
+                                          (sum, metodo) =>
+                                            sum + (metodo.monto || 0),
+                                          0
+                                        )
+                                      : record.abono_serviciotecnico || 0)
+                                )}
+                              </div>
+                            </div>
                             {record.total_factura && (
                               <div>
                                 <Text strong>Total factura:</Text>

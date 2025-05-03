@@ -24,6 +24,8 @@ import {
   Tooltip,
   Badge,
   Tag,
+  List,
+  Avatar,
 } from "antd";
 import {
   ToolOutlined,
@@ -43,6 +45,8 @@ import {
   SafetyCertificateOutlined,
   EditOutlined,
   RollbackOutlined,
+  CreditCardOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 
@@ -79,24 +83,53 @@ const ActualizarServicioTecnico = () => {
   const [costoEstimado, setCostoEstimado] = useState(0);
   const [abono, setAbono] = useState(0);
   const [modalExitoVisible, setModalExitoVisible] = useState(false);
+  const [servicioData, setServicioData] = useState(null);
+  const [metodosPago, setMetodosPago] = useState([]);
+  const [nuevoMetodoPago, setNuevoMetodoPago] = useState(null);
+  const [tiposMetodoPago, setTiposMetodoPago] = useState([]);
+  const [saldoPendiente, setSaldoPendiente] = useState(0);
 
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
       try {
         setDataLoading(true);
-        const [sedesRes, proveedoresRes, servicioRes] = await Promise.all([
-          axios.get("https://cimove-backend.onrender.com/api/sedes/"),
-          axios.get("https://cimove-backend.onrender.com/api/proveedores/all"),
-          axios.get(
-            `https://cimove-backend.onrender.com/api/serviciotecnico/${id}`
-          ),
-        ]);
+        const [sedesRes, proveedoresRes, servicioRes, tiposMetodoPagoRes] =
+          await Promise.all([
+            axios.get("https://cimove-backend.onrender.com/api/sedes/"),
+            axios.get(
+              "https://cimove-backend.onrender.com/api/proveedores/all"
+            ),
+            axios.get(
+              `https://cimove-backend.onrender.com/api/serviciotecnico/${id}`
+            ),
+            axios.get("https://cimove-backend.onrender.com/api/tipometodopago"),
+          ]);
 
         setSedes(sedesRes.data);
         setProveedores(proveedoresRes.data);
+        setTiposMetodoPago(tiposMetodoPagoRes.data);
 
         const servicio = servicioRes.data;
+        setServicioData(servicio);
+
+        // Establecer métodos de pago existentes
+        if (servicio.metodos_pago && servicio.metodos_pago.length > 0) {
+          setMetodosPago(servicio.metodos_pago);
+        }
+
+        // Calcular abono total a partir de los métodos de pago
+        const totalAbono =
+          servicio.metodos_pago && servicio.metodos_pago.length > 0
+            ? servicio.metodos_pago.reduce(
+                (sum, metodo) => sum + (metodo.monto || 0),
+                0
+              )
+            : servicio.abono_serviciotecnico || 0;
+
+        // Calcular saldo pendiente
+        const pendiente = servicio.costo_serviciotecnico - totalAbono;
+        setSaldoPendiente(pendiente);
 
         // Establecer información de sede
         const sede = sedesRes.data.find(
@@ -116,7 +149,7 @@ const ActualizarServicioTecnico = () => {
         );
         setAplicaGarantia(servicio.garantia_aplica_serviciotecnico);
         setCostoEstimado(servicio.costo_serviciotecnico);
-        setAbono(servicio.abono_serviciotecnico);
+        setAbono(totalAbono);
 
         // Establecer valores del formulario
         form.setFieldsValue({
@@ -139,7 +172,7 @@ const ActualizarServicioTecnico = () => {
           tipoDano: servicio.tipo_dano_serviciotecnico,
           claveDispositivo: servicio.clave_dispositivo_serviciotecnico,
           costo: servicio.costo_serviciotecnico,
-          abono: servicio.abono_serviciotecnico,
+          abono: totalAbono,
           garantiaAplica: servicio.garantia_aplica_serviciotecnico,
           fechaGarantia: servicio.fecha_garantia_serviciotecnico
             ? dayjs(servicio.fecha_garantia_serviciotecnico)
@@ -147,6 +180,7 @@ const ActualizarServicioTecnico = () => {
           numeroContactoAlternativo:
             servicio.numero_contacto_alternativo_servicio,
           autorizado: servicio.autorizado_serviciotecnico,
+          estadoTecnico: servicio.estadotecnico_serviciotecnico,
         });
       } catch (error) {
         console.error("Error cargando datos:", error);
@@ -158,6 +192,15 @@ const ActualizarServicioTecnico = () => {
 
     fetchData();
   }, [id, form]);
+
+  // Función para formatear moneda
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
 
   // Función para validar que el abono no sea mayor al costo
   const validateAbono = (_, value) => {
@@ -174,34 +217,114 @@ const ActualizarServicioTecnico = () => {
     return current && current < dayjs().startOf("day");
   };
 
+  // Función para manejar el nuevo método de pago
+  const handleNuevoMetodoPagoChange = (field, value) => {
+    setNuevoMetodoPago((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // Función para agregar el nuevo método de pago
+  const agregarNuevoMetodoPago = () => {
+    if (
+      !nuevoMetodoPago ||
+      !nuevoMetodoPago.id_tipometodopago ||
+      !nuevoMetodoPago.monto
+    ) {
+      message.error("Debe seleccionar un tipo de pago y especificar un monto");
+      return;
+    }
+
+    // Verificar que el monto no exceda el saldo pendiente
+    if (nuevoMetodoPago.monto > saldoPendiente) {
+      message.error("El monto no puede ser mayor al saldo pendiente");
+      return;
+    }
+
+    // Encontrar el nombre del tipo de método de pago
+    const tipoMetodo = tiposMetodoPago.find(
+      (t) => t.id_tipometodopago === Number(nuevoMetodoPago.id_tipometodopago)
+    );
+    const nombreTipo = tipoMetodo
+      ? tipoMetodo.nombre_tipometodopago
+      : "Desconocido";
+
+    const nuevoMetodo = {
+      id_tipo: Number(nuevoMetodoPago.id_tipometodopago),
+      nombre_tipo: nombreTipo,
+      monto: Number(nuevoMetodoPago.monto),
+      estado: "A",
+    };
+
+    // Actualizar métodos de pago
+    const nuevosMetodos = [...metodosPago, nuevoMetodo];
+    setMetodosPago(nuevosMetodos);
+
+    // Actualizar abono total
+    const nuevoAbono = nuevosMetodos.reduce(
+      (sum, metodo) => sum + (metodo.monto || 0),
+      0
+    );
+    setAbono(nuevoAbono);
+    form.setFieldsValue({ abono: nuevoAbono });
+
+    // Actualizar saldo pendiente
+    const nuevoPendiente = costoEstimado - nuevoAbono;
+    setSaldoPendiente(nuevoPendiente);
+
+    // Limpiar el formulario de nuevo método de pago
+    setNuevoMetodoPago(null);
+  };
+
   // Función para enviar el formulario
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
 
+      // Preparar nuevos métodos de pago (solo los que no existen en el servicio original)
+      const metodosOriginales = servicioData.metodos_pago || [];
+      const metodosOriginalesIds = metodosOriginales.map(
+        (m) => m.id_metodopago
+      );
+
+      const nuevosMetodosPago = metodosPago
+        .filter(
+          (m) =>
+            !m.id_metodopago || !metodosOriginalesIds.includes(m.id_metodopago)
+        )
+        .map((m) => ({
+          id_tipometodopago: m.id_tipo,
+          monto: m.monto,
+          estado: m.estado || "A",
+        }));
+
       const payload = {
-        id_cliente: values.idCliente,
-        id_sede: values.idSede,
-        id_proveedor: values.aplicaProveedor
+        id_sede_serviciotecnico: values.idSede,
+        id_proveedor_serviciotecnico: values.aplicaProveedor
           ? values.idProveedor
           : "PROV_TEMP_123",
-        nombre_servicio: values.nombreServicio,
-        descripcion_servicio: values.descripcionServicio,
-        fecha_servicio: values.fechaServicio.format("YYYY-MM-DD"),
-        fecha_entrega: values.fechaEntrega
+        id_cliente_serviciotecnico: values.idCliente,
+        nombre_serviciotecnico: values.nombreServicio,
+        descripcion_serviciotecnico: values.descripcionServicio,
+        fecha_entrega_serviciotecnico: values.fechaEntrega
           ? values.fechaEntrega.format("YYYY-MM-DD")
           : null,
-        tipo_dano: values.tipoDano,
-        clave_dispositivo: values.claveDispositivo || "",
-        costo: Number(values.costo),
-        abono: Number(values.abono),
-        garantia_aplica: values.garantiaAplica,
-        fecha_garantia:
+        tipo_dano_serviciotecnico: values.tipoDano,
+        clave_dispositivo_serviciotecnico: values.claveDispositivo || "",
+        costo_serviciotecnico: Number(values.costo),
+        abono_serviciotecnico: Number(values.abono),
+        garantia_aplica_serviciotecnico: values.garantiaAplica,
+        fecha_garantia_serviciotecnico:
           values.garantiaAplica && values.fechaGarantia
             ? values.fechaGarantia.format("YYYY-MM-DD")
             : null,
-        numero_contacto_alternativo: values.numeroContactoAlternativo || "",
+        numero_contacto_alternativo_servicio:
+          values.numeroContactoAlternativo || "",
         autorizado: values.autorizado,
+        estadotecnico_serviciotecnico: values.estadoTecnico,
+        estado_serviciotecnico: "A",
+        metodos_pago: nuevosMetodosPago,
       };
 
       await axios.put(
@@ -346,6 +469,36 @@ const ActualizarServicioTecnico = () => {
               />
             </Card>
 
+            {/* Sección de Estado del Servicio */}
+            <Card
+              title={
+                <Space>
+                  <InfoCircleOutlined style={{ color: colors.primary }} />
+                  <span>Estado del Servicio</span>
+                </Space>
+              }
+              style={{ marginBottom: "24px", borderRadius: "8px" }}
+              headStyle={{ backgroundColor: "#f5f5f5" }}
+            >
+              <Form.Item
+                label="Estado Técnico"
+                name="estadoTecnico"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor seleccione el estado del servicio",
+                  },
+                ]}
+              >
+                <Select placeholder="Seleccione el estado del servicio">
+                  <Option value="D">En Diagnóstico</Option>
+                  <Option value="C">Completado</Option>
+                  <Option value="P">Pendiente</Option>
+                  <Option value="X">Cancelado</Option>
+                </Select>
+              </Form.Item>
+            </Card>
+
             {/* Sección de Detalles del Servicio */}
             <Card
               title={
@@ -475,7 +628,7 @@ const ActualizarServicioTecnico = () => {
               headStyle={{ backgroundColor: "#f5f5f5" }}
             >
               <Row gutter={24}>
-                <Col xs={24} md={12}>
+                <Col xs={24} md={8}>
                   <Form.Item
                     label={
                       <Space>
@@ -499,42 +652,187 @@ const ActualizarServicioTecnico = () => {
                         `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                       }
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      onChange={(value) => setCostoEstimado(value || 0)}
+                      onChange={(value) => {
+                        setCostoEstimado(value || 0);
+                        // Recalcular saldo pendiente
+                        setSaldoPendiente(value - abono);
+                      }}
                     />
                   </Form.Item>
                 </Col>
 
-                <Col xs={24} md={12}>
+                <Col xs={24} md={8}>
                   <Form.Item
                     label={
                       <Space>
                         <DollarOutlined style={{ color: colors.primary }} />
-                        <Tooltip title="El abono no puede ser mayor al costo estimado">
+                        <Tooltip title="Abono total calculado de los métodos de pago">
                           Abono Total ($)
                         </Tooltip>
                       </Space>
                     }
                     name="abono"
-                    rules={[
-                      { required: true, message: "Por favor ingrese el abono" },
-                      { validator: validateAbono },
-                    ]}
-                    dependencies={["costo"]}
                   >
                     <InputNumber
                       style={{ width: "100%" }}
-                      min={0}
-                      max={costoEstimado}
-                      step={1000}
+                      readOnly
+                      disabled
                       formatter={(value) =>
                         `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                       }
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      onChange={(value) => setAbono(value || 0)}
                     />
                   </Form.Item>
                 </Col>
+
+                <Col xs={24} md={8}>
+                  <div style={{ marginBottom: "24px" }}>
+                    <div style={{ marginBottom: "8px" }}>
+                      <Text type="secondary">Saldo Pendiente</Text>
+                    </div>
+                    <Text
+                      strong
+                      style={{
+                        fontSize: "16px",
+                        color:
+                          saldoPendiente > 0 ? colors.danger : colors.success,
+                      }}
+                    >
+                      {formatCurrency(saldoPendiente)}
+                    </Text>
+                  </div>
+                </Col>
               </Row>
+
+              {/* Métodos de pago existentes */}
+              {metodosPago.length > 0 && (
+                <div style={{ marginBottom: "24px" }}>
+                  <Divider orientation="left">
+                    <Space>
+                      <CreditCardOutlined style={{ color: colors.primary }} />
+                      Métodos de Pago Registrados
+                    </Space>
+                  </Divider>
+
+                  <List
+                    size="small"
+                    dataSource={metodosPago}
+                    renderItem={(item) => (
+                      <List.Item>
+                        <List.Item.Meta
+                          avatar={
+                            <Avatar
+                              shape="square"
+                              icon={<CreditCardOutlined />}
+                              style={{ backgroundColor: colors.accent }}
+                            />
+                          }
+                          title={item.nombre_tipo}
+                          description={
+                            <Text type="secondary">
+                              ID: <Text strong>{item.id_tipo}</Text>
+                            </Text>
+                          }
+                        />
+                        <div>
+                          <Text strong>{formatCurrency(item.monto)}</Text>
+                        </div>
+                      </List.Item>
+                    )}
+                  />
+                </div>
+              )}
+
+              {/* Agregar nuevo método de pago */}
+              {saldoPendiente > 0 && (
+                <div style={{ marginTop: "16px" }}>
+                  <Divider orientation="left">
+                    <Space>
+                      <PlusOutlined style={{ color: colors.primary }} />
+                      Agregar Nuevo Abono
+                    </Space>
+                  </Divider>
+
+                  <Alert
+                    message="Puede agregar un nuevo abono ya que existe un saldo pendiente"
+                    type="info"
+                    showIcon
+                    style={{ marginBottom: "16px" }}
+                  />
+
+                  <Row gutter={16} align="middle">
+                    <Col span={10}>
+                      <Form.Item
+                        label="Tipo de pago"
+                        style={{ marginBottom: 0 }}
+                      >
+                        <Select
+                          placeholder="Seleccione un método"
+                          style={{ width: "100%" }}
+                          value={nuevoMetodoPago?.id_tipometodopago}
+                          onChange={(value) =>
+                            handleNuevoMetodoPagoChange(
+                              "id_tipometodopago",
+                              value
+                            )
+                          }
+                        >
+                          {tiposMetodoPago.map((tipo) => (
+                            <Option
+                              key={tipo.id_tipometodopago}
+                              value={tipo.id_tipometodopago}
+                            >
+                              {tipo.nombre_tipometodopago}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={10}>
+                      <Form.Item label="Monto" style={{ marginBottom: 0 }}>
+                        <InputNumber
+                          style={{ width: "100%" }}
+                          min={1}
+                          max={saldoPendiente}
+                          step={1000}
+                          formatter={(value) =>
+                            `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          }
+                          parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                          value={nuevoMetodoPago?.monto}
+                          onChange={(value) =>
+                            handleNuevoMetodoPagoChange("monto", value)
+                          }
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={4} style={{ textAlign: "right" }}>
+                      <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={agregarNuevoMetodoPago}
+                        disabled={
+                          !nuevoMetodoPago ||
+                          !nuevoMetodoPago.id_tipometodopago ||
+                          !nuevoMetodoPago.monto ||
+                          nuevoMetodoPago.monto > saldoPendiente
+                        }
+                      >
+                        Agregar
+                      </Button>
+                    </Col>
+                  </Row>
+
+                  {nuevoMetodoPago?.monto > saldoPendiente && (
+                    <Alert
+                      message="El monto no puede ser mayor al saldo pendiente"
+                      type="error"
+                      showIcon
+                      style={{ marginTop: "8px" }}
+                    />
+                  )}
+                </div>
+              )}
             </Card>
 
             {/* Sección de Fechas */}

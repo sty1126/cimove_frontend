@@ -18,6 +18,9 @@ import {
   Button,
   Statistic,
   Timeline,
+  List,
+  Avatar,
+  Popover,
 } from "antd";
 import {
   ToolOutlined,
@@ -37,6 +40,7 @@ import {
   SafetyCertificateOutlined,
   ClockCircleOutlined,
   FileProtectOutlined,
+  CreditCardOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 
@@ -181,9 +185,17 @@ const DetallesServicioTecnico = () => {
     );
   }
 
+  // Calcular el abono total a partir de los métodos de pago
+  const totalAbono =
+    servicio.metodos_pago && servicio.metodos_pago.length > 0
+      ? servicio.metodos_pago.reduce(
+          (sum, metodo) => sum + (metodo.monto || 0),
+          0
+        )
+      : servicio.abono_serviciotecnico || 0;
+
   // Calcular el saldo pendiente
-  const saldoPendiente =
-    servicio.costo_serviciotecnico - servicio.abono_serviciotecnico;
+  const saldoPendiente = servicio.costo_serviciotecnico - totalAbono;
 
   // Determinar el estado de pago
   let estadoPago = "Pendiente";
@@ -192,10 +204,10 @@ const DetallesServicioTecnico = () => {
   if (servicio.id_factura_serviciotecnico) {
     estadoPago = "Facturado";
     colorEstadoPago = "success";
-  } else if (servicio.abono_serviciotecnico >= servicio.costo_serviciotecnico) {
+  } else if (totalAbono >= servicio.costo_serviciotecnico) {
     estadoPago = "Pagado";
     colorEstadoPago = "success";
-  } else if (servicio.abono_serviciotecnico > 0) {
+  } else if (totalAbono > 0) {
     estadoPago = "Abonado";
     colorEstadoPago = "processing";
   }
@@ -212,6 +224,42 @@ const DetallesServicioTecnico = () => {
       default:
         return estado;
     }
+  };
+
+  // Renderizar métodos de pago
+  const renderMetodosPago = (metodos) => {
+    if (!metodos || metodos.length === 0) {
+      return <Text type="secondary">No hay métodos de pago registrados</Text>;
+    }
+
+    return (
+      <List
+        size="small"
+        dataSource={metodos}
+        renderItem={(item) => (
+          <List.Item>
+            <List.Item.Meta
+              avatar={
+                <Avatar
+                  shape="square"
+                  icon={<DollarOutlined />}
+                  style={{ backgroundColor: colors.accent }}
+                />
+              }
+              title={item.nombre_tipo || "Método sin nombre"}
+              description={
+                <Text type="secondary">
+                  ID: <Text strong>{item.id_tipo}</Text>
+                </Text>
+              }
+            />
+            <div>
+              <Text strong>{formatCurrency(item.monto)}</Text>
+            </div>
+          </List.Item>
+        )}
+      />
+    );
   };
 
   return (
@@ -523,7 +571,7 @@ const DetallesServicioTecnico = () => {
                 <Col span={12}>
                   <Statistic
                     title="Abono"
-                    value={servicio.abono_serviciotecnico}
+                    value={totalAbono}
                     precision={0}
                     formatter={(value) => formatCurrency(value)}
                     valueStyle={{ color: colors.success }}
@@ -542,6 +590,37 @@ const DetallesServicioTecnico = () => {
                   />
                 </Col>
               </Row>
+
+              {/* Métodos de pago */}
+              {servicio.metodos_pago && servicio.metodos_pago.length > 0 && (
+                <div style={{ marginTop: "16px" }}>
+                  <Divider style={{ margin: "12px 0" }} />
+                  <div style={{ marginBottom: "8px" }}>
+                    <Text strong>
+                      <CreditCardOutlined style={{ marginRight: "8px" }} />
+                      Métodos de Pago
+                    </Text>
+                  </div>
+                  <Popover
+                    content={renderMetodosPago(servicio.metodos_pago)}
+                    title="Detalle de métodos de pago"
+                    trigger="click"
+                    placement="left"
+                    overlayStyle={{ width: 300 }}
+                  >
+                    <Button type="dashed" block icon={<InfoCircleOutlined />}>
+                      Ver {servicio.metodos_pago.length} método(s) de pago
+                    </Button>
+                  </Popover>
+                  <div style={{ marginTop: "8px" }}>
+                    {servicio.metodos_pago.map((metodo, index) => (
+                      <Tag key={index} color="blue" style={{ margin: "4px" }}>
+                        {metodo.nombre_tipo}: {formatCurrency(metodo.monto)}
+                      </Tag>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Información de factura */}
               {servicio.id_factura_serviciotecnico && (
