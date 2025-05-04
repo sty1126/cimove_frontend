@@ -37,13 +37,12 @@ import FacturaVenta from "./pages/FacturaVenta";
 import ListaFacturacionVentas from "./pages/ListaFacturacionVentas";
 import CrearFacturaServicioTecnico from "./pages/CrearFacturaServicioTecnico";
 import Login from "./pages/Login";
-import Estadisticas from "./pages/Estadisticas";
-
-import { disableReactDevTools } from "@fvilers/disable-react-devtools";
-
+import EstadisticasFinancieras from "./pages/EstadisticasFinancieras";
+import EstadisticasClientesProductos from "./pages/EstadisticasClientesProductos";
 import DetallesServicioTecnico from "./pages/DetallesServicioTecnico";
 import ActualizarServicioTecnico from "./pages/ActualizarServicioTecnico";
 
+import { disableReactDevTools } from "@fvilers/disable-react-devtools";
 import { CartProvider } from "./context/CartContext";
 
 if (process.env.NODE_ENV === "production") disableReactDevTools();
@@ -190,8 +189,14 @@ function App() {
               }
             />
             <Route
-              path="estadisticas"
-              element={<PrivateRoute element={<Estadisticas />} />}
+              path="estadisticas-financieras"
+              element={<PrivateRoute element={<EstadisticasFinancieras />} />}
+            />
+            <Route
+              path="estadisticas-clienteproducto"
+              element={
+                <PrivateRoute element={<EstadisticasClientesProductos />} />
+              }
             />
             <Route
               path="detalles-servicio/:id"

@@ -44,7 +44,9 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
       "/inventario": "9",
       "/productos-vendidos": "10",
       "/calendario": "11",
-      "/estadisticas": "12",
+      "/estadisticas-financieras": "12",
+      "/empleados": "13",
+      "/estadisticas-clienteproducto": "14",
     };
 
     const key = routeToKey[path];
@@ -218,18 +220,6 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
                 ),
               },
               {
-                key: "6",
-                icon: <FaIcons.FaMoneyCheckAlt />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/pagos-compras"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Abonos
-                  </NavLink>
-                ),
-              },
-              {
                 key: "7",
                 icon: <FaIcons.FaTruck />,
                 label: !collapsed && (
@@ -293,10 +283,22 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
                 icon: <FaIcons.FaChartBar />,
                 label: !collapsed && (
                   <NavLink
-                    to="/estadisticas"
+                    to="/estadisticas-financieras"
                     style={{ color: colors.text, fontWeight: "bold" }}
                   >
-                    Estadísticas
+                    Estadísticas financieras
+                  </NavLink>
+                ),
+              },
+              {
+                key: "14",
+                icon: <FaIcons.FaChartPie />,
+                label: !collapsed && (
+                  <NavLink
+                    to="/estadisticas-clienteproducto"
+                    style={{ color: colors.text, fontWeight: "bold" }}
+                  >
+                    Estadísticas cliente-producto
                   </NavLink>
                 ),
               },
