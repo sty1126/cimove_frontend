@@ -223,12 +223,21 @@ const EstadisticasFinancieras = () => {
 
         // Calcular egresos totales (pagos a proveedores + nómina)
         const totalNomina = nominaData.reduce(
-          (sum, item) => sum + item.monto,
+          (sum, item) => sum + (Number.parseFloat(item.monto) || 0),
           0
         );
-        setEgresosTotales(
-          pagosProveedoresTotalesRes.data.total_pagado_proveedores + totalNomina
+        const totalProveedores = Number.parseFloat(
+          pagosProveedoresTotalesRes.data.total_pagado_proveedores || 0
         );
+        console.log("Cálculo de egresos:", { totalNomina, totalProveedores });
+        setEgresosTotales(totalProveedores + totalNomina);
+
+        console.log("Datos recibidos:", {
+          ingresosTotales,
+          pagosProveedoresTotales,
+          nominaData: nominaPorSedeYRol,
+          egresosTotales,
+        });
       } catch (error) {
         console.error("Error al cargar datos:", error);
       } finally {
@@ -241,14 +250,14 @@ const EstadisticasFinancieras = () => {
 
   // Formatear moneda
   const formatCurrency = (value) => {
-    if (value == null || isNaN(value)) return "-";
+    if (value == null || isNaN(value)) return "$ 0";
 
     // Convertir a número si es string
     const numValue =
       typeof value === "string" ? Number.parseFloat(value) : value;
 
     // Verificar nuevamente si es un número válido
-    if (isNaN(numValue)) return "-";
+    if (isNaN(numValue)) return "$ 0";
 
     try {
       return new Intl.NumberFormat("es-CO", {
@@ -1932,6 +1941,20 @@ const EstadisticasFinancieras = () => {
               Estadísticas Financieras
             </Title>
             <Space wrap>
+              <Select
+                defaultValue="30"
+                style={{ width: 180 }}
+                onChange={(value) => {
+                  const dias = Number.parseInt(value);
+                  setDateRange([dayjs().subtract(dias, "day"), dayjs()]);
+                }}
+              >
+                <Option value="7">Últimos 7 días</Option>
+                <Option value="30">Últimos 30 días</Option>
+                <Option value="90">Últimos 3 meses</Option>
+                <Option value="180">Últimos 6 meses</Option>
+                <Option value="365">Último año</Option>
+              </Select>
               <Button
                 type="primary"
                 icon={<ReloadOutlined />}
