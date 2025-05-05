@@ -201,6 +201,7 @@ const FacturaVenta = () => {
         iva,
         total,
         saldo: total,
+        idSede: cart[0]?.idSede, // Añadimos la sede desde el primer producto del carrito
         detalles: cart.map((prod) => ({
           idProducto: prod.id,
           cantidad: prod.cantidad,
@@ -221,6 +222,7 @@ const FacturaVenta = () => {
 
       // 🔹 Aquí imprimes lo que se envía
       console.log("Datos de la venta:", venta);
+      console.log("Sede seleccionada:", cart[0]?.idSede);
 
       const response = await axios.post(
         "https://cimove-backend.onrender.com/api/factura",

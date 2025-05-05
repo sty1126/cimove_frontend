@@ -318,6 +318,10 @@ const CrearServicioTecnico = () => {
             : [],
       };
 
+      // Verificar que el ID de sede se está enviando correctamente
+      console.log("Enviando servicio técnico con sede:", values.idSede);
+      console.log("Payload completo:", payload);
+
       await axios.post(
         "https://cimove-backend.onrender.com/api/serviciotecnico",
         payload

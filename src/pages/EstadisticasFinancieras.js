@@ -178,7 +178,7 @@ const EstadisticasFinancieras = () => {
           ),
           axios.get(
             "https://cimove-backend.onrender.com/api/estadisticas/ingresos/sededia"
-          ), // Agregar esta línea
+          ),
           axios.get(
             "https://cimove-backend.onrender.com/api/estadisticas/clientes-pagos-pendientes"
           ),
@@ -194,7 +194,7 @@ const EstadisticasFinancieras = () => {
           axios.get(
             "https://cimove-backend.onrender.com/api/estadisticas/nomina/por-sede-rol"
           ),
-          axios.get("https://cimove-backend.onrender.com/api/abonos"), // Add this line
+          axios.get("https://cimove-backend.onrender.com/api/abonos"),
         ]);
 
         // Establecer datos

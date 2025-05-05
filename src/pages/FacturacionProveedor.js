@@ -260,7 +260,13 @@ const FacturacionProveedor = () => {
     }, 0);
 
     const totalAbonado = facturasFiltradas.reduce((sum, f) => {
-      const abonado = typeof f.total_abonado === "number" ? f.total_abonado : 0;
+      // Asegurarse de que total_abonado sea un número válido
+      const abonado =
+        f.total_abonado !== null &&
+        f.total_abonado !== undefined &&
+        !isNaN(f.total_abonado)
+          ? Number(f.total_abonado)
+          : 0;
       return sum + abonado;
     }, 0);
 
@@ -402,6 +408,48 @@ const FacturacionProveedor = () => {
           >
             {icon} {estado || "Desconocido"}
           </Tag>
+        );
+      },
+    },
+    {
+      title: "Productos",
+      key: "productos",
+      render: (_, record) => {
+        const detalles = record.detalles || [];
+
+        if (detalles.length === 0) {
+          return <Text type="secondary">Sin productos</Text>;
+        }
+
+        return (
+          <Popover
+            title="Productos en la factura"
+            content={
+              <List
+                size="small"
+                dataSource={detalles}
+                renderItem={(item) => (
+                  <List.Item>
+                    <Space>
+                      <ShoppingOutlined style={{ color: colors.primary }} />
+                      <Text>Producto ID: {item.id_producto}</Text>
+                      <Badge
+                        count={item.cantidad}
+                        style={{ backgroundColor: colors.secondary }}
+                      />
+                      <Text>{formatCurrency(item.precio_unitario)} c/u</Text>
+                    </Space>
+                  </List.Item>
+                )}
+                style={{ maxHeight: "200px", overflow: "auto", width: "300px" }}
+              />
+            }
+            placement="left"
+          >
+            <Button type="link" icon={<EyeOutlined />}>
+              Ver {detalles.length} producto{detalles.length !== 1 ? "s" : ""}
+            </Button>
+          </Popover>
         );
       },
     },
@@ -1069,7 +1117,7 @@ const FacturacionProveedor = () => {
                 <List
                   size="small"
                   bordered
-                  dataSource={detalleSeleccionado.productos || []}
+                  dataSource={detalleSeleccionado.detalles || []}
                   renderItem={(item) => (
                     <List.Item>
                       <List.Item.Meta
@@ -1078,15 +1126,15 @@ const FacturacionProveedor = () => {
                             style={{ color: colors.primary, fontSize: "20px" }}
                           />
                         }
-                        title={item.nombre_producto}
+                        title={`Producto ID: ${item.id_producto}`}
                         description={`Cantidad: ${
                           item.cantidad
-                        } | Precio: ${formatCurrency(item.precio)}`}
+                        } | Precio unitario: ${formatCurrency(
+                          item.precio_unitario
+                        )}`}
                       />
                       <div>
-                        <Text strong>
-                          {formatCurrency(item.cantidad * item.precio)}
-                        </Text>
+                        <Text strong>{formatCurrency(item.subtotal)}</Text>
                       </div>
                     </List.Item>
                   )}

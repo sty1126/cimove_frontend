@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
   Form,
   InputNumber,
@@ -17,10 +17,10 @@ import {
   Badge,
   Tooltip,
   Alert,
-} from "antd"
-import axios from "axios"
-import dayjs from "dayjs"
-import { useNavigate } from "react-router-dom"
+} from "antd";
+import axios from "axios";
+import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 import {
   FileTextOutlined,
   ShoppingCartOutlined,
@@ -29,45 +29,47 @@ import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
   InfoCircleOutlined,
-} from "@ant-design/icons"
+} from "@ant-design/icons";
 
-const { Title, Text } = Typography
+const { Title, Text } = Typography;
 
 const CrearFacturaProveedor = () => {
-  const [form] = Form.useForm()
-  const navigate = useNavigate()
-  const [ordenes, setOrdenes] = useState([])
-  const [productos, setProductos] = useState([])
-  const [selectedOrden, setSelectedOrden] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [fetchingData, setFetchingData] = useState(false)
-  const [fechaFactura, setFechaFactura] = useState(dayjs())
-  const [totalFactura, setTotalFactura] = useState(0)
-  const [validationErrors, setValidationErrors] = useState([])
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const [ordenes, setOrdenes] = useState([]);
+  const [productos, setProductos] = useState([]);
+  const [selectedOrden, setSelectedOrden] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [fetchingData, setFetchingData] = useState(false);
+  const [fechaFactura, setFechaFactura] = useState(dayjs());
+  const [totalFactura, setTotalFactura] = useState(0);
+  const [validationErrors, setValidationErrors] = useState([]);
 
   useEffect(() => {
     const fetchOrdenes = async () => {
-      setFetchingData(true)
+      setFetchingData(true);
       try {
-        const res = await axios.get("https://cimove-backend.onrender.com/api/ordenes")
-        setOrdenes(res.data)
+        const res = await axios.get(
+          "https://cimove-backend.onrender.com/api/ordenes"
+        );
+        setOrdenes(res.data);
       } catch (error) {
-        message.error("Error al cargar las órdenes de compra")
-        console.error(error)
+        message.error("Error al cargar las órdenes de compra");
+        console.error(error);
       } finally {
-        setFetchingData(false)
+        setFetchingData(false);
       }
-    }
-    fetchOrdenes()
-  }, [])
+    };
+    fetchOrdenes();
+  }, []);
 
   const handleOrdenSelect = async (id_ordencompra) => {
-    setSelectedOrden(id_ordencompra)
-    setFetchingData(true)
+    setSelectedOrden(id_ordencompra);
+    setFetchingData(true);
     try {
       const res = await axios.get(
-        `https://cimove-backend.onrender.com/api/facturas-proveedor/facturas/orden/${id_ordencompra}`,
-      )
+        `https://cimove-backend.onrender.com/api/facturas-proveedor/facturas/orden/${id_ordencompra}`
+      );
       const productosConSubtotal = res.data.map((p) => ({
         id_producto: p.id_producto,
         nombre_producto: p.nombre_producto,
@@ -75,34 +77,39 @@ const CrearFacturaProveedor = () => {
         precio_unitario: p.preciounitario_detalleordencompra,
         subtotal: p.cantidad_ordenada * p.preciounitario_detalleordencompra,
         cantidad_maxima: p.cantidad_ordenada, // Asumimos que la cantidad máxima es la ordenada
-      }))
-      setProductos(productosConSubtotal)
-      calcularTotal(productosConSubtotal)
-      setValidationErrors([]) // Limpiar errores previos
+      }));
+      setProductos(productosConSubtotal);
+      calcularTotal(productosConSubtotal);
+      setValidationErrors([]); // Limpiar errores previos
     } catch (error) {
-      message.error("Error al cargar los productos de la orden")
-      console.error(error)
+      message.error("Error al cargar los productos de la orden");
+      console.error(error);
     } finally {
-      setFetchingData(false)
+      setFetchingData(false);
     }
-  }
+  };
 
   const calcularTotal = (productosActualizados) => {
-    const total = productosActualizados.reduce((sum, p) => sum + p.subtotal, 0)
-    setTotalFactura(total)
-  }
+    const total = productosActualizados.reduce((sum, p) => sum + p.subtotal, 0);
+    setTotalFactura(total);
+  };
 
   const handleProductoChange = (value, record, field) => {
     // Validar que el valor sea un número
     if (value === null || isNaN(value)) {
-      message.warning("Por favor ingrese un valor numérico válido")
-      return
+      message.warning("Por favor ingrese un valor numérico válido");
+      return;
     }
 
     // Validar que la cantidad no exceda el máximo permitido
     if (field === "cantidad_ordenada" && value > record.cantidad_maxima) {
-      message.warning(`La cantidad no puede exceder ${record.cantidad_maxima}`)
-      value = record.cantidad_maxima
+      message.warning(`La cantidad no puede exceder ${record.cantidad_maxima}`);
+      value = record.cantidad_maxima;
+    }
+
+    // Asegurar que el valor sea un entero positivo para cantidad
+    if (field === "cantidad_ordenada") {
+      value = Math.max(1, Math.floor(value));
     }
 
     const nuevosProductos = productos.map((p) => {
@@ -110,91 +117,109 @@ const CrearFacturaProveedor = () => {
         const actualizado = {
           ...p,
           [field]: value,
-        }
+        };
         actualizado.subtotal =
           (field === "cantidad_ordenada" ? value : p.cantidad_ordenada) *
-          (field === "precio_unitario" ? value : p.precio_unitario)
-        return actualizado
+          (field === "precio_unitario" ? value : p.precio_unitario);
+        return actualizado;
       }
-      return p
-    })
-    setProductos(nuevosProductos)
-    calcularTotal(nuevosProductos)
-    validateProductos(nuevosProductos)
-  }
+      return p;
+    });
+
+    console.log("Updated productos:", nuevosProductos);
+    setProductos(nuevosProductos);
+    calcularTotal(nuevosProductos);
+    validateProductos(nuevosProductos);
+  };
 
   // Función para validar todos los productos
   const validateProductos = (productosActuales) => {
-    const errores = []
+    const errores = [];
 
     productosActuales.forEach((producto) => {
       if (!producto.cantidad_ordenada || producto.cantidad_ordenada <= 0) {
-        errores.push(`El producto "${producto.nombre_producto}" debe tener una cantidad mayor a cero`)
+        errores.push(
+          `El producto "${producto.nombre_producto}" debe tener una cantidad mayor a cero`
+        );
       }
 
       if (!producto.precio_unitario || producto.precio_unitario <= 0) {
-        errores.push(`El producto "${producto.nombre_producto}" debe tener un precio unitario válido`)
+        errores.push(
+          `El producto "${producto.nombre_producto}" debe tener un precio unitario válido`
+        );
       }
-    })
+    });
 
-    setValidationErrors(errores)
-    return errores.length === 0
-  }
+    setValidationErrors(errores);
+    return errores.length === 0;
+  };
 
   const validateForm = () => {
     // Validar que haya una orden seleccionada
     if (!selectedOrden) {
-      message.error("Debe seleccionar una orden de compra")
-      return false
+      message.error("Debe seleccionar una orden de compra");
+      return false;
     }
 
     // Validar que haya una fecha de factura
     if (!fechaFactura) {
-      message.error("Debe seleccionar una fecha de factura")
-      return false
+      message.error("Debe seleccionar una fecha de factura");
+      return false;
     }
 
     // Validar que haya productos y que sean válidos
     if (productos.length === 0) {
-      message.error("No hay productos para facturar")
-      return false
+      message.error("No hay productos para facturar");
+      return false;
     }
 
-    return validateProductos(productos)
-  }
+    return validateProductos(productos);
+  };
 
   const handleFinish = async () => {
     // Validar el formulario antes de enviar
     if (!validateForm()) {
-      return
+      return;
     }
 
     try {
-      setLoading(true)
-      await axios.post("https://cimove-backend.onrender.com/api/facturas-proveedor/generar-desde-orden", {
+      setLoading(true);
+
+      // Log what we're sending to the backend for debugging
+      const dataToSend = {
         id_ordencompra: selectedOrden,
+        fecha_facturaproveedor: fechaFactura.format("YYYY-MM-DD"),
+        monto_facturaproveedor: totalFactura,
         productos: productos.map((p) => ({
           id_producto: p.id_producto,
-          cantidad_ordenada: p.cantidad_ordenada,
-          precio_unitario: p.precio_unitario,
+          cantidad_detalle: p.cantidad_ordenada,
+          preciounitario_detalle: p.precio_unitario,
+          subtotal_detalle: p.subtotal,
         })),
-      })
+      };
+
+      console.log("Sending data to backend:", dataToSend);
+
+      await axios.post(
+        "https://cimove-backend.onrender.com/api/facturas-proveedor/generar-desde-orden",
+        dataToSend
+      );
 
       message.success({
         content: "Factura registrada correctamente",
         icon: <CheckCircleOutlined style={{ color: "#52c41a" }} />,
-      })
-      navigate("/facturacion-proveedor")
+      });
+      navigate("/facturacion-proveedor");
     } catch (error) {
-      console.error("Error al registrar la factura", error)
+      console.error("Error al registrar la factura", error);
       message.error({
         content: "Error al registrar la factura",
         description: error.message,
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const columns = [
     {
@@ -215,16 +240,18 @@ const CrearFacturaProveedor = () => {
           min={1}
           max={record.cantidad_maxima}
           value={record.cantidad_ordenada}
-          onChange={(value) => handleProductoChange(value, record, "cantidad_ordenada")}
+          onChange={(value) =>
+            handleProductoChange(value, record, "cantidad_ordenada")
+          }
           style={{ width: "100%" }}
           size="middle"
           controls
           precision={0} // Solo números enteros
           parser={(value) => {
             // Asegurar que solo se acepten números enteros positivos
-            const parsed = Number.parseInt(value || "0", 10)
-            if (isNaN(parsed)) return 1
-            return parsed
+            const parsed = Number.parseInt(value || "0", 10);
+            if (isNaN(parsed)) return 1;
+            return parsed;
           }}
         />
       ),
@@ -237,7 +264,9 @@ const CrearFacturaProveedor = () => {
           min={0}
           value={record.precio_unitario}
           disabled={true}
-          formatter={(value) => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          formatter={(value) =>
+            `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          }
           parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
           style={{ width: "100%" }}
           size="middle"
@@ -253,10 +282,17 @@ const CrearFacturaProveedor = () => {
         </Text>
       ),
     },
-  ]
+  ];
 
   return (
-    <div style={{ padding: "20px", maxWidth: "100%", background: "#f5f5f5", minHeight: "100vh" }}>
+    <div
+      style={{
+        padding: "20px",
+        maxWidth: "100%",
+        background: "#f5f5f5",
+        minHeight: "100vh",
+      }}
+    >
       <Card
         title={
           <Space>
@@ -279,8 +315,15 @@ const CrearFacturaProveedor = () => {
         }}
         bodyStyle={{ padding: "24px" }}
       >
-        <Form form={form} layout="vertical" onFinish={handleFinish} requiredMark="optional">
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+          requiredMark="optional"
+        >
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "24px" }}
+          >
             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
               <Form.Item
                 label={
@@ -290,7 +333,12 @@ const CrearFacturaProveedor = () => {
                   </Space>
                 }
                 name="id_ordencompra"
-                rules={[{ required: true, message: "Por favor seleccione una orden de compra" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor seleccione una orden de compra",
+                  },
+                ]}
                 style={{ flex: "1", minWidth: "300px" }}
               >
                 <Select
@@ -319,7 +367,12 @@ const CrearFacturaProveedor = () => {
                 }
                 name="fecha_facturaproveedor"
                 initialValue={fechaFactura}
-                rules={[{ required: true, message: "Por favor seleccione una fecha de factura" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor seleccione una fecha de factura",
+                  },
+                ]}
                 style={{ flex: "1", minWidth: "200px" }}
               >
                 <DatePicker
@@ -333,7 +386,13 @@ const CrearFacturaProveedor = () => {
             </div>
 
             {fetchingData && (
-              <div style={{ display: "flex", justifyContent: "center", padding: "40px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "40px",
+                }}
+              >
                 <Spin size="large" tip="Cargando datos..." />
               </div>
             )}
@@ -361,11 +420,20 @@ const CrearFacturaProveedor = () => {
                   <Space>
                     <DollarOutlined />
                     <span>Detalle de Productos</span>
-                    <Badge count={productos.length} style={{ backgroundColor: "#1890ff" }} />
+                    <Badge
+                      count={productos.length}
+                      style={{ backgroundColor: "#1890ff" }}
+                    />
                   </Space>
                 </Divider>
 
-                <div style={{ overflowX: "auto", borderRadius: "8px", border: "1px solid #f0f0f0" }}>
+                <div
+                  style={{
+                    overflowX: "auto",
+                    borderRadius: "8px",
+                    border: "1px solid #f0f0f0",
+                  }}
+                >
                   <Table
                     dataSource={productos}
                     columns={columns}
@@ -374,16 +442,28 @@ const CrearFacturaProveedor = () => {
                     scroll={{ x: "max-content" }}
                     size="middle"
                     style={{ marginBottom: "0" }}
-                    rowClassName={(record, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
+                    rowClassName={(record, index) =>
+                      index % 2 === 0 ? "table-row-light" : "table-row-dark"
+                    }
                     summary={() => (
                       <Table.Summary fixed>
                         <Table.Summary.Row>
-                          <Table.Summary.Cell index={0} colSpan={3} style={{ textAlign: "right" }}>
+                          <Table.Summary.Cell
+                            index={0}
+                            colSpan={3}
+                            style={{ textAlign: "right" }}
+                          >
                             <Text strong>Total:</Text>
                           </Table.Summary.Cell>
                           <Table.Summary.Cell index={1}>
-                            <Text strong style={{ fontSize: "16px", color: "#1890ff" }}>
-                              $ {totalFactura.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                            <Text
+                              strong
+                              style={{ fontSize: "16px", color: "#1890ff" }}
+                            >
+                              ${" "}
+                              {totalFactura
+                                .toFixed(2)
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                             </Text>
                           </Table.Summary.Cell>
                         </Table.Summary.Row>
@@ -395,7 +475,10 @@ const CrearFacturaProveedor = () => {
                 <div style={{ marginTop: "16px" }}>
                   <Space align="center">
                     <InfoCircleOutlined style={{ color: "#1890ff" }} />
-                    <Text type="secondary">Nota: El campo de cantidad solo acepta números enteros positivos.</Text>
+                    <Text type="secondary">
+                      Nota: El campo de cantidad solo acepta números enteros
+                      positivos.
+                    </Text>
                   </Space>
                 </div>
               </>
@@ -437,7 +520,7 @@ const CrearFacturaProveedor = () => {
         }
       `}</style>
     </div>
-  )
-}
+  );
+};
 
-export default CrearFacturaProveedor
+export default CrearFacturaProveedor;

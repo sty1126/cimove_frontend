@@ -1116,6 +1116,18 @@ const ListaFacturacionVentas = () => {
                                 }}
                               />
                               <span>Productos</span>
+                              {record.detalles &&
+                                record.detalles.length > 0 &&
+                                record.detalles[0].sede && (
+                                  <Tag
+                                    color={colors.primary}
+                                    style={{ marginLeft: 8 }}
+                                  >
+                                    <ShopOutlined style={{ marginRight: 4 }} />
+                                    {record.detalles[0].sede.nombre_sede ||
+                                      `ID: ${record.detalles[0].sede.id_sede}`}
+                                  </Tag>
+                                )}
                             </div>
                           }
                           style={{ height: "100%" }}
