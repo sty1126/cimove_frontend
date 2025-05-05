@@ -72,6 +72,7 @@ import {
   Area,
   ComposedChart,
 } from "recharts";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -106,6 +107,7 @@ const chartColors = [
 ];
 
 const EstadisticasFinancieras = () => {
+  const navigate = useNavigate();
   // Estados para datos
   const [activeTab, setActiveTab] = useState("general");
   const [dateRange, setDateRange] = useState([
@@ -215,9 +217,9 @@ const EstadisticasFinancieras = () => {
 
         // Transformar datos de nómina
         const nominaData = nominaPorSedeYRolRes.data.map((item) => ({
-          sede: item[0],
-          rol: item[1],
-          monto: item[2],
+          sede: item.nombre_sede,
+          rol: item.rol,
+          monto: Number(item.total),
         }));
         setNominaPorSedeYRol(nominaData);
 
@@ -461,6 +463,7 @@ const EstadisticasFinancieras = () => {
             backgroundColor: colors.secondary,
             borderColor: colors.secondary,
           }}
+          onClick={() => navigate("/facturacion-ventas")}
         >
           Gestionar Cobro
         </Button>
@@ -500,13 +503,8 @@ const EstadisticasFinancieras = () => {
       key: "comision",
       align: "right",
       render: (_, record) => {
-        let comision = 0;
-        if (record.metodo === "Nequi") comision = Number(record.total) * 0.01;
-        else if (record.metodo === "Daviplata")
-          comision = Number(record.total) * 0.005;
-        else if (record.metodo === "Tarjeta")
-          comision = Number(record.total) * 0.03;
-
+        const comisionPorcentaje = record.comision || 0;
+        const comision = Number(record.total) * (comisionPorcentaje / 100);
         return <Text type="secondary">{formatCurrency(comision)}</Text>;
       },
     },
@@ -515,13 +513,8 @@ const EstadisticasFinancieras = () => {
       key: "neto",
       align: "right",
       render: (_, record) => {
-        let comision = 0;
-        if (record.metodo === "Nequi") comision = Number(record.total) * 0.01;
-        else if (record.metodo === "Daviplata")
-          comision = Number(record.total) * 0.005;
-        else if (record.metodo === "Tarjeta")
-          comision = Number(record.total) * 0.03;
-
+        const comisionPorcentaje = record.comision || 0;
+        const comision = Number(record.total) * (comisionPorcentaje / 100);
         const neto = Number(record.total) - comision;
         return (
           <Text style={{ color: colors.success }}>{formatCurrency(neto)}</Text>
@@ -1062,13 +1055,9 @@ const EstadisticasFinancieras = () => {
                     );
 
                     const totalComisiones = pageData.reduce((total, item) => {
-                      let comision = 0;
-                      if (item.metodo === "Nequi")
-                        comision = Number(item.total) * 0.01;
-                      else if (item.metodo === "Daviplata")
-                        comision = Number(item.total) * 0.005;
-                      else if (item.metodo === "Tarjeta")
-                        comision = Number(item.total) * 0.03;
+                      const comisionPorcentaje = item.comision || 0;
+                      const comision =
+                        Number(item.total) * (comisionPorcentaje / 100);
                       return total + comision;
                     }, 0);
 
