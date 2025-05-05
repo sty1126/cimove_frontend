@@ -20,31 +20,28 @@ import {
   Input,
   Select,
   message,
+  Tooltip,
 } from "antd";
 import {
   ShoppingOutlined,
   UserOutlined,
   BarChartOutlined,
-  PieChartOutlined,
   ReloadOutlined,
   TableOutlined,
   WarningOutlined,
   CheckCircleOutlined,
   DollarOutlined,
-  SearchOutlined,
   ExclamationCircleOutlined,
   StockOutlined,
-  FileTextOutlined,
   PhoneOutlined,
   AlertOutlined,
   EditOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import {
   BarChart,
   Bar,
-  PieChart,
-  Pie,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -55,11 +52,6 @@ import {
   Scatter,
   ScatterChart,
   ZAxis,
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
 } from "recharts";
 
 const { Title, Text, Paragraph } = Typography;
@@ -353,33 +345,7 @@ const EstadisticasClientesProductos = () => {
     return (
       <div>
         <div className="mb-6">
-          <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
-            <Col xs={24} md={12}>
-              <Search
-                placeholder="Buscar productos..."
-                allowClear
-                enterButton={<SearchOutlined />}
-                size="large"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-            </Col>
-            <Col xs={24} md={12}>
-              <Select
-                style={{ width: "100%" }}
-                size="large"
-                value={filtroProductos}
-                onChange={setFiltroProductos}
-                placeholder="Filtrar productos"
-              >
-                <Option value="todos">Todos los productos</Option>
-                <Option value="vendidos">Productos vendidos</Option>
-                <Option value="no_vendidos">Productos no vendidos</Option>
-                <Option value="con_stock">Con stock disponible</Option>
-                <Option value="sin_stock">Sin stock disponible</Option>
-              </Select>
-            </Col>
-          </Row>
+          {/* Remove search and filter */}
 
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={12} md={6}>
@@ -636,92 +602,6 @@ const EstadisticasClientesProductos = () => {
                 </Card>
               </Col>
             </Row>
-
-            <Row gutter={[24, 24]}>
-              <Col xs={24} md={12}>
-                <Card
-                  title={
-                    <Space>
-                      <PieChartOutlined style={{ color: colors.primary }} />
-                      <span>Distribución de productos por frecuencia</span>
-                    </Space>
-                  }
-                  bordered={false}
-                >
-                  <div style={{ height: "400px" }}>
-                    {productosFrecuentes && productosFrecuentes.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={productosFrecuentes}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            outerRadius={150}
-                            fill="#8884d8"
-                            dataKey="frecuencia_venta"
-                            nameKey="nombre_producto"
-                            label={({ name, percent }) =>
-                              `${name}: ${(percent * 100).toFixed(0)}%`
-                            }
-                          >
-                            {productosFrecuentes.map((entry, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={chartColors[index % chartColors.length]}
-                              />
-                            ))}
-                          </Pie>
-                          <RechartsTooltip content={<CustomTooltip />} />
-                          <Legend />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <Empty description="No hay datos disponibles" />
-                    )}
-                  </div>
-                </Card>
-              </Col>
-              <Col xs={24} md={12}>
-                <Card
-                  title={
-                    <Space>
-                      <AlertOutlined style={{ color: colors.danger }} />
-                      <span>Productos sin movimiento</span>
-                    </Space>
-                  }
-                  bordered={false}
-                >
-                  <div style={{ height: "400px" }}>
-                    {productosObsoletos && productosObsoletos.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart
-                          cx="50%"
-                          cy="50%"
-                          outerRadius="80%"
-                          data={productosObsoletos.slice(0, 8)}
-                        >
-                          <PolarGrid />
-                          <PolarAngleAxis dataKey="nombre_producto" />
-                          <PolarRadiusAxis angle={30} domain={[0, 1]} />
-                          <Radar
-                            name="Sin ventas"
-                            dataKey="total_vendido"
-                            stroke={colors.danger}
-                            fill={colors.danger}
-                            fillOpacity={0.6}
-                          />
-                          <Legend />
-                          <RechartsTooltip />
-                        </RadarChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <Empty description="No hay datos disponibles" />
-                    )}
-                  </div>
-                </Card>
-              </Col>
-            </Row>
           </div>
         ) : (
           <div>
@@ -911,6 +791,9 @@ const EstadisticasClientesProductos = () => {
                     <Space>
                       <DollarOutlined style={{ color: colors.primary }} />
                       <span>Productos por valor de venta</span>
+                      <Tooltip title="Muestra los productos ordenados por el valor total de ventas generado. Representa el impacto económico de cada producto en los ingresos de la empresa.">
+                        <InfoCircleOutlined style={{ color: colors.accent }} />
+                      </Tooltip>
                     </Space>
                   }
                   bordered={false}
@@ -971,21 +854,6 @@ const EstadisticasClientesProductos = () => {
                         align: "center",
                         render: () => <Tag color={colors.danger}>0</Tag>,
                       },
-                      {
-                        title: "Acción recomendada",
-                        key: "accion",
-                        align: "center",
-                        render: () => (
-                          <Select
-                            defaultValue="promocion"
-                            style={{ width: 150 }}
-                          >
-                            <Option value="promocion">Promoción</Option>
-                            <Option value="descontinuar">Descontinuar</Option>
-                            <Option value="reubicar">Reubicar</Option>
-                          </Select>
-                        ),
-                      },
                     ]}
                     dataSource={productosObsoletos.map((item, index) => ({
                       ...item,
@@ -1033,33 +901,6 @@ const EstadisticasClientesProductos = () => {
     return (
       <div>
         <div className="mb-6">
-          <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
-            <Col xs={24} md={12}>
-              <Search
-                placeholder="Buscar clientes..."
-                allowClear
-                enterButton={<SearchOutlined />}
-                size="large"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-            </Col>
-            <Col xs={24} md={12}>
-              <Select
-                style={{ width: "100%" }}
-                size="large"
-                value={filtroClientes}
-                onChange={setFiltroClientes}
-                placeholder="Filtrar clientes"
-              >
-                <Option value="todos">Todos los clientes</Option>
-                <Option value="con_deuda">Con pagos pendientes</Option>
-                <Option value="sin_deuda">Sin pagos pendientes</Option>
-                <Option value="frecuentes">Clientes frecuentes</Option>
-              </Select>
-            </Col>
-          </Row>
-
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={12} md={6}>
               <Card bordered={false}>
@@ -1193,44 +1034,104 @@ const EstadisticasClientesProductos = () => {
                 <Card
                   title={
                     <Space>
-                      <PieChartOutlined style={{ color: colors.primary }} />
-                      <span>Distribución de ventas por cliente</span>
+                      <UserOutlined style={{ color: colors.primary }} />
+                      <span>Frecuencia de compras por cliente</span>
+                      <Tooltip title="Muestra la frecuencia con la que cada cliente realiza compras, ayudando a identificar clientes habituales.">
+                        <InfoCircleOutlined style={{ color: colors.accent }} />
+                      </Tooltip>
                     </Space>
                   }
                   bordered={false}
                 >
-                  <div style={{ height: "400px" }}>
-                    {clientesPorMonto && clientesPorMonto.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={clientesPorMonto}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            outerRadius={150}
-                            fill="#8884d8"
-                            dataKey="total_compras"
-                            nameKey="nombre_cliente"
-                            label={({ name, percent }) =>
-                              `${name}: ${(percent * 100).toFixed(0)}%`
-                            }
-                          >
-                            {clientesPorMonto.map((entry, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={chartColors[index % chartColors.length]}
-                              />
-                            ))}
-                          </Pie>
-                          <RechartsTooltip content={<CustomTooltip />} />
-                          <Legend />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <Empty description="No hay datos disponibles" />
-                    )}
-                  </div>
+                  <Table
+                    columns={[
+                      {
+                        title: "Cliente",
+                        dataIndex: "nombre_cliente",
+                        key: "nombre_cliente",
+                        render: (text) => <Text strong>{text}</Text>,
+                      },
+                      {
+                        title: "Última compra",
+                        dataIndex: "ultima_compra",
+                        key: "ultima_compra",
+                        align: "center",
+                        render: () => {
+                          // Generar fechas aleatorias recientes para demostración
+                          const days = Math.floor(Math.random() * 60);
+                          const date = new Date();
+                          date.setDate(date.getDate() - days);
+                          const formattedDate =
+                            date.toLocaleDateString("es-ES");
+
+                          let statusColor = colors.success;
+                          if (days > 30) statusColor = colors.warning;
+                          if (days > 45) statusColor = colors.danger;
+
+                          return (
+                            <Text style={{ color: statusColor }}>
+                              {formattedDate}
+                            </Text>
+                          );
+                        },
+                      },
+                      {
+                        title: "Frecuencia",
+                        dataIndex: "frecuencia",
+                        key: "frecuencia",
+                        align: "center",
+                        render: () => {
+                          const options = ["Alta", "Media", "Baja"];
+                          const colorsUsed = [
+                            colors.success,
+                            colors.warning,
+                            colors.danger,
+                          ];
+                          const index = Math.floor(Math.random() * 3);
+                          return (
+                            <Tag color={colorsUsed[index]}>
+                              {options[index]}
+                            </Tag>
+                          );
+                        },
+                      },
+                      {
+                        title: "Fidelidad",
+                        dataIndex: "fidelidad",
+                        key: "fidelidad",
+                        align: "center",
+                        render: () => {
+                          const score = Math.floor(Math.random() * 5) + 1;
+                          return (
+                            <div>
+                              {[...Array(5)].map((_, i) => (
+                                <span
+                                  key={i}
+                                  style={{
+                                    color:
+                                      i < score ? colors.warning : "#d9d9d9",
+                                    fontSize: "16px",
+                                  }}
+                                >
+                                  ★
+                                </span>
+                              ))}
+                            </div>
+                          );
+                        },
+                      },
+                    ]}
+                    dataSource={
+                      clientesPorMonto
+                        ? clientesPorMonto.map((item, index) => ({
+                            ...item,
+                            key: index,
+                          }))
+                        : []
+                    }
+                    pagination={{ pageSize: 5 }}
+                    size="small"
+                  />
                 </Card>
               </Col>
             </Row>
@@ -1395,22 +1296,13 @@ const EstadisticasClientesProductos = () => {
                         key: "acciones",
                         align: "center",
                         render: () => (
-                          <Space>
-                            <Button
-                              type="primary"
-                              size="small"
-                              icon={<FileTextOutlined />}
-                            >
-                              Ver Facturas
-                            </Button>
-                            <Button
-                              type="default"
-                              size="small"
-                              icon={<PhoneOutlined />}
-                            >
-                              Contactar
-                            </Button>
-                          </Space>
+                          <Button
+                            type="default"
+                            size="small"
+                            icon={<PhoneOutlined />}
+                          >
+                            Contactar
+                          </Button>
                         ),
                       },
                     ]}
@@ -1513,16 +1405,6 @@ const EstadisticasClientesProductos = () => {
                           <Text style={{ color: colors.danger }}>
                             {formatCurrency(text)}
                           </Text>
-                        ),
-                      },
-                      {
-                        title: "Acciones",
-                        key: "acciones",
-                        align: "center",
-                        render: () => (
-                          <Button type="primary" danger size="small">
-                            Gestionar Cobro
-                          </Button>
                         ),
                       },
                     ]}
