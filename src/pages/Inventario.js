@@ -290,7 +290,7 @@ const Inventario = () => {
   };
 
   const handleViewDetails = (record) => {
-    window.open(`/detalles-producto/${record.id_producto}`, "_blank");
+    window.open(`/detalles-producto/${record.id_producto}`);
   };
 
   const handleDelete = async (id) => {
