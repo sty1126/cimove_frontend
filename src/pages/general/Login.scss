@@ -1,0 +1,493 @@
+// Paleta de colores mejorada
+$primary: #0d7f93;
+$secondary: #4d8a52;
+$accent: #7fbad6;
+$light: #c3d3c6;
+$background: #e8eaec;
+$text: #2a3033;
+$danger: #c25f48;
+$gradient-start: #0d7f93;
+$gradient-middle: #2d8a7a;
+$gradient-end: #4d8a52;
+
+// Resetear estilos para el componente de login
+.login-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Nunito", serif;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+
+  // Columna izquierda - Diseño geométrico moderno
+  .login-left-column {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    position: relative;
+    background: linear-gradient(
+      135deg,
+      $gradient-start 0%,
+      $gradient-middle 50%,
+      $gradient-end 100%
+    );
+    color: white;
+    overflow: hidden;
+
+    // Elementos decorativos geométricos (sin círculos)
+    &::before {
+      content: "";
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.05)
+      );
+      transform: rotate(45deg);
+      top: 10%;
+      left: -50px;
+      z-index: 0;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      width: 150px;
+      height: 300px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.03)
+      );
+      transform: rotate(-15deg);
+      bottom: 10%;
+      right: -30px;
+      z-index: 0;
+    }
+
+    .login-brand {
+      text-align: center;
+      z-index: 1;
+      margin-bottom: 3rem;
+
+      .brand-icon {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 1.5rem;
+        border-radius: 16px;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      p {
+        font-size: 1.2rem;
+        margin-bottom: 0;
+        opacity: 0.9;
+      }
+    }
+
+    .feature-list {
+      z-index: 1;
+      margin-bottom: 2rem;
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        opacity: 0.9;
+
+        .feature-dot {
+          width: 8px;
+          height: 8px;
+          background: rgba(255, 255, 255, 0.8);
+          border-radius: 2px;
+          margin-right: 1rem;
+          flex-shrink: 0;
+        }
+      }
+    }
+
+    .login-tagline {
+      font-size: 1.1rem;
+      opacity: 0.8;
+      text-align: center;
+      z-index: 1;
+      font-weight: 500;
+      margin-bottom: 2rem;
+    }
+
+    .login-footer {
+      margin-top: auto;
+      font-size: 0.875rem;
+      opacity: 0.7;
+      z-index: 1;
+    }
+  }
+
+  // Columna derecha
+  .login-right-column {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+
+    .login-form-container {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+
+      h2 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, $primary 0%, $secondary 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        color: #64748b;
+        font-size: 1rem;
+      }
+    }
+
+    .login-form {
+      width: 100%;
+
+      .form-group {
+        margin-bottom: 1.5rem;
+
+        label {
+          display: block;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 0.5rem;
+        }
+
+        .input-with-icon {
+          position: relative;
+
+          .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            z-index: 1;
+          }
+
+          input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+
+            &:focus {
+              outline: none;
+              border-color: $primary;
+              background: white;
+              box-shadow: 0 0 0 3px rgba($primary, 0.1);
+            }
+
+            &::placeholder {
+              color: #9ca3af;
+            }
+          }
+        }
+      }
+
+      .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+
+        .remember-me {
+          display: flex;
+          align-items: center;
+
+          input {
+            margin-right: 8px;
+            accent-color: $primary;
+            transform: scale(1.1);
+          }
+
+          label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+          }
+        }
+
+        .forgot-password {
+          font-size: 0.875rem;
+          color: $primary;
+          text-decoration: none;
+          font-weight: 600;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: darken($primary, 10%);
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .login-button {
+        width: 100%;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(
+          135deg,
+          $gradient-start 0%,
+          $gradient-middle 50%,
+          $gradient-end 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 16px rgba($primary, 0.2);
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px rgba($primary, 0.3);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        svg {
+          margin-right: 8px;
+        }
+
+        .loading-spinner {
+          width: 20px;
+          height: 20px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          border-top-color: white;
+          animation: spin 1s linear infinite;
+          margin-right: 8px;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      }
+
+      .signup-link {
+        margin-top: 2rem;
+        text-align: center;
+
+        p {
+          font-size: 0.875rem;
+          color: #6b7280;
+          margin-bottom: 0.5rem;
+        }
+
+        a {
+          color: $primary;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 0.875rem;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: darken($primary, 10%);
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    flex-direction: column;
+
+    .login-left-column,
+    .login-right-column {
+      width: 100%;
+    }
+
+    .login-left-column {
+      height: 35%;
+      min-height: 280px;
+      padding: 1.5rem;
+
+      .login-brand {
+        margin-bottom: 1.5rem;
+
+        h1 {
+          font-size: 2.2rem;
+        }
+
+        .brand-icon {
+          padding: 1rem;
+          margin-bottom: 1rem;
+        }
+      }
+
+      .feature-list {
+        display: none;
+      }
+    }
+
+    .login-right-column {
+      height: 65%;
+      padding: 1.5rem;
+
+      .login-form-container {
+        padding: 2rem;
+        max-width: 100%;
+      }
+    }
+  }
+}
+
+// Estilos personalizados para SweetAlert2
+@keyframes swalShow {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes swalHide {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+.swal-animate-show {
+  animation: swalShow 0.3s ease;
+}
+
+.swal-animate-hide {
+  animation: swalHide 0.3s ease;
+}
+
+.swal2-popup {
+  border-radius: 16px !important;
+  padding: 2rem !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+  font-family: "Nunito", serif !important;
+}
+
+.swal2-title {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: $text !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.swal2-html-container {
+  font-size: 1rem !important;
+  color: lighten($text, 20%) !important;
+  margin-top: 0.5rem !important;
+}
+
+.swal2-confirm {
+  background: linear-gradient(
+    135deg,
+    $gradient-start 0%,
+    $gradient-end 100%
+  ) !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  padding: 12px 28px !important;
+  box-shadow: 0 8px 16px rgba($primary, 0.2) !important;
+  transition: all 0.3s ease !important;
+
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 24px rgba($primary, 0.3) !important;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($primary, 0.3) !important;
+  }
+}
+
+.swal2-icon.swal2-error {
+  border-color: $danger !important;
+}
+
+.swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
+  background-color: $danger !important;
+}
+
+.swal2-icon {
+  margin: 1.5rem auto !important;
+  border-width: 3px !important;
+}
+
+.error-message {
+  color: $danger;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  display: block;
+  font-weight: 500;
+}

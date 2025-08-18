@@ -1,49 +1,76 @@
+// Core y estilos
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.scss";
 
-import Layout from "./components/Layout";
-import LandingPageNavbar from "./components/LandingNavbar";
-import PrivateRoute from "./components/PrivateRoute"; // Importa el PrivateRoute
-
-import LandingPage from "./pages/LandingPage";
-import Home from "./pages/Home";
-import Inventario from "./pages/Inventario";
-import RegistroProducto from "./pages/RegistroProducto";
-import DetallesProducto from "./pages/DetallesProducto";
-import ActualizarProducto from "./pages/ActualizarProducto";
-import AnadirNovedad from "./pages/AnadirNovedad";
-import AnadirStock from "./pages/AnadirStock";
-import AsociarProveedores from "./pages/AsociarProveedores";
-import ListaProveedores from "./pages/ListaProveedores";
-import DetallesProveedor from "./pages/DetallesProveedor";
-import RegistroProveedor from "./pages/RegistroProveedor";
-import ActualizarProveedor from "./pages/ActualizarProveedor";
-import Catalogo from "./pages/Catalogo";
-import FacturacionProveedor from "./pages/FacturacionProveedor";
-import ProcesarPedido from "./pages/ProcesarPedido";
-import ListaClientes from "./pages/ListaClientes";
-import CrearCliente from "./pages/CrearCliente";
-import ActualizarCliente from "./pages/ActualizarCliente";
-import DetalleCliente from "./pages/DetallesCliente";
-import ListaEmpleados from "./pages/ListaEmpleados";
-import CrearEmpleado from "./pages/CrearEmpleado";
-import DetalleEmpleado from "./pages/DetallesEmpleado";
-import ActualizarEmpleado from "./pages/ActualizarEmpleado";
-import CrearFacturaProveedor from "./pages/CrearFacturaProveedor";
-import PagosCompras from "./pages/PagosCompras";
-import FormularioAbono from "./pages/FormularioAbono";
-import Ventas from "./pages/Ventas";
-import FacturaVenta from "./pages/FacturaVenta";
-import ListaFacturacionVentas from "./pages/ListaFacturacionVentas";
-import CrearFacturaServicioTecnico from "./pages/CrearFacturaServicioTecnico";
-import Login from "./pages/Login";
-import EstadisticasFinancieras from "./pages/EstadisticasFinancieras";
-import EstadisticasClientesProductos from "./pages/EstadisticasClientesProductos";
-import DetallesServicioTecnico from "./pages/DetallesServicioTecnico";
-import ActualizarServicioTecnico from "./pages/ActualizarServicioTecnico";
-
+// Contexto y utilidades
 import { disableReactDevTools } from "@fvilers/disable-react-devtools";
 import { CartProvider } from "./context/CartContext";
+
+// Componentes globales
+import Layout from "./components/Layout";
+import LandingPageNavbar from "./components/LandingNavbar";
+import PrivateRoute from "./components/PrivateRoute";
+
+// Clientes
+import ActualizarCliente from "./pages/clientes/ActualizarCliente";
+import CrearCliente from "./pages/clientes/CrearCliente";
+import DetallesCliente from "./pages/clientes/DetallesCliente";
+import ListaClientes from "./pages/clientes/ListaClientes";
+import SeleccionarCliente from "./pages/clientes/SeleccionarCliente";
+import SeleccionarClientePorSede from "./pages/clientes/SeleccionarClientePorSede";
+
+// Empleados
+import ActualizarEmpleado from "./pages/empleados/ActualizarEmpleado";
+import CrearEmpleado from "./pages/empleados/CrearEmpleado";
+import DetallesEmpleado from "./pages/empleados/DetallesEmpleado";
+import ListaEmpleados from "./pages/empleados/ListaEmpleados";
+
+// Estadísticas
+import EstadisticasClientesProductos from "./pages/estadisticas/EstadisticasClientesProductos";
+import EstadisticasFinancieras from "./pages/estadisticas/EstadisticasFinancieras";
+
+// General
+import Home from "./pages/general/Home";
+import LandingPage from "./pages/general/LandingPage";
+import Login from "./pages/general/Login";
+
+// Inventario
+import AnadirNovedad from "./pages/inventario/AnadirNovedad";
+import AnadirStock from "./pages/inventario/AnadirStock";
+import Inventario from "./pages/inventario/Inventario";
+
+// Productos
+import ActualizarProducto from "./pages/productos/ActualizarProducto";
+import ConsultaProducto from "./pages/productos/ConsultaProducto";
+import DetallesProducto from "./pages/productos/DetallesProducto";
+import ListaProducto from "./pages/productos/ListaProducto";
+import RegistroProducto from "./pages/productos/RegistroProducto";
+import SeleccionarProducto from "./pages/productos/SeleccionarProducto";
+import SeleccionarProductoGeneral from "./pages/productos/SeleccionarProductoGeneral";
+
+// Proveedores
+import ActualizarProveedor from "./pages/proveedores/ActualizarProveedor";
+import AsociarProveedores from "./pages/proveedores/AsociarProveedores";
+import Catalogo from "./pages/proveedores/Catalogo";
+import CrearFacturaProveedor from "./pages/proveedores/CrearFacturaProveedor";
+import DetallesProveedor from "./pages/proveedores/DetallesProveedor";
+import FacturacionProveedor from "./pages/proveedores/FacturacionProveedor";
+import FormularioAbono from "./pages/proveedores/FormularioAbono";
+import ListaProveedores from "./pages/proveedores/ListaProveedores";
+import PagosCompras from "./pages/proveedores/PagosCompras";
+import ProcesarPedido from "./pages/proveedores/ProcesarPedido";
+import RegistroProveedor from "./pages/proveedores/RegistroProveedor";
+import SeleccionarProveedor from "./pages/proveedores/SeleccionarProveedor";
+
+// Servicios Técnicos
+import ActualizarServicioTecnico from "./pages/serviciosTecnicos/ActualizarServicioTecnico";
+import CrearFacturaServicioTecnico from "./pages/serviciosTecnicos/CrearFacturaServicioTecnico";
+import DetallesServicioTecnico from "./pages/serviciosTecnicos/DetallesServicioTecnico";
+
+// Ventas
+import FacturaVenta from "./pages/ventas/FacturaVenta";
+import ListaFacturacionVentas from "./pages/ventas/ListaFacturacionVentas";
+import Ventas from "./pages/ventas/Ventas";
 
 if (process.env.NODE_ENV === "production") disableReactDevTools();
 
@@ -148,7 +175,7 @@ function App() {
             />
             <Route
               path="cliente/:id"
-              element={<PrivateRoute element={<DetalleCliente />} />}
+              element={<PrivateRoute element={<DetallesCliente />} />}
             />
             <Route
               path="empleados"
@@ -160,7 +187,7 @@ function App() {
             />
             <Route
               path="empleados/:id"
-              element={<PrivateRoute element={<DetalleEmpleado />} />}
+              element={<PrivateRoute element={<DetallesEmpleado />} />}
             />
             <Route
               path="empleados/editar/:id"

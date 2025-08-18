@@ -10,7 +10,6 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-import logo from "../media/logoCimove_noletras.png";
 
 // Estilos personalizados
 const styles = {
@@ -165,7 +164,7 @@ const Navbar = () => {
         onMouseLeave={() => setBrandHovered(false)}
       >
         <img
-          src={logo || "/placeholder.svg"}
+          src="/media/logoCimove_noletras.png"
           alt="CIMOVE Logo"
           style={{
             ...styles.logo,
