@@ -70,7 +70,7 @@ const HomeContent = () => {
         {/* Encabezado */}
         <div style={{ marginBottom: "24px" }}>
           <Title level={2} style={{ margin: 0, color: colors.primary }}>
-            Kper-shop - NIT:999-999-999
+            Kper-shop
           </Title>
           <Text type="secondary" style={{ fontSize: "16px" }}>
             Bienvenido al sistema de gestión

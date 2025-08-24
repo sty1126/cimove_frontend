@@ -72,6 +72,9 @@ import FacturaVenta from "./pages/ventas/FacturaVenta";
 import ListaFacturacionVentas from "./pages/ventas/ListaFacturacionVentas";
 import Ventas from "./pages/ventas/Ventas";
 
+// Notificaciones
+import Calendario from "./pages/notificaciones/Calendario";
+
 if (process.env.NODE_ENV === "production") disableReactDevTools();
 
 function App() {
@@ -232,6 +235,10 @@ function App() {
             <Route
               path="editar-servicio/:id"
               element={<PrivateRoute element={<ActualizarServicioTecnico />} />}
+            />
+            <Route
+              path="calendario"
+              element={<PrivateRoute element={<Calendario />} />}
             />
           </Route>
         </Routes>
