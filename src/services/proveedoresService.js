@@ -23,7 +23,7 @@ export const actualizarProveedor = async (id, datos) => {
 
 // Obtener tipos de proveedor
 export const obtenerTiposProveedor = async () => {
-  const response = await axios.get(`${BASE_URL}/tipos`);
+  const response = await axios.get(`${BASE_URL}/proveedores/tipos`);
   return response.data;
 };
 
@@ -199,7 +199,7 @@ export const procesarPedido = async (productosPayload) => {
 
 // Obtener ciudades
 export const getCiudades = async () => {
-  const response = await axios.get(`${BASE_URL}/ciudades/ciudades`);
+  const response = await axios.get(`${BASE_URL}/ciudades`);
   return response.data;
 };
 

@@ -484,9 +484,9 @@ const CrearCliente = () => {
                         warningOnly: true,
                       },
                       {
-                        max: 150,
+                        max: 30,
                         message:
-                          "La dirección no puede exceder los 150 caracteres",
+                          "La dirección no puede exceder los 40 caracteres",
                       },
                       {
                         pattern: validationPatterns.direccion,
@@ -495,7 +495,7 @@ const CrearCliente = () => {
                       },
                     ]}
                   >
-                    <Input placeholder="Ingrese dirección" maxLength={150} />
+                    <Input placeholder="Ingrese dirección" maxLength={30} />
                   </Form.Item>
                 </Col>
 
@@ -517,8 +517,8 @@ const CrearCliente = () => {
                         warningOnly: true,
                       },
                       {
-                        max: 50,
-                        message: "El barrio no puede exceder los 50 caracteres",
+                        max: 30,
+                        message: "El barrio no puede exceder los 30 caracteres",
                       },
                       {
                         pattern: validationPatterns.barrio,
@@ -527,7 +527,7 @@ const CrearCliente = () => {
                       },
                     ]}
                   >
-                    <Input placeholder="Ingrese barrio" maxLength={50} />
+                    <Input placeholder="Ingrese barrio" maxLength={30} />
                   </Form.Item>
                 </Col>
 
@@ -586,12 +586,13 @@ const CrearCliente = () => {
                         },
                         {
                           pattern: validationPatterns.nombreApellido,
+                          min:3,
                           message:
-                            "El nombre debe contener solo letras y espacios (mínimo 2 caracteres)",
+                            "El nombre debe contener solo letras y espacios (mínimo 3 caracteres)",
                         },
                       ]}
                     >
-                      <Input placeholder="Ingrese nombre" maxLength={50} />
+                      <Input placeholder="Ingrese nombre" maxLength={20} />
                     </Form.Item>
                   </Col>
 
@@ -612,11 +613,11 @@ const CrearCliente = () => {
                         {
                           pattern: validationPatterns.nombreApellido,
                           message:
-                            "El apellido debe contener solo letras y espacios (mínimo 2 caracteres)",
+                            "El apellido debe contener solo letras y espacios (mínimo 3 caracteres)",
                         },
                       ]}
                     >
-                      <Input placeholder="Ingrese apellido" maxLength={50} />
+                      <Input placeholder="Ingrese apellido" maxLength={20} />
                     </Form.Item>
                   </Col>
 

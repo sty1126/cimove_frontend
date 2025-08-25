@@ -55,7 +55,7 @@ export async function obtenerTiposCliente() {
 
 // Obtener todos los clientes
 export const obtenerClientes = async () => {
-  const response = await fetch(`${BASE_URL}/clientes`);
+  const response = await fetch(`${BASE_URL}/clientes/`);
   if (!response.ok) throw new Error("Error al obtener los clientes");
   return await response.json();
 };
@@ -63,7 +63,7 @@ export const obtenerClientes = async () => {
 // Cambiar estado de cliente (eliminar lógico)
 export const eliminarCliente = async (id) => {
   const response = await fetch(`${BASE_URL}/clientes/eliminar/${id}`, {
-    method: "PUT",
+    method: "DELETE",
     headers: {
       "Content-Type": "application/json",
     },

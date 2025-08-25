@@ -326,7 +326,7 @@ const FacturacionProveedor = () => {
   // Columnas para la tabla de facturas
   const columnasFacturas = [
     {
-      title: "N.º Factura",
+      title: "N.º movimiento",
       dataIndex: "id_facturaproveedor",
       key: "id_facturaproveedor",
       sorter: (a, b) => a.id_facturaproveedor - b.id_facturaproveedor,
@@ -421,7 +421,7 @@ const FacturacionProveedor = () => {
 
         return (
           <Popover
-            title="Productos en la factura"
+            title="Productos en el registro de movimiento"
             content={
               <List
                 size="small"
@@ -473,7 +473,7 @@ const FacturacionProveedor = () => {
           <Tooltip
             title={
               record.monto_facturaproveedor - record.total_abonado <= 0
-                ? "Factura completamente pagada"
+                ? "movimiento completamente pagado"
                 : "Registrar abono"
             }
           >
@@ -671,7 +671,7 @@ const FacturacionProveedor = () => {
           >
             <Title level={2} style={{ margin: 0, color: colors.primary }}>
               <FileTextOutlined style={{ marginRight: "12px" }} />
-              Facturación de Proveedores
+                Registro de Proveedores
             </Title>
             <Button
               type="primary"
@@ -682,7 +682,7 @@ const FacturacionProveedor = () => {
                 borderColor: colors.primary,
               }}
             >
-              Nueva Factura
+            Registrar movimiento
             </Button>
           </div>
 
@@ -696,7 +696,7 @@ const FacturacionProveedor = () => {
             <TabPane
               tab={
                 <span>
-                  <FileTextOutlined /> Facturas
+                  <FileTextOutlined /> Movimientos
                 </span>
               }
               key="facturas"
@@ -784,7 +784,7 @@ const FacturacionProveedor = () => {
               <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
                 <Col xs={24} md={6}>
                   <Input
-                    placeholder="Buscar factura..."
+                    placeholder="Buscar movimiento..."
                     prefix={
                       <SearchOutlined style={{ color: colors.primary }} />
                     }

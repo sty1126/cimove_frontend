@@ -56,16 +56,7 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
   }, [location]);
 
   // Estilos personalizados para el menú
-  const menuItemStyle = {
-    margin: "4px 0",
-    borderRadius: "6px",
-    transition: "all 0.3s ease",
-  };
 
-  const menuItemActiveStyle = {
-    backgroundColor: colors.active,
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-  };
 
   // Estilo personalizado para el título del grupo
   const groupTitleStyle = {
@@ -180,7 +171,7 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
                     to="/facturacion-ventas"
                     style={{ color: colors.text, fontWeight: "bold" }}
                   >
-                    Facturación
+                    Movimientos 
                   </NavLink>
                 ),
               },
@@ -215,7 +206,7 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
                     to="/facturacion-proveedor"
                     style={{ color: colors.text, fontWeight: "bold" }}
                   >
-                    Facturación
+                    Movimientos
                   </NavLink>
                 ),
               },

@@ -300,16 +300,16 @@ const ActualizarCliente = () => {
                             "El nombre solo debe contener letras y espacios",
                         },
                         {
-                          max: 50,
+                          max: 30,
                           message:
-                            "El nombre no puede exceder los 50 caracteres",
+                            "El nombre no puede exceder los 30 caracteres",
                         },
                       ]}
                     >
                       <Input
                         placeholder="Ingrese nombre"
                         disabled={submitting}
-                        maxLength={50}
+                        maxLength={30}
                       />
                     </Form.Item>
                   </Col>
@@ -333,16 +333,16 @@ const ActualizarCliente = () => {
                             "El apellido solo debe contener letras y espacios",
                         },
                         {
-                          max: 50,
+                          max: 30,
                           message:
-                            "El apellido no puede exceder los 50 caracteres",
+                            "El apellido no puede exceder los 30 caracteres",
                         },
                       ]}
                     >
                       <Input
                         placeholder="Ingrese apellido"
                         disabled={submitting}
-                        maxLength={50}
+                        maxLength={30}
                       />
                     </Form.Item>
                   </Col>
@@ -592,15 +592,15 @@ const ActualizarCliente = () => {
                       message: "El barrio contiene caracteres no permitidos",
                     },
                     {
-                      max: 50,
-                      message: "El barrio no puede exceder los 50 caracteres",
+                      max: 30,
+                      message: "El barrio no puede exceder los 30 caracteres",
                     },
                   ]}
                 >
                   <Input
                     placeholder="Ingrese barrio"
                     disabled={submitting}
-                    maxLength={50}
+                    maxLength={30}
                   />
                 </Form.Item>
               </Col>

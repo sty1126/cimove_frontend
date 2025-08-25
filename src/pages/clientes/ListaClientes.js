@@ -524,6 +524,7 @@ const ListaClientes = () => {
                 placeholder="Buscar por ID, nombre o razón social..."
                 prefix={<SearchOutlined style={{ color: colors.primary }} />}
                 value={filtro}
+                maxLength={20}
                 onChange={(e) => setFiltro(e.target.value)}
                 allowClear
                 size="large"

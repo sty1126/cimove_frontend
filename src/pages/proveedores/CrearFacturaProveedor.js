@@ -288,7 +288,7 @@ const CrearFacturaProveedor = () => {
           <Space>
             <FileTextOutlined style={{ fontSize: "24px", color: "#1890ff" }} />
             <Title level={4} style={{ margin: 0 }}>
-              Crear Factura de Proveedor
+              Crear movimiento financiero de Proveedor
             </Title>
           </Space>
         }
@@ -352,7 +352,7 @@ const CrearFacturaProveedor = () => {
                 label={
                   <Space>
                     <CalendarOutlined />
-                    <span>Fecha de Factura</span>
+                    <span>Fecha de movimiento financiero</span>
                   </Space>
                 }
                 name="fecha_facturaproveedor"
@@ -360,7 +360,7 @@ const CrearFacturaProveedor = () => {
                 rules={[
                   {
                     required: true,
-                    message: "Por favor seleccione una fecha de factura",
+                    message: "Por favor seleccione una fecha del movimiento financiero",
                   },
                 ]}
                 style={{ flex: "1", minWidth: "200px" }}
@@ -489,7 +489,7 @@ const CrearFacturaProveedor = () => {
                 disabled={productos.length === 0 || validationErrors.length > 0}
                 icon={<CheckCircleOutlined />}
               >
-                Registrar Factura
+                Registrar movimiento
               </Button>
             </Form.Item>
           </div>
