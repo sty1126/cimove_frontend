@@ -1,20 +1,7 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import {
-  Card,
-  Button,
-  Typography,
-  Space,
-  List,
-  Tag,
-  Spin,
-  Empty,
-  Popconfirm,
-  message,
-  Tabs,
-  Badge,
-} from "antd";
+import { useState, useEffect } from "react"
+import { Card, Button, Typography, Space, List, Tag, Spin, Empty, Popconfirm, message, Tabs, Badge } from "antd"
 import {
   LeftOutlined,
   RightOutlined,
@@ -26,19 +13,19 @@ import {
   DeleteOutlined,
   UndoOutlined,
   CheckCircleOutlined,
-} from "@ant-design/icons";
-import ModalCrearNotificacion from "./CrearNotificacion";
-import ModalModificarNotificacion from "./ModificarNotificacion";
+} from "@ant-design/icons"
+import ModalCrearNotificacion from "./CrearNotificacion"
+import ModalModificarNotificacion from "./ModificarNotificacion"
 import {
   getNotificaciones,
   getNotificacionesCompletadas,
   marcarNotificacionCompletada,
   restaurarNotificacionPendiente,
   eliminarNotificacion,
-} from "../../services/notificacionesService";
+} from "../../services/notificacionesService"
 
-const { Title, Text } = Typography;
-const { TabPane } = Tabs;
+const { Title, Text } = Typography
+const { TabPane } = Tabs
 
 // Paleta de colores personalizada
 const colors = {
@@ -54,30 +41,26 @@ const colors = {
   white: "#FFFFFF",
   lightGray: "#F5F5F5",
   mediumGray: "#D9D9D9",
-};
+}
 
 const Calendario = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [modalCrearVisible, setModalCrearVisible] = useState(false);
-  const [modalModificarVisible, setModalModificarVisible] = useState(false);
-  const [notificaciones, setNotificaciones] = useState([]);
-  const [notificacionesCompletadas, setNotificacionesCompletadas] = useState(
-    []
-  );
-  const [loading, setLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState({});
-  const [selectedNotificacionForEdit, setSelectedNotificacionForEdit] =
-    useState(null);
-  const [activeTab, setActiveTab] = useState("pendientes");
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedDay, setSelectedDay] = useState(null)
+  const [modalCrearVisible, setModalCrearVisible] = useState(false)
+  const [modalModificarVisible, setModalModificarVisible] = useState(false)
+  const [notificaciones, setNotificaciones] = useState([])
+  const [notificacionesCompletadas, setNotificacionesCompletadas] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [actionLoading, setActionLoading] = useState({})
+  const [selectedNotificacionForEdit, setSelectedNotificacionForEdit] = useState(null)
+  const [activeTab, setActiveTab] = useState("pendientes")
 
   // Obtener información del mes actual
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  const today = new Date();
-  const isCurrentMonth =
-    today.getFullYear() === year && today.getMonth() === month;
-  const todayDate = today.getDate();
+  const year = currentDate.getFullYear()
+  const month = currentDate.getMonth()
+  const today = new Date()
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month
+  const todayDate = today.getDate()
 
   // Nombres de los meses y días
   const monthNames = [
@@ -93,212 +76,216 @@ const Calendario = () => {
     "Octubre",
     "Noviembre",
     "Diciembre",
-  ];
+  ]
 
-  const dayNames = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
+  const dayNames = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"]
 
   // Cargar notificaciones
   const cargarNotificaciones = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const data = await getNotificaciones();
-      setNotificaciones(data);
+      const data = await getNotificaciones()
+      setNotificaciones(data)
     } catch (error) {
-      console.error("Error al cargar notificaciones:", error);
-      message.error("Error al cargar las notificaciones");
+      console.error("Error al cargar notificaciones:", error)
+      message.error("Error al cargar las notificaciones")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Cargar notificaciones completadas
   const cargarNotificacionesCompletadas = async () => {
     try {
-      const data = await getNotificacionesCompletadas();
-      setNotificacionesCompletadas(data);
+      const data = await getNotificacionesCompletadas()
+      setNotificacionesCompletadas(data)
     } catch (error) {
-      console.error("Error al cargar notificaciones completadas:", error);
-      message.error("Error al cargar las notificaciones completadas");
+      console.error("Error al cargar notificaciones completadas:", error)
+      message.error("Error al cargar las notificaciones completadas")
     }
-  };
+  }
 
   // Cargar notificaciones al montar el componente y al cambiar de mes
   useEffect(() => {
-    cargarNotificaciones();
-    cargarNotificacionesCompletadas();
-  }, [currentDate]);
+    cargarNotificaciones()
+    cargarNotificacionesCompletadas()
+  }, [currentDate])
 
-  // Función para verificar si un día tiene notificaciones
   const getDayNotifications = (day, month, year) => {
-    const dayDate = new Date(year, month, day);
-    return notificaciones.filter((notif) => {
-      const fechaInicio = new Date(notif.fechainicio_notificacion);
-      const fechaFin = new Date(notif.fechafin_notificacion);
-      return dayDate >= fechaInicio && dayDate <= fechaFin;
-    });
-  };
+    const dayDate = new Date(year, month, day)
+    const pendingNotifications = notificaciones.filter((notif) => {
+      // Only include non-completed notifications
+      if (notif.estado_notificacion === "C") return false
+
+      const fechaInicio = new Date(notif.fechainicio_notificacion)
+      const fechaFin = new Date(notif.fechafin_notificacion)
+      return dayDate >= fechaInicio && dayDate <= fechaFin
+    })
+
+    // Sort by urgency: U (Urgent) first, then N (Normal), then B (Low)
+    return pendingNotifications.sort((a, b) => {
+      const urgencyOrder = { U: 0, N: 1, B: 2 }
+      return urgencyOrder[a.urgencia_notificacion] - urgencyOrder[b.urgencia_notificacion]
+    })
+  }
 
   // Función para obtener el color del borde del día según la urgencia más alta
   const getDayBorderColor = (dayNotifications) => {
-    if (dayNotifications.length === 0) return "transparent";
+    if (dayNotifications.length === 0) return "transparent"
 
     // Buscar la urgencia más alta
-    const hasUrgent = dayNotifications.some(
-      (notif) => notif.urgencia_notificacion === "U"
-    );
-    const hasNormal = dayNotifications.some(
-      (notif) => notif.urgencia_notificacion === "N"
-    );
+    const hasUrgent = dayNotifications.some((notif) => notif.urgencia_notificacion === "U")
+    const hasNormal = dayNotifications.some((notif) => notif.urgencia_notificacion === "N")
 
-    if (hasUrgent) return colors.danger;
-    if (hasNormal) return colors.warning;
-    return colors.success;
-  };
+    if (hasUrgent) return colors.danger
+    if (hasNormal) return colors.warning
+    return colors.success
+  }
 
   // Función para obtener el color del indicador según la urgencia
   const getUrgencyColor = (urgencia) => {
     switch (urgencia) {
       case "U": // Urgente
-        return colors.danger;
+        return colors.danger
       case "N": // Normal
-        return colors.warning;
+        return colors.warning
       case "B": // Baja/No urgente
-        return colors.success;
+        return colors.success
       default:
-        return colors.accent;
+        return colors.accent
     }
-  };
+  }
 
   // Función para obtener el color del estado
   const getStatusColor = (estado) => {
     switch (estado) {
       case "P": // Pendiente
-        return colors.warning;
+        return colors.warning
       case "E": // En proceso
-        return colors.accent;
+        return colors.accent
       case "A": // Activo
-        return colors.success;
+        return colors.success
       case "C": // Completado
-        return colors.mediumGray;
+        return colors.mediumGray
       default:
-        return colors.primary;
+        return colors.primary
     }
-  };
+  }
 
   // Función para obtener el texto del estado
   const getStatusText = (estado) => {
     switch (estado) {
       case "P":
-        return "Pendiente";
+        return "Pendiente"
       case "E":
-        return "En Proceso";
+        return "En Proceso"
       case "A":
-        return "Activo";
+        return "Activo"
       case "C":
-        return "Completado";
+        return "Completado"
       default:
-        return "Desconocido";
+        return "Desconocido"
     }
-  };
+  }
 
   // Función para obtener el texto de urgencia
   const getUrgencyText = (urgencia) => {
     switch (urgencia) {
       case "U":
-        return "Urgente";
+        return "Urgente"
       case "N":
-        return "Normal";
+        return "Normal"
       case "B":
-        return "No Urgente";
+        return "No Urgente"
       default:
-        return "Normal";
+        return "Normal"
     }
-  };
+  }
 
   // Marcar notificación como completada
   const handleMarcarCompletado = async (notificacion) => {
     setActionLoading((prev) => ({
       ...prev,
       [`complete_${notificacion.id_notificacion}`]: true,
-    }));
+    }))
     try {
-      await marcarNotificacionCompletada(notificacion.id_notificacion);
-      message.success("Notificación marcada como completada");
-      await cargarNotificaciones();
-      await cargarNotificacionesCompletadas();
+      await marcarNotificacionCompletada(notificacion.id_notificacion)
+      message.success("Notificación marcada como completada")
+      await cargarNotificaciones()
+      await cargarNotificacionesCompletadas()
     } catch (error) {
-      console.error("Error al marcar como completado:", error);
-      message.error("Error al marcar la notificación como completada");
+      console.error("Error al marcar como completado:", error)
+      message.error("Error al marcar la notificación como completada")
     } finally {
       setActionLoading((prev) => ({
         ...prev,
         [`complete_${notificacion.id_notificacion}`]: false,
-      }));
+      }))
     }
-  };
+  }
 
   // Restaurar notificación a pendiente
   const handleRestaurarPendiente = async (notificacion) => {
     setActionLoading((prev) => ({
       ...prev,
       [`restore_${notificacion.id_notificacion}`]: true,
-    }));
+    }))
     try {
-      await restaurarNotificacionPendiente(notificacion.id_notificacion);
-      message.success("Notificación restaurada a pendiente");
-      await cargarNotificaciones();
-      await cargarNotificacionesCompletadas();
+      await restaurarNotificacionPendiente(notificacion.id_notificacion)
+      message.success("Notificación restaurada a pendiente")
+      await cargarNotificaciones()
+      await cargarNotificacionesCompletadas()
     } catch (error) {
-      console.error("Error al restaurar notificación:", error);
-      message.error("Error al restaurar la notificación");
+      console.error("Error al restaurar notificación:", error)
+      message.error("Error al restaurar la notificación")
     } finally {
       setActionLoading((prev) => ({
         ...prev,
         [`restore_${notificacion.id_notificacion}`]: false,
-      }));
+      }))
     }
-  };
+  }
 
   // Eliminar notificación
   const handleEliminarNotificacion = async (notificacion) => {
     setActionLoading((prev) => ({
       ...prev,
       [`delete_${notificacion.id_notificacion}`]: true,
-    }));
+    }))
     try {
-      await eliminarNotificacion(notificacion.id_notificacion);
-      message.success("Notificación eliminada exitosamente");
-      await cargarNotificaciones();
-      await cargarNotificacionesCompletadas();
+      await eliminarNotificacion(notificacion.id_notificacion)
+      message.success("Notificación eliminada exitosamente")
+      await cargarNotificaciones()
+      await cargarNotificacionesCompletadas()
     } catch (error) {
-      console.error("Error al eliminar notificación:", error);
-      message.error("Error al eliminar la notificación");
+      console.error("Error al eliminar notificación:", error)
+      message.error("Error al eliminar la notificación")
     } finally {
       setActionLoading((prev) => ({
         ...prev,
         [`delete_${notificacion.id_notificacion}`]: false,
-      }));
+      }))
     }
-  };
+  }
 
   // Editar notificación
   const handleEditarNotificacion = (notificacion) => {
-    setSelectedNotificacionForEdit(notificacion);
-    setModalModificarVisible(true);
-  };
+    setSelectedNotificacionForEdit(notificacion)
+    setModalModificarVisible(true)
+  }
 
   // Obtener el primer día del mes y la cantidad de días
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
-  const daysInMonth = lastDayOfMonth.getDate();
-  const startingDayOfWeek = (firstDayOfMonth.getDay() + 6) % 7;
+  const firstDayOfMonth = new Date(year, month, 1)
+  const lastDayOfMonth = new Date(year, month + 1, 0)
+  const daysInMonth = lastDayOfMonth.getDate()
+  const startingDayOfWeek = (firstDayOfMonth.getDay() + 6) % 7
 
   // Obtener días del mes anterior para completar la primera semana
-  const prevMonth = new Date(year, month - 1, 0);
-  const daysInPrevMonth = prevMonth.getDate();
+  const prevMonth = new Date(year, month - 1, 0)
+  const daysInPrevMonth = prevMonth.getDate()
 
   // Generar array de días para mostrar
-  const calendarDays = [];
+  const calendarDays = []
 
   // Días del mes anterior
   for (let i = startingDayOfWeek - 1; i >= 0; i--) {
@@ -306,7 +293,7 @@ const Calendario = () => {
       day: daysInPrevMonth - i,
       isCurrentMonth: false,
       isPrevMonth: true,
-    });
+    })
   }
 
   // Días del mes actual
@@ -316,70 +303,68 @@ const Calendario = () => {
       isCurrentMonth: true,
       isPrevMonth: false,
       isToday: isCurrentMonth && day === todayDate,
-    });
+    })
   }
 
   // Días del siguiente mes para completar la última semana
-  const remainingDays = 42 - calendarDays.length;
+  const remainingDays = 42 - calendarDays.length
   for (let day = 1; day <= remainingDays; day++) {
     calendarDays.push({
       day,
       isCurrentMonth: false,
       isPrevMonth: false,
-    });
+    })
   }
 
   // Navegación entre meses
   const goToPreviousMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-    setSelectedDay(null);
-  };
+    setCurrentDate(new Date(year, month - 1, 1))
+    setSelectedDay(null)
+  }
 
   const goToNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
-    setSelectedDay(null);
-  };
+    setCurrentDate(new Date(year, month + 1, 1))
+    setSelectedDay(null)
+  }
 
   // Seleccionar día
   const selectDay = (dayInfo) => {
     if (dayInfo.isCurrentMonth) {
-      setSelectedDay(dayInfo.day);
-      setActiveTab("pendientes"); // Cambiar a la pestaña de pendientes al seleccionar día
+      setSelectedDay(dayInfo.day)
+      setActiveTab("pendientes") // Cambiar a la pestaña de pendientes al seleccionar día
     }
-  };
+  }
 
   // Abrir modal para crear notificación
   const handleAgregarNotificacion = () => {
-    setModalCrearVisible(true);
-  };
+    setModalCrearVisible(true)
+  }
 
   // Abrir modal para modificar notificación
   const handleModificarNotificacion = () => {
-    setModalModificarVisible(true);
-  };
+    setModalModificarVisible(true)
+  }
 
   // Cerrar modales
   const handleCloseModalCrear = () => {
-    setModalCrearVisible(false);
-  };
+    setModalCrearVisible(false)
+  }
 
   const handleCloseModalModificar = () => {
-    setModalModificarVisible(false);
-    setSelectedNotificacionForEdit(null);
-  };
+    setModalModificarVisible(false)
+    setSelectedNotificacionForEdit(null)
+  }
 
   // Éxito al crear/modificar notificación
   const handleSuccessModal = () => {
-    setModalCrearVisible(false);
-    setModalModificarVisible(false);
-    cargarNotificaciones();
-    cargarNotificacionesCompletadas();
-  };
+    setModalCrearVisible(false)
+    setModalModificarVisible(false)
+    cargarNotificaciones()
+    cargarNotificacionesCompletadas()
+  }
 
   // Obtener notificaciones del día seleccionado
-  const selectedDayNotifications = selectedDay
-    ? getDayNotifications(selectedDay, month, year)
-    : [];
+  const selectedDayNotifications = selectedDay ? getDayNotifications(selectedDay, month, year) : []
 
   return (
     <div
@@ -413,10 +398,7 @@ const Calendario = () => {
               gap: "16px",
             }}
           >
-            <Title
-              level={window.innerWidth <= 768 ? 3 : 2}
-              style={{ margin: 0, color: colors.primary }}
-            >
+            <Title level={window.innerWidth <= 768 ? 3 : 2} style={{ margin: 0, color: colors.primary }}>
               📅 Calendario de Notificaciones
             </Title>
 
@@ -453,9 +435,7 @@ const Calendario = () => {
                   fontWeight: "500",
                 }}
               >
-                {window.innerWidth <= 768
-                  ? "Gestionar"
-                  : "Gestionar notificaciones"}
+                {window.innerWidth <= 768 ? "Gestionar" : "Gestionar notificaciones"}
               </Button>
             </Space>
           </div>
@@ -553,15 +533,12 @@ const Calendario = () => {
           }}
         >
           {calendarDays.map((dayInfo, index) => {
-            const isSelected =
-              selectedDay === dayInfo.day && dayInfo.isCurrentMonth;
-            const isToday = dayInfo.isToday;
+            const isSelected = selectedDay === dayInfo.day && dayInfo.isCurrentMonth
+            const isToday = dayInfo.isToday
 
             // Obtener notificaciones para este día
-            const dayNotifications = dayInfo.isCurrentMonth
-              ? getDayNotifications(dayInfo.day, month, year)
-              : [];
-            const borderColor = getDayBorderColor(dayNotifications);
+            const dayNotifications = dayInfo.isCurrentMonth ? getDayNotifications(dayInfo.day, month, year) : []
+            const borderColor = getDayBorderColor(dayNotifications)
 
             return (
               <div
@@ -575,43 +552,32 @@ const Calendario = () => {
                   justifyContent: "center",
                   borderRadius: "6px",
                   cursor: dayInfo.isCurrentMonth ? "pointer" : "default",
-                  backgroundColor: isSelected
-                    ? colors.primary
-                    : isToday
-                    ? `${colors.accent}40`
-                    : "transparent",
-                  color: isSelected
-                    ? colors.white
-                    : dayInfo.isCurrentMonth
-                    ? colors.text
-                    : colors.mediumGray,
+                  backgroundColor: isSelected ? colors.primary : isToday ? `${colors.accent}40` : "transparent",
+                  color: isSelected ? colors.white : dayInfo.isCurrentMonth ? colors.text : colors.mediumGray,
                   fontWeight: isToday || isSelected ? "600" : "400",
                   fontSize: window.innerWidth <= 768 ? "14px" : "16px",
                   border: isSelected
                     ? `3px solid ${colors.primary}`
                     : isToday && !isSelected
-                    ? `2px solid ${colors.accent}`
-                    : dayNotifications.length > 0
-                    ? `2px solid ${borderColor}`
-                    : "2px solid transparent",
+                      ? `2px solid ${colors.accent}`
+                      : dayNotifications.length > 0
+                        ? `2px solid ${borderColor}`
+                        : "2px solid transparent",
                   transition: "all 0.2s ease",
                   position: "relative",
                   padding: "4px",
-                  boxShadow:
-                    dayNotifications.length > 0 && !isSelected
-                      ? `0 0 0 1px ${borderColor}20`
-                      : "none",
+                  boxShadow: dayNotifications.length > 0 && !isSelected ? `0 0 0 1px ${borderColor}20` : "none",
                 }}
                 onMouseEnter={(e) => {
                   if (dayInfo.isCurrentMonth && !isSelected) {
-                    e.target.style.backgroundColor = `${colors.light}60`;
+                    e.target.style.backgroundColor = `${colors.light}60`
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (dayInfo.isCurrentMonth && !isSelected && !isToday) {
-                    e.target.style.backgroundColor = "transparent";
+                    e.target.style.backgroundColor = "transparent"
                   } else if (isToday && !isSelected) {
-                    e.target.style.backgroundColor = `${colors.accent}40`;
+                    e.target.style.backgroundColor = `${colors.accent}40`
                   }
                 }}
               >
@@ -628,26 +594,19 @@ const Calendario = () => {
                       justifyContent: "center",
                     }}
                   >
-                    {dayNotifications
-                      .slice(0, window.innerWidth <= 768 ? 2 : 3)
-                      .map((notif, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            width: window.innerWidth <= 768 ? "4px" : "6px",
-                            height: window.innerWidth <= 768 ? "4px" : "6px",
-                            borderRadius: "50%",
-                            backgroundColor: getUrgencyColor(
-                              notif.urgencia_notificacion
-                            ),
-                            border: `1px solid ${
-                              isSelected ? colors.white : colors.white
-                            }`,
-                          }}
-                        />
-                      ))}
-                    {dayNotifications.length >
-                      (window.innerWidth <= 768 ? 2 : 3) && (
+                    {dayNotifications.slice(0, window.innerWidth <= 768 ? 2 : 3).map((notif, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          width: window.innerWidth <= 768 ? "4px" : "6px",
+                          height: window.innerWidth <= 768 ? "4px" : "6px",
+                          borderRadius: "50%",
+                          backgroundColor: getUrgencyColor(notif.urgencia_notificacion),
+                          border: `1px solid ${isSelected ? colors.white : colors.white}`,
+                        }}
+                      />
+                    ))}
+                    {dayNotifications.length > (window.innerWidth <= 768 ? 2 : 3) && (
                       <div
                         style={{
                           fontSize: window.innerWidth <= 768 ? "6px" : "8px",
@@ -655,15 +614,13 @@ const Calendario = () => {
                           fontWeight: "bold",
                         }}
                       >
-                        +
-                        {dayNotifications.length -
-                          (window.innerWidth <= 768 ? 2 : 3)}
+                        +{dayNotifications.length - (window.innerWidth <= 768 ? 2 : 3)}
                       </div>
                     )}
                   </div>
                 )}
               </div>
-            );
+            )
           })}
         </div>
 
@@ -725,13 +682,10 @@ const Calendario = () => {
                       ? ` ${selectedDay}`
                       : " Pendientes"
                     : selectedDay
-                    ? ` ${selectedDay} de ${monthNames[month]}`
-                    : " Notificaciones"}
+                      ? ` ${selectedDay} de ${monthNames[month]}`
+                      : " Notificaciones"}
                   {selectedDayNotifications.length > 0 && (
-                    <Badge
-                      count={selectedDayNotifications.length}
-                      style={{ marginLeft: "8px" }}
-                    />
+                    <Badge count={selectedDayNotifications.length} style={{ marginLeft: "8px" }} />
                   )}
                 </span>
               ),
@@ -775,9 +729,7 @@ const Calendario = () => {
                                     width: "8px",
                                     height: "8px",
                                     borderRadius: "50%",
-                                    backgroundColor: getUrgencyColor(
-                                      notif.urgencia_notificacion
-                                    ),
+                                    backgroundColor: getUrgencyColor(notif.urgencia_notificacion),
                                     display: "inline-block",
                                     marginLeft: "8px",
                                   }}
@@ -796,9 +748,7 @@ const Calendario = () => {
                                   type="text"
                                   size="small"
                                   icon={<EditOutlined />}
-                                  onClick={() =>
-                                    handleEditarNotificacion(notif)
-                                  }
+                                  onClick={() => handleEditarNotificacion(notif)}
                                   style={{
                                     color: colors.primary,
                                     padding: "4px",
@@ -814,14 +764,8 @@ const Calendario = () => {
                                     type="text"
                                     size="small"
                                     icon={<CheckOutlined />}
-                                    onClick={() =>
-                                      handleMarcarCompletado(notif)
-                                    }
-                                    loading={
-                                      actionLoading[
-                                        `complete_${notif.id_notificacion}`
-                                      ]
-                                    }
+                                    onClick={() => handleMarcarCompletado(notif)}
+                                    loading={actionLoading[`complete_${notif.id_notificacion}`]}
                                     style={{
                                       color: colors.success,
                                       padding: "4px",
@@ -836,9 +780,7 @@ const Calendario = () => {
                                 <Popconfirm
                                   title="¿Eliminar notificación?"
                                   description="Esta acción no se puede deshacer"
-                                  onConfirm={() =>
-                                    handleEliminarNotificacion(notif)
-                                  }
+                                  onConfirm={() => handleEliminarNotificacion(notif)}
                                   okText="Sí, eliminar"
                                   cancelText="Cancelar"
                                   okButtonProps={{
@@ -852,11 +794,7 @@ const Calendario = () => {
                                     type="text"
                                     size="small"
                                     icon={<DeleteOutlined />}
-                                    loading={
-                                      actionLoading[
-                                        `delete_${notif.id_notificacion}`
-                                      ]
-                                    }
+                                    loading={actionLoading[`delete_${notif.id_notificacion}`]}
                                     style={{
                                       color: colors.danger,
                                       padding: "4px",
@@ -891,17 +829,13 @@ const Calendario = () => {
                               }}
                             >
                               <Tag
-                                color={getStatusColor(
-                                  notif.estado_notificacion
-                                )}
+                                color={getStatusColor(notif.estado_notificacion)}
                                 style={{ fontSize: "10px", padding: "2px 6px" }}
                               >
                                 {getStatusText(notif.estado_notificacion)}
                               </Tag>
                               <Tag
-                                color={getUrgencyColor(
-                                  notif.urgencia_notificacion
-                                )}
+                                color={getUrgencyColor(notif.urgencia_notificacion)}
                                 style={{ fontSize: "10px", padding: "2px 6px" }}
                               >
                                 {getUrgencyText(notif.urgencia_notificacion)}
@@ -914,9 +848,7 @@ const Calendario = () => {
                                 color: colors.mediumGray,
                               }}
                             >
-                              <ClockCircleOutlined
-                                style={{ marginRight: "4px" }}
-                              />
+                              <ClockCircleOutlined style={{ marginRight: "4px" }} />
                               {notif.horainicio_notificacion?.substring(0, 5)} -{" "}
                               {notif.horafin_notificacion?.substring(0, 5)}
                             </div>
@@ -938,12 +870,8 @@ const Calendario = () => {
                         color: colors.mediumGray,
                       }}
                     >
-                      <CalendarOutlined
-                        style={{ fontSize: "48px", marginBottom: "16px" }}
-                      />
-                      <Text type="secondary">
-                        Haz clic en un día para ver sus notificaciones
-                      </Text>
+                      <CalendarOutlined style={{ fontSize: "48px", marginBottom: "16px" }} />
+                      <Text type="secondary">Haz clic en un día para ver sus notificaciones</Text>
                     </div>
                   )}
                 </div>
@@ -956,10 +884,7 @@ const Calendario = () => {
                   <CheckCircleOutlined />
                   Completadas
                   {notificacionesCompletadas.length > 0 && (
-                    <Badge
-                      count={notificacionesCompletadas.length}
-                      style={{ marginLeft: "8px" }}
-                    />
+                    <Badge count={notificacionesCompletadas.length} style={{ marginLeft: "8px" }} />
                   )}
                 </span>
               ),
@@ -1023,14 +948,8 @@ const Calendario = () => {
                                   type="text"
                                   size="small"
                                   icon={<UndoOutlined />}
-                                  onClick={() =>
-                                    handleRestaurarPendiente(notif)
-                                  }
-                                  loading={
-                                    actionLoading[
-                                      `restore_${notif.id_notificacion}`
-                                    ]
-                                  }
+                                  onClick={() => handleRestaurarPendiente(notif)}
+                                  loading={actionLoading[`restore_${notif.id_notificacion}`]}
                                   style={{
                                     color: colors.warning,
                                     padding: "4px",
@@ -1044,9 +963,7 @@ const Calendario = () => {
                                 <Popconfirm
                                   title="¿Eliminar notificación completada?"
                                   description="Esta acción no se puede deshacer"
-                                  onConfirm={() =>
-                                    handleEliminarNotificacion(notif)
-                                  }
+                                  onConfirm={() => handleEliminarNotificacion(notif)}
                                   okText="Sí, eliminar"
                                   cancelText="Cancelar"
                                   okButtonProps={{
@@ -1060,11 +977,7 @@ const Calendario = () => {
                                     type="text"
                                     size="small"
                                     icon={<DeleteOutlined />}
-                                    loading={
-                                      actionLoading[
-                                        `delete_${notif.id_notificacion}`
-                                      ]
-                                    }
+                                    loading={actionLoading[`delete_${notif.id_notificacion}`]}
                                     style={{
                                       color: colors.danger,
                                       padding: "4px",
@@ -1099,16 +1012,11 @@ const Calendario = () => {
                                 marginBottom: "8px",
                               }}
                             >
-                              <Tag
-                                color={colors.success}
-                                style={{ fontSize: "10px", padding: "2px 6px" }}
-                              >
+                              <Tag color={colors.success} style={{ fontSize: "10px", padding: "2px 6px" }}>
                                 Completado
                               </Tag>
                               <Tag
-                                color={getUrgencyColor(
-                                  notif.urgencia_notificacion
-                                )}
+                                color={getUrgencyColor(notif.urgencia_notificacion)}
                                 style={{
                                   fontSize: "10px",
                                   padding: "2px 6px",
@@ -1126,9 +1034,7 @@ const Calendario = () => {
                                 opacity: 0.7,
                               }}
                             >
-                              <ClockCircleOutlined
-                                style={{ marginRight: "4px" }}
-                              />
+                              <ClockCircleOutlined style={{ marginRight: "4px" }} />
                               {notif.horainicio_notificacion?.substring(0, 5)} -{" "}
                               {notif.horafin_notificacion?.substring(0, 5)}
                             </div>
@@ -1167,7 +1073,7 @@ const Calendario = () => {
         selectedNotificacion={selectedNotificacionForEdit}
       />
     </div>
-  );
-};
+  )
+}
 
-export default Calendario;
+export default Calendario
