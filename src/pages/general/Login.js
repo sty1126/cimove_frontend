@@ -158,7 +158,7 @@ const Login = () => {
                   onChange={handleEmailChange}
                   placeholder="Correo electrónico"
                   required
-                  maxLength={254}
+                  maxLength={40}
                 />
               </div>
               {errors.identificacion && (
@@ -178,7 +178,7 @@ const Login = () => {
                   placeholder="Contraseña"
                   required
                   minLength={6}
-                  maxLength={72}
+                  maxLength={25}
                 />
               </div>
               {errors.contrasena && (

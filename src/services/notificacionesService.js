@@ -24,6 +24,11 @@ export const crearNotificacion = async (notificacionData) => {
   return response.data;
 };
 
+export const probarEnvioCorreo = async () => {
+  const response = await axios.get(`${BASE_URL}/notificaciones/test-email`);
+  return response.data;
+};
+
 // Actualizar notificación
 export const actualizarNotificacion = async (id, notificacionData) => {
   const response = await axios.put(
