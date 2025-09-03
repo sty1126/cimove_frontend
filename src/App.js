@@ -33,6 +33,7 @@ import EstadisticasFinancieras from "./pages/estadisticas/EstadisticasFinanciera
 import Home from "./pages/general/Home";
 import LandingPage from "./pages/general/LandingPage";
 import Login from "./pages/general/Login";
+import ResetPassword from "./pages/general/ResetPassword";
 
 // Inventario
 import AnadirNovedad from "./pages/inventario/AnadirNovedad";
@@ -95,7 +96,8 @@ function App() {
 
           {/* LOGIN */}
           <Route path="/login" element={<Login />} />
-
+          <Route path="/reset-password" element={<ResetPassword />} />
+          
           {/* TODAS LAS DEMÁS PÁGINAS */}
           <Route path="/*" element={<Layout />}>
             {/* Rutas protegidas por autenticación */}
