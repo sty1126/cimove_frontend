@@ -26,8 +26,7 @@ import DetallesEmpleado from "./pages/empleados/DetallesEmpleado";
 import ListaEmpleados from "./pages/empleados/ListaEmpleados";
 
 // Estadísticas
-import EstadisticasClientesProductos from "./pages/estadisticas/EstadisticasClientesProductos";
-import EstadisticasFinancieras from "./pages/estadisticas/EstadisticasFinancieras";
+import Estadisticas from "./pages/estadisticas/Estadisticas";
 
 // General
 import Home from "./pages/general/Home";
@@ -219,14 +218,8 @@ function App() {
               }
             />
             <Route
-              path="estadisticas-financieras"
-              element={<PrivateRoute element={<EstadisticasFinancieras />} />}
-            />
-            <Route
-              path="estadisticas-clienteproducto"
-              element={
-                <PrivateRoute element={<EstadisticasClientesProductos />} />
-              }
+              path="estadisticas"
+              element={<PrivateRoute element={<Estadisticas />} />}
             />
             <Route
               path="detalles-servicio/:id"

@@ -44,9 +44,8 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
       "/inventario": "9",
       "/productos-vendidos": "10",
       "/calendario": "11",
-      "/estadisticas-financieras": "12",
+      "/estadisticas": "12",
       "/empleados": "13",
-      "/estadisticas-clienteproducto": "14",
     };
 
     const key = routeToKey[path];
@@ -274,22 +273,10 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
                 icon: <FaIcons.FaChartBar />,
                 label: !collapsed && (
                   <NavLink
-                    to="/estadisticas-financieras"
+                    to="/estadisticas"
                     style={{ color: colors.text, fontWeight: "bold" }}
                   >
-                    Estadísticas financieras
-                  </NavLink>
-                ),
-              },
-              {
-                key: "14",
-                icon: <FaIcons.FaChartPie />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/estadisticas-clienteproducto"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Estadísticas cliente-producto
+                    Estadísticas
                   </NavLink>
                 ),
               },
