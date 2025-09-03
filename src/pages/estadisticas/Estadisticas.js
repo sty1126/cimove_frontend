@@ -1,104 +1,288 @@
-"use client"
+"use client";
 
-import { Card, Row, Col, Table, Button } from "react-bootstrap"
-import { DollarSign, TrendingUp, TrendingDown, PieChart, FileText } from "lucide-react"
+import { useState } from "react";
+import {
+  Container,
+  Card,
+  Button,
+  Form,
+  Alert,
+  Nav,
+  Tab,
+} from "react-bootstrap";
+import {
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  ShoppingCart,
+  Users,
+  RefreshCw,
+  AlertCircle,
+  FileText,
+} from "lucide-react";
+import EstadisticasGeneral from "./EstadisticasGenerales";
+import EstadisticasIngresos from "./EstadisticasIngresos";
+import EstadisticasEgresos from "./EstadisticasEgresos";
+import EstadisticasProductos from "./EstadisticasProductos";
+import EstadisticasClientes from "./EstadisticasClientes";
 
-const colors = { primary:"#0D7F93", success:"#4D8A52", danger:"#C25F48", accent:"#7FBAD6", text:"#2A3033" }
+// Paleta de colores personalizada
+const colors = {
+  primary: "#0D7F93",
+  secondary: "#4D8A52",
+  accent: "#7FBAD6",
+  light: "#C3D3C6",
+  background: "#E8EAEC",
+  text: "#2A3033",
+  success: "#4D8A52",
+  warning: "#E0A458",
+  danger: "#C25F48",
+  white: "#FFFFFF",
+  lightGray: "#F5F5F5",
+  mediumGray: "#D9D9D9",
+};
 
-export const Estadisticas = ({ dashboardData, generatePDF, formatCurrency }) => {
-  if (!dashboardData) return <div className="text-center p-5">Cargando datos...</div>
+export default function EstadisticasApp() {
+  const [activeTab, setActiveTab] = useState("general");
+  const [fechaInicio, setFechaInicio] = useState("2025-08-17");
+  const [fechaFin, setFechaFin] = useState("2025-08-31");
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState(false);
+
+  const API_BASE = "http://localhost:4000/api/estadisticas";
+  const API_BASE2 = "http://localhost:4000";
+
+  const loadData = async () => {
+    setLoading(true);
+    setApiError(false);
+
+    // Simular carga de datos
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
+  const generatePDF = async () => {
+    try {
+      const response = await fetch(`${API_BASE2}/api/reportes/pdf`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fechaInicio,
+          fechaFin,
+          seccion: activeTab, // si tu backend lo usa
+        }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `estadisticas-${activeTab}-${fechaInicio}-${fechaFin}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        const text = await response.text();
+        console.error("Error en la respuesta del servidor:", text);
+      }
+    } catch (error) {
+      console.error("Error generando PDF:", error);
+    }
+  };
 
   return (
-    <div>
-      <Row className="mb-4">
-        <Col md={3}><Card style={{ borderLeft: `4px solid ${colors.success}` }}>
-          <Card.Body>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <Card.Title style={{ fontSize:"0.875rem", color: colors.text }}>Total Ingresos</Card.Title>
-                <div style={{ fontSize:"1.5rem", fontWeight:"bold", color: colors.success }}>
-                  {formatCurrency(dashboardData.resumen?.totalIngresos || 0)}
-                </div>
-              </div>
-              <TrendingUp size={20} style={{ color: colors.success }} />
-            </div>
-          </Card.Body>
-        </Card></Col>
+    <div
+      style={{
+        backgroundColor: colors.background,
+        minHeight: "100vh",
+        padding: "2rem",
+      }}
+    >
+      <Container fluid style={{ maxWidth: "1400px" }}>
+        {apiError && (
+          <Alert variant="info" className="mb-4">
+            <AlertCircle size={16} className="me-2" />
+            No se pudo conectar con la API en {API_BASE}. Mostrando datos de
+            ejemplo. Para conectar con tu API real, asegúrate de que esté
+            corriendo en el puerto 4000.
+          </Alert>
+        )}
 
-        <Col md={3}><Card style={{ borderLeft: `4px solid ${colors.danger}` }}>
-          <Card.Body>
+        <Card
+          style={{
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            border: "2px solid #e0e0e0",
+          }}
+        >
+          <Card.Header style={{ padding: "1.5rem" }}>
             <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <Card.Title style={{ fontSize:"0.875rem", color: colors.text }}>Total Egresos</Card.Title>
-                <div style={{ fontSize:"1.5rem", fontWeight:"bold", color: colors.danger }}>
-                  {formatCurrency(dashboardData.resumen?.totalEgresos || 0)}
-                </div>
+              <div className="d-flex align-items-center">
+                <BarChart3
+                  size={32}
+                  style={{ color: colors.primary }}
+                  className="me-3"
+                />
+                <Card.Title
+                  style={{
+                    fontSize: "1.75rem",
+                    color: colors.primary,
+                    margin: 0,
+                  }}
+                >
+                  Estadísticas
+                </Card.Title>
               </div>
-              <TrendingDown size={20} style={{ color: colors.danger }} />
-            </div>
-          </Card.Body>
-        </Card></Col>
-
-        <Col md={3}><Card style={{ borderLeft: `4px solid ${colors.primary}` }}>
-          <Card.Body>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <Card.Title style={{ fontSize:"0.875rem", color: colors.text }}>Beneficio Neto</Card.Title>
-                <div style={{ fontSize:"1.5rem", fontWeight:"bold", color: colors.primary }}>
-                  {formatCurrency(dashboardData.resumen?.beneficioNeto || 0)}
-                </div>
+              <div className="d-flex gap-2">
+                <Button
+                  variant="success"
+                  onClick={generatePDF}
+                  className="d-flex align-items-center me-2"
+                >
+                  <FileText size={16} className="me-2" />
+                  Generar PDF
+                </Button>
+                <Button
+                  variant="outline-secondary"
+                  onClick={loadData}
+                  disabled={loading}
+                  className="d-flex align-items-center"
+                >
+                  <RefreshCw
+                    size={16}
+                    className={`me-2 ${loading ? "spin" : ""}`}
+                  />
+                  Actualizar
+                </Button>
               </div>
-              <DollarSign size={20} style={{ color: colors.primary }} />
             </div>
-          </Card.Body>
-        </Card></Col>
-
-        <Col md={3}><Card style={{ borderLeft: `4px solid ${colors.accent}` }}>
-          <Card.Body>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <Card.Title style={{ fontSize:"0.875rem", color: colors.text }}>Margen</Card.Title>
-                <div style={{ fontSize:"1.5rem", fontWeight:"bold", color: colors.accent }}>
-                  {dashboardData.resumen?.margenPorcentaje || 0}%
-                </div>
+          </Card.Header>
+          <Card.Body style={{ padding: "2rem" }}>
+            <div className="row mb-4">
+              <div className="col-md-6 mb-3">
+                <Form.Group>
+                  <Form.Label>Fecha Inicio:</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={fechaInicio}
+                    onChange={(e) => setFechaInicio(e.target.value)}
+                  />
+                </Form.Group>
               </div>
-              <PieChart size={20} style={{ color: colors.accent }} />
+              <div className="col-md-6 mb-3">
+                <Form.Group>
+                  <Form.Label>Fecha Fin:</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={fechaFin}
+                    onChange={(e) => setFechaFin(e.target.value)}
+                  />
+                </Form.Group>
+              </div>
             </div>
-          </Card.Body>
-        </Card></Col>
-      </Row>
 
-      <Card>
-        <Card.Header className="d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center">
-            <PieChart size={20} style={{ color: colors.primary }} className="me-2" />
-            <Card.Title className="mb-0">Ingresos por Categoría</Card.Title>
-          </div>
-          <Button onClick={() => generatePDF("dashboard")} style={{ backgroundColor: colors.primary, borderColor: colors.primary }}>
-            <FileText size={16} className="me-2" /> Generar PDF
-          </Button>
-        </Card.Header>
-        <Card.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Categoría</th>
-                <th>Ingreso Total</th>
-                <th>Porcentaje</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(dashboardData.ingresos?.porCategoria || []).map((item, i) => (
-                <tr key={i}>
-                  <td style={{ fontWeight:"500" }}>{item.categoria}</td>
-                  <td style={{ color: colors.success, fontWeight:"600" }}>{formatCurrency(item.ingreso_total)}</td>
-                  <td>{item.porcentaje}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
+            <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
+              <Nav variant="tabs" className="mb-4">
+                <Nav.Item>
+                  <Nav.Link
+                    eventKey="general"
+                    className="d-flex align-items-center"
+                  >
+                    <BarChart3 size={16} className="me-2" />
+                    General
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link
+                    eventKey="ingresos"
+                    className="d-flex align-items-center"
+                  >
+                    <TrendingUp size={16} className="me-2" />
+                    Ingresos
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link
+                    eventKey="egresos"
+                    className="d-flex align-items-center"
+                  >
+                    <TrendingDown size={16} className="me-2" />
+                    Egresos
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link
+                    eventKey="productos"
+                    className="d-flex align-items-center"
+                  >
+                    <ShoppingCart size={16} className="me-2" />
+                    Productos
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link
+                    eventKey="clientes"
+                    className="d-flex align-items-center"
+                  >
+                    <Users size={16} className="me-2" />
+                    Clientes
+                  </Nav.Link>
+                </Nav.Item>
+              </Nav>
+
+              <Tab.Content>
+                <Tab.Pane eventKey="general">
+                  <EstadisticasGeneral
+                    fechaInicio={fechaInicio}
+                    fechaFin={fechaFin}
+                    loading={loading}
+                    apiError={apiError}
+                  />
+                </Tab.Pane>
+
+                <Tab.Pane eventKey="ingresos">
+                  <EstadisticasIngresos
+                    fechaInicio={fechaInicio}
+                    fechaFin={fechaFin}
+                    loading={loading}
+                    apiError={apiError}
+                  />
+                </Tab.Pane>
+
+                <Tab.Pane eventKey="egresos">
+                  <EstadisticasEgresos
+                    fechaInicio={fechaInicio}
+                    fechaFin={fechaFin}
+                    loading={loading}
+                    apiError={apiError}
+                  />
+                </Tab.Pane>
+
+                <Tab.Pane eventKey="productos">
+                  <EstadisticasProductos
+                    fechaInicio={fechaInicio}
+                    fechaFin={fechaFin}
+                    loading={loading}
+                    apiError={apiError}
+                  />
+                </Tab.Pane>
+
+                <Tab.Pane eventKey="clientes">
+                  <EstadisticasClientes
+                    fechaInicio={fechaInicio}
+                    fechaFin={fechaFin}
+                    loading={loading}
+                    apiError={apiError}
+                  />
+                </Tab.Pane>
+              </Tab.Content>
+            </Tab.Container>
+          </Card.Body>
+        </Card>
+      </Container>
     </div>
-  )
+  );
 }
