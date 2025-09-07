@@ -529,8 +529,8 @@ const ListaProveedores = () => {
             </Col>
             <Col xs={24} sm={12} md={8}>
               <Select
-                placeholder="Filtrar por tipo"
-                value={searchTipo}
+                placeholder="Filtrar por tipo de proveedor"
+                //  value={searchTipo}
                 onChange={setSearchTipo}
                 style={{ width: "100%", borderRadius: "6px" }}
                 allowClear

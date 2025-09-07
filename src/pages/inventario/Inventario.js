@@ -413,7 +413,7 @@ const Inventario = () => {
     if (searchCode) {
       const searchNumber = Number.parseInt(searchCode, 10);
       if (!isNaN(searchNumber)) {
-        filtered = filtered.filter((item) => item.id_producto === searchNumber);
+        filtered = filtered.filter((item) => item.id_producto.toString().includes(searchCode));
       }
     }
 

@@ -11,13 +11,13 @@ export const getAbonos = async () => {
 
 // Obtener proveedor por ID
 export const obtenerProveedorPorId = async (id) => {
-  const response = await axios.get(`${BASE_URL}/api/proveedores/${id}`);
+  const response = await axios.get(`${BASE_URL}/proveedores/${id}`);
   return response.data;
 };
 
 // Actualizar proveedor
 export const actualizarProveedor = async (id, datos) => {
-  const response = await axios.put(`${BASE_URL}/api/proveedores/${id}`, datos);
+  const response = await axios.put(`${BASE_URL}/proveedores/${id}`, datos);
   return response.data;
 };
 
@@ -35,20 +35,20 @@ export const obtenerCiudades = async () => {
 
 // Obtener todos los proveedores
 export const obtenerTodosLosProveedores = async () => {
-  const response = await axios.get(`${BASE_URL}/api/proveedores/all`);
+  const response = await axios.get(`${BASE_URL}/proveedores/all`);
   return response.data;
 };
 
 // Obtener detalles del producto por ID
 export const obtenerProductoPorId = async (idProducto) => {
-  const response = await axios.get(`${BASE_URL}/api/productos/${idProducto}`);
+  const response = await axios.get(`${BASE_URL}/productos/${idProducto}`);
   return Array.isArray(response.data) ? response.data[0] : response.data;
 };
 
 // Obtener proveedores asociados a un producto
 export const obtenerProveedoresAsociados = async (idProducto) => {
   const response = await axios.get(
-    `${BASE_URL}/api/productos/${idProducto}/proveedores`
+    `${BASE_URL}/proveedor-producto/${idProducto}/producto` 
   );
   return response.data;
 };
@@ -59,7 +59,7 @@ export const asociarProveedorAProducto = async (idProveedor, idProducto) => {
     id_proveedor_proveedorproducto: idProveedor,
     id_producto_proveedorproducto: idProducto,
   };
-  const response = await axios.post(`${BASE_URL}/api/proveedor-producto`, body);
+  const response = await axios.post(`${BASE_URL}/proveedor-producto`, body);
   return response.data;
 };
 
@@ -89,7 +89,7 @@ export const obtenerDetalleProveedor = async (id) => {
 };
 
 export const obtenerProductosDeProveedor = async (id) => {
-  const response = await axios.get(`${BASE_URL}/proveedores/${id}/productos`);
+  const response = await axios.get(`${BASE_URL}/proveedor-producto/proveedor/${id}/productos`);
   return response.data;
 };
 
@@ -169,7 +169,7 @@ export const crearTipoProveedor = async (nombre) => {
     throw new Error("El nombre del tipo no puede estar vacío");
   }
 
-  const response = await axios.post(`${BASE_URL}/tipoproveedores`, {
+  const response = await axios.post(`${BASE_URL}/proveedores/tipos`, {
     nombre_tipoproveedor: nombre,
   });
   return response.data;
