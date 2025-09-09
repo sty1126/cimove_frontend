@@ -40,6 +40,7 @@ import {
   StopOutlined,
   CheckCircleOutlined,
   UserSwitchOutlined,
+  AuditOutlined,
 } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
@@ -611,6 +612,10 @@ const ListaEmpleados = () => {
     ).size,
   };
 
+  const handleAuditoria = () => {
+    navigate("/auditoria-empleados");
+  };
+
   if (loading && empleados.length === 0) {
     return (
       <div
@@ -656,6 +661,18 @@ const ListaEmpleados = () => {
             Lista de Empleados
           </Title>
           <Space>
+            <Button
+              type="primary"
+              icon={<AuditOutlined />}
+              onClick={handleAuditoria}
+              style={{
+                borderRadius: "6px",
+                backgroundColor: colors.accent,
+                borderColor: colors.accent,
+              }}
+            >
+              Auditoría
+            </Button>
             <Button
               type="primary"
               icon={<SyncOutlined />}

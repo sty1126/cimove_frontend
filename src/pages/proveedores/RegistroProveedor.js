@@ -81,6 +81,7 @@ const RegistroProveedor = () => {
   const [loadingCiudades, setLoadingCiudades] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [digitoVerificacion, setDigitoVerificacion] = useState("");
+  const [aplicaSaldoInicial, setAplicaSaldoInicial] = useState(false);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -193,13 +194,18 @@ const RegistroProveedor = () => {
       return;
     }
 
-    const saldo = values.saldo_proveedor;
-    if (typeof saldo !== "number" || saldo <= 0) {
-      message.error({
-        content: "El saldo inicial debe ser un número mayor a cero",
-        style: { marginTop: "20px" },
-      });
-      return;
+    if (aplicaSaldoInicial) {
+      const saldo = values.saldo_proveedor;
+      if (typeof saldo !== "number" || saldo < 1) {
+        message.error({
+          content: "El saldo inicial debe ser un número mayor o igual a 1",
+          style: { marginTop: "20px" },
+        });
+        return;
+      }
+    } else {
+      // Si no aplica saldo inicial, enviarlo como 0
+      values.saldo_proveedor = 0;
     }
 
     setSubmitting(true);
@@ -305,7 +311,7 @@ const RegistroProveedor = () => {
                 id_tipoproveedor_proveedor: "",
                 representante_proveedor: "",
                 fecharegistro_proveedor: dayjs(),
-                saldo_proveedor: 0.01,
+                saldo_proveedor: 1,
                 digitoverificacion_proveedor: "",
               }}
             >
@@ -657,6 +663,25 @@ const RegistroProveedor = () => {
                 </Col>
 
                 <Col xs={24} md={12}>
+                  <div style={{ marginBottom: "16px" }}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={aplicaSaldoInicial}
+                        onChange={(e) => {
+                          setAplicaSaldoInicial(e.target.checked);
+                          if (!e.target.checked) {
+                            form.setFieldsValue({ saldo_proveedor: 0 });
+                          } else {
+                            form.setFieldsValue({ saldo_proveedor: 1 });
+                          }
+                        }}
+                        style={{ marginRight: "8px" }}
+                      />
+                      Aplica saldo inicial
+                    </label>
+                  </div>
+
                   <Form.Item
                     label={
                       <Space>
@@ -665,41 +690,51 @@ const RegistroProveedor = () => {
                       </Space>
                     }
                     name="saldo_proveedor"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Por favor ingrese un saldo inicial",
-                      },
-                      {
-                        validator: (_, value) => {
-                          if (value === null || value === undefined) {
-                            return Promise.reject(
-                              new Error("El saldo inicial es requerido")
-                            );
-                          }
-                          if (typeof value !== "number") {
-                            return Promise.reject(
-                              new Error("El saldo inicial debe ser un número")
-                            );
-                          }
-                          if (value <= 0) {
-                            return Promise.reject(
-                              new Error(
-                                "El saldo inicial debe ser mayor a cero"
-                              )
-                            );
-                          }
-                          return Promise.resolve();
-                        },
-                      },
-                    ]}
+                    rules={
+                      aplicaSaldoInicial
+                        ? [
+                            {
+                              required: true,
+                              message: "Por favor ingrese un saldo inicial",
+                            },
+                            {
+                              validator: (_, value) => {
+                                if (value === null || value === undefined) {
+                                  return Promise.reject(
+                                    new Error("El saldo inicial es requerido")
+                                  );
+                                }
+                                if (typeof value !== "number") {
+                                  return Promise.reject(
+                                    new Error(
+                                      "El saldo inicial debe ser un número"
+                                    )
+                                  );
+                                }
+                                if (value < 1) {
+                                  return Promise.reject(
+                                    new Error(
+                                      "El saldo inicial debe ser mayor o igual a 1"
+                                    )
+                                  );
+                                }
+                                return Promise.resolve();
+                              },
+                            },
+                          ]
+                        : []
+                    }
                   >
                     <InputNumber
                       style={{ width: "100%" }}
-                      placeholder="Ingrese saldo inicial"
-                      min={0.01}
+                      placeholder={
+                        aplicaSaldoInicial
+                          ? "Ingrese saldo inicial"
+                          : "Sin saldo inicial"
+                      }
+                      min={aplicaSaldoInicial ? 1 : 0}
                       precision={2}
-                      disabled={submitting}
+                      disabled={submitting || !aplicaSaldoInicial}
                       prefix="$"
                       stringMode={false}
                       inputMode="decimal"

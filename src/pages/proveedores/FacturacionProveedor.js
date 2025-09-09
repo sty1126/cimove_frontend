@@ -671,7 +671,7 @@ const FacturacionProveedor = () => {
           >
             <Title level={2} style={{ margin: 0, color: colors.primary }}>
               <FileTextOutlined style={{ marginRight: "12px" }} />
-                Registro de Proveedores
+              Registro de Proveedores
             </Title>
             <Button
               type="primary"
@@ -682,7 +682,7 @@ const FacturacionProveedor = () => {
                 borderColor: colors.primary,
               }}
             >
-            Registrar movimiento
+              Registrar movimiento
             </Button>
           </div>
 

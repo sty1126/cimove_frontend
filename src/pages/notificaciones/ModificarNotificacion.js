@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   Modal,
   Form,
@@ -17,7 +17,8 @@ import {
   Card,
   Spin,
   Empty,
-} from "antd"
+  Checkbox,
+} from "antd";
 import {
   EditOutlined,
   CalendarOutlined,
@@ -27,13 +28,16 @@ import {
   ArrowLeftOutlined,
   SaveOutlined,
   SearchOutlined,
-} from "@ant-design/icons"
-import dayjs from "dayjs"
-import { getNotificaciones, actualizarNotificacion } from "../../services/notificacionesService"
+} from "@ant-design/icons";
+import dayjs from "dayjs";
+import {
+  getNotificaciones,
+  actualizarNotificacion,
+} from "../../services/notificacionesService";
 
-const { TextArea } = Input
-const { Option } = Select
-const { Title, Text } = Typography
+const { TextArea } = Input;
+const { Option } = Select;
+const { Title, Text } = Typography;
 
 // Paleta de colores personalizada
 const colors = {
@@ -47,7 +51,7 @@ const colors = {
   warning: "#E0A458",
   danger: "#C25F48",
   white: "#FFFFFF",
-}
+};
 
 const ModalModificarNotificacion = ({
   visible,
@@ -55,95 +59,141 @@ const ModalModificarNotificacion = ({
   onSuccess,
   selectedNotificacion: propSelectedNotificacion,
 }) => {
-  const [form] = Form.useForm()
-  const [loading, setLoading] = useState(false)
-  const [notificaciones, setNotificaciones] = useState([])
-  const [selectedNotificacion, setSelectedNotificacion] = useState(null)
-  const [loadingList, setLoadingList] = useState(false)
-  const [view, setView] = useState("list") // "list" o "edit"
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [notificaciones, setNotificaciones] = useState([]);
+  const [selectedNotificacion, setSelectedNotificacion] = useState(null);
+  const [loadingList, setLoadingList] = useState(false);
+  const [view, setView] = useState("list"); // "list" o "edit"
+  const [masDeUnDia, setMasDeUnDia] = useState(false);
+  const [todoElDia, setTodoElDia] = useState(false);
 
-  // Cargar notificaciones al abrir el modal o manejar notificación específica
   useEffect(() => {
     if (visible) {
       if (propSelectedNotificacion) {
-        // Si se pasa una notificación específica, ir directamente a edición
-        setSelectedNotificacion(propSelectedNotificacion)
-        setView("edit")
+        setSelectedNotificacion(propSelectedNotificacion);
+        setView("edit");
 
-        // Llenar el formulario con los datos de la notificación
+        const fechaInicio = dayjs(
+          propSelectedNotificacion.fechainicio_notificacion
+        );
+        const fechaFin = dayjs(propSelectedNotificacion.fechafin_notificacion);
+        const horaInicio = dayjs(
+          propSelectedNotificacion.horainicio_notificacion,
+          "HH:mm:ss"
+        );
+        const horaFin = dayjs(
+          propSelectedNotificacion.horafin_notificacion,
+          "HH:mm:ss"
+        );
+
+        const esMultiDia = !fechaInicio.isSame(fechaFin, "day");
+        const esTodoElDia =
+          horaInicio.format("HH:mm") === "07:00" &&
+          horaFin.format("HH:mm") === "19:00";
+
+        setMasDeUnDia(esMultiDia);
+        setTodoElDia(esTodoElDia);
+
         form.setFieldsValue({
           nombre: propSelectedNotificacion.nombre_notificacion,
           descripcion: propSelectedNotificacion.descripcion_notificacion,
           urgencia: propSelectedNotificacion.urgencia_notificacion,
-          fechaInicio: dayjs(propSelectedNotificacion.fechainicio_notificacion),
-          fechaFin: dayjs(propSelectedNotificacion.fechafin_notificacion),
-          horaInicio: dayjs(propSelectedNotificacion.horainicio_notificacion, "HH:mm:ss"),
-          horaFin: dayjs(propSelectedNotificacion.horafin_notificacion, "HH:mm:ss"),
+          fechaInicio: fechaInicio,
+          fechaFin: fechaFin,
+          horaInicio: horaInicio,
+          horaFin: horaFin,
           estado: propSelectedNotificacion.estado_notificacion,
-        })
+        });
       } else {
-        // Si no se pasa notificación específica, mostrar lista
-        cargarNotificaciones()
+        cargarNotificaciones();
       }
     } else {
-      // Reset cuando se cierra
-      setView("list")
-      setSelectedNotificacion(null)
-      form.resetFields()
+      setView("list");
+      setSelectedNotificacion(null);
+      form.resetFields();
     }
-  }, [visible, propSelectedNotificacion])
+  }, [visible, propSelectedNotificacion]);
 
   const cargarNotificaciones = async () => {
     try {
-      setLoadingList(true)
-      const data = await getNotificaciones()
-      setNotificaciones(data)
+      setLoadingList(true);
+      const data = await getNotificaciones();
+      setNotificaciones(data);
     } catch (error) {
-      console.error("Error al cargar notificaciones:", error)
-      message.error("Error al cargar las notificaciones")
+      console.error("Error al cargar notificaciones:", error);
+      message.error("Error al cargar las notificaciones");
     } finally {
-      setLoadingList(false)
+      setLoadingList(false);
     }
-  }
+  };
 
   const seleccionarNotificacion = (notificacion) => {
-    setSelectedNotificacion(notificacion)
-    setView("edit")
+    setSelectedNotificacion(notificacion);
+    setView("edit");
 
-    // Llenar el formulario con los datos de la notificación
+    const fechaInicio = dayjs(notificacion.fechainicio_notificacion);
+    const fechaFin = dayjs(notificacion.fechafin_notificacion);
+    const horaInicio = dayjs(notificacion.horainicio_notificacion, "HH:mm:ss");
+    const horaFin = dayjs(notificacion.horafin_notificacion, "HH:mm:ss");
+
+    const esMultiDia = !fechaInicio.isSame(fechaFin, "day");
+    const esTodoElDia =
+      horaInicio.format("HH:mm") === "07:00" &&
+      horaFin.format("HH:mm") === "19:00";
+
+    setMasDeUnDia(esMultiDia);
+    setTodoElDia(esTodoElDia);
+
     form.setFieldsValue({
       nombre: notificacion.nombre_notificacion,
       descripcion: notificacion.descripcion_notificacion,
       urgencia: notificacion.urgencia_notificacion,
-      fechaInicio: dayjs(notificacion.fechainicio_notificacion),
-      fechaFin: dayjs(notificacion.fechafin_notificacion),
-      horaInicio: dayjs(notificacion.horainicio_notificacion, "HH:mm:ss"),
-      horaFin: dayjs(notificacion.horafin_notificacion, "HH:mm:ss"),
+      fechaInicio: fechaInicio,
+      fechaFin: fechaFin,
+      horaInicio: horaInicio,
+      horaFin: horaFin,
       estado: notificacion.estado_notificacion,
-    })
-  }
+    });
+  };
 
   const volverALista = () => {
     if (propSelectedNotificacion) {
-      // Si es edición directa, cerrar modal
-      onClose()
+      onClose();
     } else {
-      // Si es desde lista, volver a la lista
-      setView("list")
-      setSelectedNotificacion(null)
-      form.resetFields()
+      setView("list");
+      setSelectedNotificacion(null);
+      form.resetFields();
     }
-  }
+  };
 
   const handleGuardarCambios = async (values) => {
     try {
-      setLoading(true)
+      setLoading(true);
 
-      // Validar que la fecha de fin no sea anterior a la de inicio
       if (values.fechaFin.isBefore(values.fechaInicio)) {
-        message.error("La fecha de fin no puede ser anterior a la fecha de inicio")
-        setLoading(false)
-        return
+        message.error(
+          "La fecha de fin no puede ser anterior a la fecha de inicio"
+        );
+        setLoading(false);
+        return;
+      }
+
+      const today = dayjs().startOf("day");
+      if (values.fechaInicio.isBefore(today)) {
+        message.error("No se pueden seleccionar fechas en el pasado");
+        setLoading(false);
+        return;
+      }
+
+      if (values.fechaInicio.isSame(values.fechaFin, "day")) {
+        if (values.horaFin.isBefore(values.horaInicio)) {
+          message.error(
+            "La hora de fin no puede ser anterior a la hora de inicio"
+          );
+          setLoading(false);
+          return;
+        }
       }
 
       const notificacionData = {
@@ -155,83 +205,114 @@ const ModalModificarNotificacion = ({
         horainicio_notificacion: values.horaInicio.format("HH:mm:ss"),
         horafin_notificacion: values.horaFin.format("HH:mm:ss"),
         estado_notificacion: values.estado,
-      }
+      };
 
-      const notifToUpdate = propSelectedNotificacion || selectedNotificacion
-      await actualizarNotificacion(notifToUpdate.id_notificacion, notificacionData)
+      const notifToUpdate = propSelectedNotificacion || selectedNotificacion;
+      await actualizarNotificacion(
+        notifToUpdate.id_notificacion,
+        notificacionData
+      );
 
-      message.success("Notificación actualizada exitosamente")
+      message.success("Notificación actualizada exitosamente");
 
       if (propSelectedNotificacion) {
-        onSuccess()
-        onClose()
+        onSuccess();
+        onClose();
       } else {
-        await cargarNotificaciones()
-        volverALista()
-        onSuccess()
+        await cargarNotificaciones();
+        volverALista();
+        onSuccess();
       }
     } catch (error) {
-      console.error("Error al actualizar notificación:", error)
-      message.error("Error al actualizar la notificación")
+      console.error("Error al actualizar notificación:", error);
+      message.error("Error al actualizar la notificación");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    form.resetFields()
-    setView("list")
-    setSelectedNotificacion(null)
-    onClose()
-  }
+    form.resetFields();
+    setView("list");
+    setSelectedNotificacion(null);
+    onClose();
+  };
 
   const getUrgenciaColor = (urgencia) => {
     switch (urgencia) {
       case "U":
-        return colors.danger
+        return colors.danger;
       case "N":
-        return colors.warning
+        return colors.warning;
       case "B":
-        return colors.success
+        return colors.success;
       default:
-        return colors.text
+        return colors.text;
     }
-  }
+  };
 
   const getUrgenciaText = (urgencia) => {
     switch (urgencia) {
       case "U":
-        return "Alta"
+        return "Alta";
       case "N":
-        return "Normal"
+        return "Normal";
       case "B":
-        return "Baja"
+        return "Baja";
       default:
-        return urgencia
+        return urgencia;
     }
-  }
+  };
 
   const getEstadoText = (estado) => {
     switch (estado) {
       case "P":
-        return "Pendiente"
+        return "Pendiente";
       case "E":
-        return "En Proceso"
+        return "En Proceso";
       case "A":
-        return "Activo"
+        return "Activo";
       case "C":
-        return "Completado"
+        return "Completado";
       default:
-        return estado
+        return estado;
     }
-  }
+  };
+
+  const disabledDate = (current) => {
+    return current && current < dayjs().startOf("day");
+  };
+
+  const handleTodoElDiaChange = (checked) => {
+    setTodoElDia(checked);
+    if (checked) {
+      form.setFieldsValue({
+        horaInicio: dayjs("07:00", "HH:mm"),
+        horaFin: dayjs("19:00", "HH:mm"),
+      });
+    }
+  };
+
+  const handleMasDeUnDiaChange = (checked) => {
+    setMasDeUnDia(checked);
+    if (!checked) {
+      const fechaInicio = form.getFieldValue("fechaInicio");
+      if (fechaInicio) {
+        form.setFieldsValue({
+          fechaFin: fechaInicio,
+        });
+      }
+    }
+  };
 
   return (
     <Modal
       title={
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {view === "list" ? (
-            <SearchOutlined style={{ color: colors.secondary, fontSize: "24px" }} />
+            <SearchOutlined
+              style={{ color: colors.secondary, fontSize: "24px" }}
+            />
           ) : (
             <EditOutlined style={{ color: colors.warning, fontSize: "24px" }} />
           )}
@@ -240,8 +321,8 @@ const ModalModificarNotificacion = ({
               {propSelectedNotificacion
                 ? `Editando: ${propSelectedNotificacion.nombre_notificacion}`
                 : view === "list"
-                  ? "Seleccionar Notificación"
-                  : `Editando: ${selectedNotificacion?.nombre_notificacion}`}
+                ? "Seleccionar Notificación"
+                : `Editando: ${selectedNotificacion?.nombre_notificacion}`}
             </Title>
             <Text type="secondary" style={{ fontSize: "12px" }}>
               {view === "list"
@@ -263,7 +344,6 @@ const ModalModificarNotificacion = ({
       }}
     >
       {view === "list" ? (
-        // Vista de lista de notificaciones
         <div>
           {loadingList ? (
             <div style={{ textAlign: "center", padding: "40px" }}>
@@ -280,7 +360,9 @@ const ModalModificarNotificacion = ({
                   <Title level={4} style={{ color: colors.text }}>
                     No hay notificaciones disponibles
                   </Title>
-                  <Text type="secondary">Crea una nueva notificación para comenzar</Text>
+                  <Text type="secondary">
+                    Crea una nueva notificación para comenzar
+                  </Text>
                 </div>
               }
               style={{ padding: "40px 0" }}
@@ -303,12 +385,12 @@ const ModalModificarNotificacion = ({
                   }}
                   bodyStyle={{ padding: "20px" }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = colors.primary
-                    e.currentTarget.style.boxShadow = `0 4px 12px ${colors.primary}20`
+                    e.currentTarget.style.borderColor = colors.primary;
+                    e.currentTarget.style.boxShadow = `0 4px 12px ${colors.primary}20`;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = colors.light
-                    e.currentTarget.style.boxShadow = "none"
+                    e.currentTarget.style.borderColor = colors.light;
+                    e.currentTarget.style.boxShadow = "none";
                   }}
                 >
                   <div
@@ -327,8 +409,12 @@ const ModalModificarNotificacion = ({
                           marginBottom: "8px",
                         }}
                       >
-                        <Title level={5} style={{ margin: 0, color: colors.text }}>
-                          #{notificacion.id_notificacion} - {notificacion.nombre_notificacion}
+                        <Title
+                          level={5}
+                          style={{ margin: 0, color: colors.text }}
+                        >
+                          #{notificacion.id_notificacion} -{" "}
+                          {notificacion.nombre_notificacion}
                         </Title>
                         <span
                           style={{
@@ -336,8 +422,12 @@ const ModalModificarNotificacion = ({
                             borderRadius: "16px",
                             fontSize: "12px",
                             fontWeight: "600",
-                            backgroundColor: `${getUrgenciaColor(notificacion.urgencia_notificacion)}20`,
-                            color: getUrgenciaColor(notificacion.urgencia_notificacion),
+                            backgroundColor: `${getUrgenciaColor(
+                              notificacion.urgencia_notificacion
+                            )}20`,
+                            color: getUrgenciaColor(
+                              notificacion.urgencia_notificacion
+                            ),
                           }}
                         >
                           {getUrgenciaText(notificacion.urgencia_notificacion)}
@@ -352,8 +442,13 @@ const ModalModificarNotificacion = ({
                           lineHeight: "1.5",
                         }}
                       >
-                        {notificacion.descripcion_notificacion?.substring(0, 120)}
-                        {notificacion.descripcion_notificacion?.length > 120 ? "..." : ""}
+                        {notificacion.descripcion_notificacion?.substring(
+                          0,
+                          120
+                        )}
+                        {notificacion.descripcion_notificacion?.length > 120
+                          ? "..."
+                          : ""}
                       </Text>
 
                       <div
@@ -365,12 +460,20 @@ const ModalModificarNotificacion = ({
                         }}
                       >
                         <Text type="secondary">
-                          {dayjs(notificacion.fechainicio_notificacion).format("DD/MM/YYYY")} -{" "}
-                          {dayjs(notificacion.fechafin_notificacion).format("DD/MM/YYYY")}
+                          {dayjs(notificacion.fechainicio_notificacion).format(
+                            "DD/MM/YYYY"
+                          )}{" "}
+                          -{" "}
+                          {dayjs(notificacion.fechafin_notificacion).format(
+                            "DD/MM/YYYY"
+                          )}
                         </Text>
                         <Text type="secondary">
-                          {notificacion.horainicio_notificacion?.substring(0, 5)} -{" "}
-                          {notificacion.horafin_notificacion?.substring(0, 5)}
+                          {notificacion.horainicio_notificacion?.substring(
+                            0,
+                            5
+                          )}{" "}
+                          - {notificacion.horafin_notificacion?.substring(0, 5)}
                         </Text>
                       </div>
                     </div>
@@ -396,7 +499,9 @@ const ModalModificarNotificacion = ({
                       >
                         {getEstadoText(notificacion.estado_notificacion)}
                       </span>
-                      <EditOutlined style={{ color: colors.secondary, fontSize: "20px" }} />
+                      <EditOutlined
+                        style={{ color: colors.secondary, fontSize: "20px" }}
+                      />
                     </div>
                   </div>
                 </Card>
@@ -405,7 +510,6 @@ const ModalModificarNotificacion = ({
           )}
         </div>
       ) : (
-        // Vista de edición
         <div>
           <div style={{ marginBottom: "24px" }}>
             <Button
@@ -432,14 +536,18 @@ const ModalModificarNotificacion = ({
               <Text strong style={{ color: colors.primary }}>
                 ID de Notificación:{" "}
               </Text>
-              <Text style={{ fontSize: "16px", fontWeight: "600" }}>#{selectedNotificacion?.id_notificacion}</Text>
+              <Text style={{ fontSize: "16px", fontWeight: "600" }}>
+                #{selectedNotificacion?.id_notificacion}
+              </Text>
             </div>
           </div>
 
           <Form form={form} layout="vertical" onFinish={handleGuardarCambios}>
-            {/* Información básica */}
             <div style={{ marginBottom: "24px" }}>
-              <Title level={5} style={{ color: colors.warning, marginBottom: "16px" }}>
+              <Title
+                level={5}
+                style={{ color: colors.warning, marginBottom: "16px" }}
+              >
                 Información Básica
               </Title>
 
@@ -462,12 +570,19 @@ const ModalModificarNotificacion = ({
                   <Form.Item
                     name="urgencia"
                     label="Nivel de Urgencia"
-                    rules={[{ required: true, message: "Seleccione el nivel de urgencia" }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Seleccione el nivel de urgencia",
+                      },
+                    ]}
                   >
                     <Select
                       placeholder="Seleccione la urgencia"
                       style={{ borderRadius: "8px" }}
-                      suffixIcon={<FlagOutlined style={{ color: colors.primary }} />}
+                      suffixIcon={
+                        <FlagOutlined style={{ color: colors.primary }} />
+                      }
                     >
                       <Option value="B">Baja</Option>
                       <Option value="N">Normal</Option>
@@ -480,12 +595,18 @@ const ModalModificarNotificacion = ({
                   <Form.Item
                     name="estado"
                     label="Estado Actual"
-                    rules={[{ required: true, message: "Seleccione el estado" }]}
+                    rules={[
+                      { required: true, message: "Seleccione el estado" },
+                    ]}
                   >
                     <Select
                       placeholder="Seleccione el estado"
                       style={{ borderRadius: "8px" }}
-                      suffixIcon={<CheckCircleOutlined style={{ color: colors.primary }} />}
+                      suffixIcon={
+                        <CheckCircleOutlined
+                          style={{ color: colors.primary }}
+                        />
+                      }
                     >
                       <Option value="P">Pendiente</Option>
                       <Option value="E">En Proceso</Option>
@@ -518,18 +639,41 @@ const ModalModificarNotificacion = ({
               <CalendarOutlined style={{ color: colors.primary }} />
             </Divider>
 
-            {/* Fechas y horarios */}
             <div style={{ marginBottom: "24px" }}>
-              <Title level={5} style={{ color: colors.primary, marginBottom: "16px" }}>
+              <Title
+                level={5}
+                style={{ color: colors.primary, marginBottom: "16px" }}
+              >
                 Programación
               </Title>
+
+              <div style={{ marginBottom: "16px" }}>
+                <Checkbox
+                  checked={masDeUnDia}
+                  onChange={(e) => handleMasDeUnDiaChange(e.target.checked)}
+                  style={{ marginRight: "16px" }}
+                >
+                  Más de un día
+                </Checkbox>
+                <Checkbox
+                  checked={todoElDia}
+                  onChange={(e) => handleTodoElDiaChange(e.target.checked)}
+                >
+                  Todo el día (7:00 AM - 7:00 PM)
+                </Checkbox>
+              </div>
 
               <Row gutter={16}>
                 <Col xs={24} md={12}>
                   <Form.Item
                     name="fechaInicio"
                     label="Fecha de Inicio"
-                    rules={[{ required: true, message: "La fecha de inicio es obligatoria" }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "La fecha de inicio es obligatoria",
+                      },
+                    ]}
                   >
                     <DatePicker
                       style={{
@@ -539,6 +683,12 @@ const ModalModificarNotificacion = ({
                       }}
                       format="DD/MM/YYYY"
                       placeholder="Seleccione fecha de inicio"
+                      disabledDate={disabledDate}
+                      onChange={(date) => {
+                        if (!masDeUnDia && date) {
+                          form.setFieldsValue({ fechaFin: date });
+                        }
+                      }}
                     />
                   </Form.Item>
                 </Col>
@@ -547,7 +697,12 @@ const ModalModificarNotificacion = ({
                   <Form.Item
                     name="fechaFin"
                     label="Fecha de Fin"
-                    rules={[{ required: true, message: "La fecha de fin es obligatoria" }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "La fecha de fin es obligatoria",
+                      },
+                    ]}
                   >
                     <DatePicker
                       style={{
@@ -557,6 +712,8 @@ const ModalModificarNotificacion = ({
                       }}
                       format="DD/MM/YYYY"
                       placeholder="Seleccione fecha de fin"
+                      disabledDate={disabledDate}
+                      disabled={!masDeUnDia}
                     />
                   </Form.Item>
                 </Col>
@@ -567,7 +724,12 @@ const ModalModificarNotificacion = ({
                   <Form.Item
                     name="horaInicio"
                     label="Hora de Inicio"
-                    rules={[{ required: true, message: "La hora de inicio es obligatoria" }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "La hora de inicio es obligatoria",
+                      },
+                    ]}
                   >
                     <TimePicker
                       style={{
@@ -577,7 +739,12 @@ const ModalModificarNotificacion = ({
                       }}
                       format="HH:mm"
                       placeholder="Hora de inicio"
-                      suffixIcon={<ClockCircleOutlined style={{ color: colors.primary }} />}
+                      suffixIcon={
+                        <ClockCircleOutlined
+                          style={{ color: colors.primary }}
+                        />
+                      }
+                      disabled={todoElDia}
                     />
                   </Form.Item>
                 </Col>
@@ -586,7 +753,12 @@ const ModalModificarNotificacion = ({
                   <Form.Item
                     name="horaFin"
                     label="Hora de Fin"
-                    rules={[{ required: true, message: "La hora de fin es obligatoria" }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "La hora de fin es obligatoria",
+                      },
+                    ]}
                   >
                     <TimePicker
                       style={{
@@ -596,14 +768,18 @@ const ModalModificarNotificacion = ({
                       }}
                       format="HH:mm"
                       placeholder="Hora de fin"
-                      suffixIcon={<ClockCircleOutlined style={{ color: colors.primary }} />}
+                      suffixIcon={
+                        <ClockCircleOutlined
+                          style={{ color: colors.primary }}
+                        />
+                      }
+                      disabled={todoElDia}
                     />
                   </Form.Item>
                 </Col>
               </Row>
             </div>
 
-            {/* Botones de acción */}
             <div
               style={{
                 display: "flex",
@@ -648,7 +824,7 @@ const ModalModificarNotificacion = ({
         </div>
       )}
     </Modal>
-  )
-}
+  );
+};
 
-export default ModalModificarNotificacion
+export default ModalModificarNotificacion;

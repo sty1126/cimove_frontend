@@ -18,6 +18,7 @@ import {
   message,
   Spin,
   Alert,
+  Checkbox,
 } from "antd";
 import {
   SwapOutlined,
@@ -73,6 +74,8 @@ const AnadirNovedad = () => {
   const [sedeDestino, setSedeDestino] = useState("");
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
+  const [aplicaCliente, setAplicaCliente] = useState(false);
+  const [aplicaProveedor, setAplicaProveedor] = useState(false);
   const [showProductoModal, setShowProductoModal] = useState(false);
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [showProveedorModal, setShowProveedorModal] = useState(false);
@@ -81,6 +84,37 @@ const AnadirNovedad = () => {
   const [stockMaximo, setStockMaximo] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // Funciones para renderizar icono y título del movimiento
+  const renderIconoMovimiento = () => {
+    switch (tipoMov) {
+      case "1":
+        return <SwapOutlined style={{ color: colors.primary }} />;
+      case "2":
+        return <SwapOutlined style={{ color: colors.primary }} />;
+      case "3":
+        return <UserOutlined style={{ color: colors.primary }} />;
+      case "4":
+        return <UserOutlined style={{ color: colors.primary }} />;
+      case "5":
+        return <ArrowRightOutlined style={{ color: colors.primary }} />;
+      case "6":
+        return <InfoCircleOutlined style={{ color: colors.accent }} />;
+      case "7":
+        return <InfoCircleOutlined style={{ color: colors.accent }} />;
+      case "8":
+        return <InfoCircleOutlined style={{ color: colors.accent }} />;
+      case "9":
+        return <InfoCircleOutlined style={{ color: colors.accent }} />;
+      default:
+        return null;
+    }
+  };
+
+  const renderTituloMovimiento = () => {
+    const tipo = tiposMovimiento.find((t) => t.id_tipomov === Number(tipoMov));
+    return tipo ? tipo.nom_tipomov : "Seleccione un tipo de movimiento";
+  };
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -111,10 +145,32 @@ const AnadirNovedad = () => {
     if (value !== "5") {
       setSedeDestino("");
     }
-    if (value !== "3" && value !== "6") {
+
+    // Resetear cliente y proveedor
+    setClienteSeleccionado(null);
+    setProveedorSeleccionado(null);
+
+    // Configurar checkboxes según el tipo de movimiento
+    // Solo venta crédito requiere cliente obligatorio
+    if (value === "3") {
+      // Venta Crédito
+      setAplicaCliente(true);
+    } else {
+      setAplicaCliente(false);
+    }
+    setAplicaProveedor(false);
+  };
+
+  const handleAplicaClienteChange = (checked) => {
+    setAplicaCliente(checked);
+    if (!checked) {
       setClienteSeleccionado(null);
     }
-    if (value !== "7" && value !== "9") {
+  };
+
+  const handleAplicaProveedorChange = (checked) => {
+    setAplicaProveedor(checked);
+    if (!checked) {
       setProveedorSeleccionado(null);
     }
   };
@@ -125,10 +181,29 @@ const AnadirNovedad = () => {
     setProducto(null); // Resetear producto al cambiar sede
   };
 
+  const disabledDate = (current) => {
+    return current && current > dayjs().endOf("day");
+  };
+
   // Obtener nombre del tipo de movimiento
   const getTipoMovimientoNombre = (id) => {
     const tipo = tiposMovimiento.find((t) => t.id_tipomov === Number(id));
     return tipo ? tipo.nom_tipomov : "";
+  };
+
+  const getValidacionesDescripcion = (tipoId) => {
+    const validaciones = {
+      1: "Entrada por Ajuste: Suma al inventario local",
+      2: "Salida por Ajuste: Resta del inventario, validar stock suficiente",
+      3: "Venta Crédito: Cliente obligatorio, validar stock suficiente",
+      4: "Venta Contado: Validar stock suficiente, cliente opcional",
+      5: "Cambio de sede: Validar stock en origen, requiere sede destino",
+      6: "Ingreso por Garantía: Producto dañado entra en estado 'G'",
+      7: "Salida por Garantía: Entrega producto nuevo, resta del inventario",
+      8: "Ingreso por Reparación: Producto entra en estado 'R'",
+      9: "Salida por Reparación: Envío a reparar, validar stock en estado 'R'",
+    };
+    return validaciones[tipoId] || "";
   };
 
   // Enviar formulario
@@ -148,22 +223,50 @@ const AnadirNovedad = () => {
         return;
       }
 
+      // Validar fecha no sea futura
+      if (fecha.isAfter(dayjs(), "day")) {
+        message.error("La fecha no puede ser futura");
+        setSubmitting(false);
+        return;
+      }
+
+      // Validar cliente obligatorio solo para venta crédito
+      if (tipoMov === "3" && !clienteSeleccionado) {
+        message.error("El cliente es obligatorio para venta a crédito");
+        setSubmitting(false);
+        return;
+      }
+
+      // Validar cliente si está marcado como aplicable
+      if (aplicaCliente && !clienteSeleccionado) {
+        message.error("Debe seleccionar un cliente");
+        setSubmitting(false);
+        return;
+      }
+
+      // Validar proveedor si está marcado como aplicable
+      if (aplicaProveedor && !proveedorSeleccionado) {
+        message.error("Debe seleccionar un proveedor");
+        setSubmitting(false);
+        return;
+      }
+
       const novedad = {
         ID_TIPOMOV_MOVIMIENTO: Number(tipoMov),
-        ID_PRODUCTO_MOVIMIENTO: producto ? Number(producto.id_producto) : null,
+        ID_PRODUCTO_MOVIMIENTO: Number(producto.id_producto),
         CANTIDAD_MOVIMIENTO: Number(cantidad),
         FECHA_MOVIMIENTO: fecha.format("YYYY-MM-DD"),
         ESTADO_MOVIMIENTO: "A",
         ID_SEDE_MOVIMIENTO: Number(sede),
         ID_SEDEDESTINO_MOVIMIENTO:
-          tipoMov === "5" ? (sedeDestino ? Number(sedeDestino) : null) : null,
+          tipoMov === "5" && sedeDestino ? Number(sedeDestino) : null,
         ID_CLIENTE_MOVIMIENTO:
-          tipoMov === "3" || tipoMov === "6"
-            ? clienteSeleccionado?.id_cliente ?? null
+          aplicaCliente && clienteSeleccionado
+            ? Number(clienteSeleccionado.id_cliente)
             : null,
         ID_PROVEEDOR_MOVIMIENTO:
-          tipoMov === "7" || tipoMov === "9"
-            ? proveedorSeleccionado?.id_proveedor ?? null
+          aplicaProveedor && proveedorSeleccionado
+            ? Number(proveedorSeleccionado.id_proveedor)
             : null,
       };
 
@@ -203,30 +306,6 @@ const AnadirNovedad = () => {
       );
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  // Renderizar título según el tipo de movimiento
-  const renderTituloMovimiento = () => {
-    if (!tipoMov) return "Agregar Novedad de Inventario";
-
-    const tipoNombre = getTipoMovimientoNombre(tipoMov);
-    return `Registrar ${tipoNombre}`;
-  };
-
-  // Renderizar icono según el tipo de movimiento
-  const renderIconoMovimiento = () => {
-    switch (tipoMov) {
-      case "3": // Venta
-      case "6": // Devolución cliente
-        return <UserOutlined style={{ marginRight: "12px" }} />;
-      case "5": // Traslado
-        return <SwapOutlined style={{ marginRight: "12px" }} />;
-      case "7": // Compra
-      case "9": // Devolución proveedor
-        return <TeamOutlined style={{ marginRight: "12px" }} />;
-      default:
-        return <TagOutlined style={{ marginRight: "12px" }} />;
     }
   };
 
@@ -320,6 +399,15 @@ const AnadirNovedad = () => {
                     ))}
                   </Select>
                 </Form.Item>
+                {tipoMov && (
+                  <Alert
+                    message="Información del movimiento"
+                    description={getValidacionesDescripcion(tipoMov)}
+                    type="info"
+                    showIcon
+                    style={{ marginBottom: "16px" }}
+                  />
+                )}
               </Col>
 
               <Col xs={24} md={12}>
@@ -387,21 +475,63 @@ const AnadirNovedad = () => {
               </Form.Item>
             )}
 
-            {/* Cliente */}
-            {(tipoMov === "3" || tipoMov === "6") && (
+            <Row gutter={24}>
+              <Col xs={24} md={12}>
+                <Form.Item>
+                  <Checkbox
+                    checked={aplicaCliente}
+                    onChange={(e) =>
+                      handleAplicaClienteChange(e.target.checked)
+                    }
+                    disabled={tipoMov === "3" || submitting} // Obligatorio para venta crédito
+                  >
+                    <Space>
+                      <UserOutlined style={{ color: colors.primary }} />
+                      Aplica Cliente
+                      {tipoMov === "3" && (
+                        <Text type="secondary">(Obligatorio)</Text>
+                      )}
+                    </Space>
+                  </Checkbox>
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item>
+                  <Checkbox
+                    checked={aplicaProveedor}
+                    onChange={(e) =>
+                      handleAplicaProveedorChange(e.target.checked)
+                    }
+                    disabled={submitting}
+                  >
+                    <Space>
+                      <TeamOutlined style={{ color: colors.primary }} />
+                      Aplica Proveedor
+                    </Space>
+                  </Checkbox>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            {aplicaCliente && (
               <Form.Item
                 label={
                   <Space>
                     <UserOutlined style={{ color: colors.primary }} />
                     Cliente
+                    {tipoMov === "3" && <Text type="danger">*</Text>}
                   </Space>
                 }
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor seleccione un cliente",
-                  },
-                ]}
+                rules={
+                  tipoMov === "3"
+                    ? [
+                        {
+                          required: true,
+                          message: "Por favor seleccione un cliente",
+                        },
+                      ]
+                    : []
+                }
               >
                 <Input.Group compact>
                   <Input
@@ -430,8 +560,7 @@ const AnadirNovedad = () => {
               </Form.Item>
             )}
 
-            {/* Proveedor */}
-            {(tipoMov === "7" || tipoMov === "9") && (
+            {aplicaProveedor && (
               <Form.Item
                 label={
                   <Space>
@@ -439,12 +568,6 @@ const AnadirNovedad = () => {
                     Proveedor
                   </Space>
                 }
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor seleccione un proveedor",
-                  },
-                ]}
               >
                 <Input.Group compact>
                   <Input
@@ -473,7 +596,6 @@ const AnadirNovedad = () => {
               </Form.Item>
             )}
 
-            {/* Producto */}
             <Form.Item
               label={
                 <Space>
@@ -522,6 +644,11 @@ const AnadirNovedad = () => {
                       required: true,
                       message: "Por favor ingrese la cantidad",
                     },
+                    {
+                      type: "number",
+                      min: 1,
+                      message: "La cantidad debe ser mayor a 0",
+                    },
                   ]}
                   initialValue={cantidad}
                 >
@@ -556,6 +683,8 @@ const AnadirNovedad = () => {
                     format="YYYY-MM-DD"
                     onChange={(value) => setFecha(value)}
                     disabled={submitting}
+                    disabledDate={disabledDate}
+                    placeholder="Seleccione una fecha (no puede ser futura)"
                   />
                 </Form.Item>
               </Col>
@@ -700,7 +829,7 @@ const CheckCircleIcon = () => (
   >
     <path
       d="M12 22C6.477 22 2 17.523 2 12C2 6.477 6.477 2 12 2C17.523 2 22 6.477 22 12C22 17.523 17.523 22 12 22ZM11.003 16L17.073 9.929L15.659 8.515L11.003 13.172L8.174 10.343L6.76 11.757L11.003 16Z"
-      fill={colors.success}
+      fill="#4D8A52"
     />
   </svg>
 );

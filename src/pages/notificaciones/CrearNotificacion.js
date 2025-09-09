@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   Modal,
   Form,
@@ -14,7 +14,8 @@ import {
   Col,
   Typography,
   Divider,
-} from "antd"
+  Checkbox,
+} from "antd";
 import {
   PlusCircleOutlined,
   CalendarOutlined,
@@ -25,13 +26,13 @@ import {
   CheckCircleOutlined,
   InfoCircleOutlined,
   FlagOutlined,
-} from "@ant-design/icons"
-import dayjs from "dayjs"
-import { crearNotificacion } from "../../services/notificacionesService"
+} from "@ant-design/icons";
+import dayjs from "dayjs";
+import { crearNotificacion } from "../../services/notificacionesService";
 
-const { TextArea } = Input
-const { Option } = Select
-const { Title, Text } = Typography
+const { TextArea } = Input;
+const { Option } = Select;
+const { Title, Text } = Typography;
 
 // Paleta de colores personalizada
 const colors = {
@@ -45,11 +46,20 @@ const colors = {
   warning: "#E0A458",
   danger: "#C25F48",
   white: "#FFFFFF",
-}
+};
 
-const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, selectedMonth, selectedYear }) => {
-  const [form] = Form.useForm()
-  const [loading, setLoading] = useState(false)
+const ModalCrearNotificacion = ({
+  visible,
+  onClose,
+  onSuccess,
+  selectedDate,
+  selectedMonth,
+  selectedYear,
+}) => {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [masDeUnDia, setMasDeUnDia] = useState(false);
+  const [todoElDia, setTodoElDia] = useState(false);
 
   const urgenciaOptions = [
     {
@@ -58,14 +68,25 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
       color: colors.success,
       icon: <FlagOutlined style={{ color: colors.success }} />,
     },
-    { label: "Normal", value: "N", color: colors.warning, icon: <FlagOutlined style={{ color: colors.warning }} /> },
-    { label: "Urgente", value: "U", color: colors.danger, icon: <FlagOutlined style={{ color: colors.danger }} /> },
-  ]
+    {
+      label: "Normal",
+      value: "N",
+      color: colors.warning,
+      icon: <FlagOutlined style={{ color: colors.warning }} />,
+    },
+    {
+      label: "Urgente",
+      value: "U",
+      color: colors.danger,
+      icon: <FlagOutlined style={{ color: colors.danger }} />,
+    },
+  ];
 
-  // Configurar valores por defecto cuando se abre el modal
   useEffect(() => {
     if (visible) {
-      const fechaSeleccionada = dayjs(new Date(selectedYear, selectedMonth, selectedDate))
+      const fechaSeleccionada = dayjs(
+        new Date(selectedYear, selectedMonth, selectedDate)
+      );
 
       form.setFieldsValue({
         nombre_notificacion: "",
@@ -75,54 +96,115 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
         horainicio_notificacion: dayjs("09:00", "HH:mm"),
         horafin_notificacion: dayjs("18:00", "HH:mm"),
         urgencia_notificacion: "N", // Normal por defecto
-      })
+      });
     }
-  }, [visible, selectedDate, selectedMonth, selectedYear, form])
+  }, [visible, selectedDate, selectedMonth, selectedYear, form]);
+
+  const disabledDate = (current) => {
+    return current && current < dayjs().startOf("day");
+  };
 
   const handleSubmit = async (values) => {
-    setLoading(true)
+    setLoading(true);
     try {
-      // Validar que la fecha de fin no sea anterior a la de inicio
-      if (values.fechafin_notificacion.isBefore(values.fechainicio_notificacion)) {
-        message.error("La fecha de fin no puede ser anterior a la fecha de inicio")
-        setLoading(false)
-        return
+      if (
+        values.fechafin_notificacion.isBefore(values.fechainicio_notificacion)
+      ) {
+        message.error(
+          "La fecha de fin no puede ser anterior a la fecha de inicio"
+        );
+        setLoading(false);
+        return;
       }
 
-      // Formatear los datos para enviar al backend
+      const today = dayjs().startOf("day");
+      if (values.fechainicio_notificacion.isBefore(today)) {
+        message.error("No se pueden seleccionar fechas en el pasado");
+        setLoading(false);
+        return;
+      }
+
+      if (
+        values.fechainicio_notificacion.isSame(
+          values.fechafin_notificacion,
+          "day"
+        )
+      ) {
+        if (
+          values.horafin_notificacion.isBefore(values.horainicio_notificacion)
+        ) {
+          message.error(
+            "La hora de fin no puede ser anterior a la hora de inicio"
+          );
+          setLoading(false);
+          return;
+        }
+      }
+
       const notificacionData = {
         nombre_notificacion: values.nombre_notificacion,
         descripcion_notificacion: values.descripcion_notificacion,
         urgencia_notificacion: values.urgencia_notificacion,
-        fechainicio_notificacion: values.fechainicio_notificacion.format("YYYY-MM-DD"),
-        fechafin_notificacion: values.fechafin_notificacion.format("YYYY-MM-DD"),
-        horainicio_notificacion: values.horainicio_notificacion.format("HH:mm:ss"),
+        fechainicio_notificacion:
+          values.fechainicio_notificacion.format("YYYY-MM-DD"),
+        fechafin_notificacion:
+          values.fechafin_notificacion.format("YYYY-MM-DD"),
+        horainicio_notificacion:
+          values.horainicio_notificacion.format("HH:mm:ss"),
         horafin_notificacion: values.horafin_notificacion.format("HH:mm:ss"),
         estado_notificacion: "P", // Pendiente por defecto
-      }
+      };
 
-      await crearNotificacion(notificacionData)
-      message.success("Notificación creada exitosamente")
-      form.resetFields()
-      onSuccess()
+      await crearNotificacion(notificacionData);
+      message.success("Notificación creada exitosamente");
+      form.resetFields();
+      setMasDeUnDia(false);
+      setTodoElDia(false);
+      onSuccess();
     } catch (error) {
-      console.error("Error al crear notificación:", error)
-      message.error(error?.response?.data?.error || "Error al crear la notificación")
+      console.error("Error al crear notificación:", error);
+      message.error(
+        error?.response?.data?.error || "Error al crear la notificación"
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    form.resetFields()
-    onClose()
-  }
+    form.resetFields();
+    setMasDeUnDia(false);
+    setTodoElDia(false);
+    onClose();
+  };
+
+  const handleTodoElDiaChange = (checked) => {
+    setTodoElDia(checked);
+    if (checked) {
+      form.setFieldsValue({
+        horainicio_notificacion: dayjs("07:00", "HH:mm"),
+        horafin_notificacion: dayjs("19:00", "HH:mm"),
+      });
+    }
+  };
+
+  const handleMasDeUnDiaChange = (checked) => {
+    setMasDeUnDia(checked);
+    if (!checked) {
+      const fechaInicio = form.getFieldValue("fechainicio_notificacion");
+      if (fechaInicio) {
+        form.setFieldsValue({ fechafin_notificacion: fechaInicio });
+      }
+    }
+  };
 
   return (
     <Modal
       title={
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <PlusCircleOutlined style={{ color: colors.success, fontSize: "24px" }} />
+          <PlusCircleOutlined
+            style={{ color: colors.success, fontSize: "24px" }}
+          />
           <div>
             <Title level={4} style={{ margin: 0, color: colors.text }}>
               Crear Nueva Notificación
@@ -144,10 +226,18 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
         overflowY: "auto",
       }}
     >
-      <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false} style={{ marginTop: "16px" }}>
-        {/* Información básica */}
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        requiredMark={false}
+        style={{ marginTop: "16px" }}
+      >
         <div style={{ marginBottom: "24px" }}>
-          <Title level={5} style={{ color: colors.success, marginBottom: "16px" }}>
+          <Title
+            level={5}
+            style={{ color: colors.success, marginBottom: "16px" }}
+          >
             <TagOutlined style={{ marginRight: "8px" }} />
             Información Básica
           </Title>
@@ -182,7 +272,11 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
                 <Select
                   placeholder="¿Qué tan importante es?"
                   style={{ borderRadius: "8px" }}
-                  suffixIcon={<ExclamationCircleOutlined style={{ color: colors.primary }} />}
+                  suffixIcon={
+                    <ExclamationCircleOutlined
+                      style={{ color: colors.primary }}
+                    />
+                  }
                 >
                   {urgenciaOptions.map((option) => (
                     <Option key={option.value} value={option.value}>
@@ -212,7 +306,8 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
               >
                 <Text style={{ fontSize: "12px", color: colors.text }}>
                   <InfoCircleOutlined style={{ marginRight: "4px" }} />
-                  <strong>Tip:</strong> Las notificaciones urgentes aparecerán con borde rojo en el calendario
+                  <strong>Tip:</strong> Las notificaciones urgentes aparecerán
+                  con borde rojo en el calendario
                 </Text>
               </div>
             </Col>
@@ -240,12 +335,30 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
           <CalendarOutlined style={{ color: colors.primary }} />
         </Divider>
 
-        {/* Fechas y horarios */}
         <div style={{ marginBottom: "24px" }}>
-          <Title level={5} style={{ color: colors.primary, marginBottom: "16px" }}>
+          <Title
+            level={5}
+            style={{ color: colors.primary, marginBottom: "16px" }}
+          >
             <CalendarOutlined style={{ marginRight: "8px" }} />
             Programación
           </Title>
+
+          <div style={{ marginBottom: "16px" }}>
+            <Checkbox
+              checked={masDeUnDia}
+              onChange={(e) => handleMasDeUnDiaChange(e.target.checked)}
+              style={{ marginRight: "16px" }}
+            >
+              Más de un día
+            </Checkbox>
+            <Checkbox
+              checked={todoElDia}
+              onChange={(e) => handleTodoElDiaChange(e.target.checked)}
+            >
+              Todo el día (7:00 AM - 7:00 PM)
+            </Checkbox>
+          </div>
 
           <Row gutter={16}>
             <Col xs={24} md={12}>
@@ -263,6 +376,12 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
                   style={{ width: "100%", borderRadius: "8px", height: "40px" }}
                   format="DD/MM/YYYY"
                   placeholder="¿Cuándo inicia?"
+                  disabledDate={disabledDate}
+                  onChange={(date) => {
+                    if (!masDeUnDia && date) {
+                      form.setFieldsValue({ fechafin_notificacion: date });
+                    }
+                  }}
                 />
               </Form.Item>
             </Col>
@@ -271,12 +390,16 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
               <Form.Item
                 name="fechafin_notificacion"
                 label="Fecha de Fin"
-                rules={[{ required: true, message: "La fecha de fin es obligatoria" }]}
+                rules={[
+                  { required: true, message: "La fecha de fin es obligatoria" },
+                ]}
               >
                 <DatePicker
                   style={{ width: "100%", borderRadius: "8px", height: "40px" }}
                   format="DD/MM/YYYY"
                   placeholder="¿Cuándo termina?"
+                  disabledDate={disabledDate}
+                  disabled={!masDeUnDia}
                 />
               </Form.Item>
             </Col>
@@ -298,7 +421,10 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
                   style={{ width: "100%", borderRadius: "8px", height: "40px" }}
                   format="HH:mm"
                   placeholder="Hora de inicio"
-                  suffixIcon={<ClockCircleOutlined style={{ color: colors.primary }} />}
+                  suffixIcon={
+                    <ClockCircleOutlined style={{ color: colors.primary }} />
+                  }
+                  disabled={todoElDia}
                 />
               </Form.Item>
             </Col>
@@ -307,20 +433,24 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
               <Form.Item
                 name="horafin_notificacion"
                 label="Hora de Fin"
-                rules={[{ required: true, message: "La hora de fin es obligatoria" }]}
+                rules={[
+                  { required: true, message: "La hora de fin es obligatoria" },
+                ]}
               >
                 <TimePicker
                   style={{ width: "100%", borderRadius: "8px", height: "40px" }}
                   format="HH:mm"
                   placeholder="Hora de fin"
-                  suffixIcon={<ClockCircleOutlined style={{ color: colors.primary }} />}
+                  suffixIcon={
+                    <ClockCircleOutlined style={{ color: colors.primary }} />
+                  }
+                  disabled={todoElDia}
                 />
               </Form.Item>
             </Col>
           </Row>
         </div>
 
-        {/* Botones de acción */}
         <div
           style={{
             display: "flex",
@@ -363,7 +493,7 @@ const ModalCrearNotificacion = ({ visible, onClose, onSuccess, selectedDate, sel
         </div>
       </Form>
     </Modal>
-  )
-}
+  );
+};
 
-export default ModalCrearNotificacion
+export default ModalCrearNotificacion;

@@ -42,7 +42,6 @@ import {
 import {
   obtenerCategorias,
   obtenerProductosPorSede,
-  buscarProductoPorCodigo,
 } from "../../services/ventasService";
 import { obtenerSedes } from "../../services/generalService";
 import { obtenerProductoPorCodigo } from "../../services/productosService";
