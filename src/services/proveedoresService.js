@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const BASE_URL = "https://cimove-backend.onrender.com/api";
-const BASE_URL = "http://localhost:4000/api";
+const BASE_URL = "https://cimove-backend.onrender.com/api";
+//const BASE_URL = "http://localhost:4000/api";
 
 // Obtener abonos
 export const getAbonos = async () => {
@@ -48,7 +48,7 @@ export const obtenerProductoPorId = async (idProducto) => {
 // Obtener proveedores asociados a un producto
 export const obtenerProveedoresAsociados = async (idProducto) => {
   const response = await axios.get(
-    `${BASE_URL}/proveedor-producto/${idProducto}/producto` 
+    `${BASE_URL}/proveedor-producto/${idProducto}/producto`
   );
   return response.data;
 };
@@ -89,7 +89,9 @@ export const obtenerDetalleProveedor = async (id) => {
 };
 
 export const obtenerProductosDeProveedor = async (id) => {
-  const response = await axios.get(`${BASE_URL}/proveedor-producto/proveedor/${id}/productos`);
+  const response = await axios.get(
+    `${BASE_URL}/proveedor-producto/proveedor/${id}/productos`
+  );
   return response.data;
 };
 

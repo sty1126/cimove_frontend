@@ -1,15 +1,18 @@
 import axios from "axios";
 
-// const BASE_URL = "https://cimove-backend.onrender.com/api";
-const BASE_URL = "http://localhost:4000/api";
+const BASE_URL = "https://cimove-backend.onrender.com/api";
+//const BASE_URL = "http://localhost:4000/api";
 
 // ESTADÍSTICAS DE PRODUCTOS
 
 export const obtenerTopProductosPorCantidad = async (limite = 10) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/productos/top-por-cantidad`, {
-      params: { limite }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/productos/top-por-cantidad`,
+      {
+        params: { limite },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener productos por cantidad:", error);
@@ -19,9 +22,12 @@ export const obtenerTopProductosPorCantidad = async (limite = 10) => {
 
 export const obtenerTopProductosPorValor = async (limite = 10) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/productos/top-por-valor`, {
-      params: { limite }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/productos/top-por-valor`,
+      {
+        params: { limite },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener productos por valor:", error);
@@ -31,9 +37,12 @@ export const obtenerTopProductosPorValor = async (limite = 10) => {
 
 export const obtenerProductosFrecuentes = async (limite = 10) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/productos/frecuentes`, {
-      params: { limite }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/productos/frecuentes`,
+      {
+        params: { limite },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener productos frecuentes:", error);
@@ -43,9 +52,12 @@ export const obtenerProductosFrecuentes = async (limite = 10) => {
 
 export const obtenerStockVsVentas = async (limite = 100) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/productos/stock-vs-ventas`, {
-      params: { limite }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/productos/stock-vs-ventas`,
+      {
+        params: { limite },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener datos de stock vs ventas:", error);
@@ -55,9 +67,12 @@ export const obtenerStockVsVentas = async (limite = 100) => {
 
 export const obtenerProductosObsoletos = async (dias = 90, limite = 20) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/productos/obsoletos`, {
-      params: { dias, limite }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/productos/obsoletos`,
+      {
+        params: { dias, limite },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener productos obsoletos:", error);
@@ -69,9 +84,12 @@ export const obtenerProductosObsoletos = async (dias = 90, limite = 20) => {
 
 export const obtenerTopClientesPorMonto = async (limite = 10) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/clientes/top-por-monto`, {
-      params: { limite }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/clientes/top-por-monto`,
+      {
+        params: { limite },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener clientes por monto:", error);
@@ -81,9 +99,12 @@ export const obtenerTopClientesPorMonto = async (limite = 10) => {
 
 export const obtenerTopClientesPorCantidad = async (limite = 10) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/clientes/top-por-cantidad`, {
-      params: { limite }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/clientes/top-por-cantidad`,
+      {
+        params: { limite },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener clientes por cantidad:", error);
@@ -91,11 +112,17 @@ export const obtenerTopClientesPorCantidad = async (limite = 10) => {
   }
 };
 
-export const obtenerTopClientesPorFrecuencia = async (limite = 10, meses = 6) => {
+export const obtenerTopClientesPorFrecuencia = async (
+  limite = 10,
+  meses = 6
+) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/clientes/top-por-frecuencia`, {
-      params: { limite, meses }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/clientes/top-por-frecuencia`,
+      {
+        params: { limite, meses },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener clientes por frecuencia:", error);
@@ -103,11 +130,17 @@ export const obtenerTopClientesPorFrecuencia = async (limite = 10, meses = 6) =>
   }
 };
 
-export const obtenerClientesFrecuentesVsEsporadicos = async (limite = 50, meses = 3) => {
+export const obtenerClientesFrecuentesVsEsporadicos = async (
+  limite = 50,
+  meses = 3
+) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/clientes/frecuentes-vs-esporadicos`, {
-      params: { limite, meses }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/clientes/frecuentes-vs-esporadicos`,
+      {
+        params: { limite, meses },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener clasificación de clientes:", error);
@@ -117,9 +150,12 @@ export const obtenerClientesFrecuentesVsEsporadicos = async (limite = 50, meses 
 
 export const obtenerClientesConPagosPendientes = async (limite = 20) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/clientes/con-pagos-pendientes`, {
-      params: { limite }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/clientes/con-pagos-pendientes`,
+      {
+        params: { limite },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener clientes con pagos pendientes:", error);
@@ -132,9 +168,12 @@ export const obtenerClientesConPagosPendientes = async (limite = 20) => {
 
 export const getIngresosTotales = async (fechaInicio, fechaFin) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/ingresos/totales`, {
-      params: { fechaInicio, fechaFin }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/ingresos/totales`,
+      {
+        params: { fechaInicio, fechaFin },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener ingresos totales:", error);
@@ -144,9 +183,12 @@ export const getIngresosTotales = async (fechaInicio, fechaFin) => {
 
 export const getIngresosPorDia = async (fechaInicio, fechaFin) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/ingresos/por-dia`, {
-      params: { fechaInicio, fechaFin }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/ingresos/por-dia`,
+      {
+        params: { fechaInicio, fechaFin },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener ingresos por día:", error);
@@ -156,9 +198,12 @@ export const getIngresosPorDia = async (fechaInicio, fechaFin) => {
 
 export const getIngresosPorMes = async (anio) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/ingresos/por-mes`, {
-      params: { anio }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/ingresos/por-mes`,
+      {
+        params: { anio },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener ingresos por mes:", error);
@@ -168,9 +213,12 @@ export const getIngresosPorMes = async (anio) => {
 
 export const getIngresosPorMetodoPago = async (fechaInicio, fechaFin) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/ingresos/por-metodo-pago`, {
-      params: { fechaInicio, fechaFin }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/ingresos/por-metodo-pago`,
+      {
+        params: { fechaInicio, fechaFin },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener ingresos por método de pago:", error);
@@ -180,9 +228,12 @@ export const getIngresosPorMetodoPago = async (fechaInicio, fechaFin) => {
 
 export const getVentasPorSede = async (fechaInicio, fechaFin) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/ventas/por-sede`, {
-      params: { fechaInicio, fechaFin }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/ventas/por-sede`,
+      {
+        params: { fechaInicio, fechaFin },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener ventas por sede:", error);
@@ -192,9 +243,12 @@ export const getVentasPorSede = async (fechaInicio, fechaFin) => {
 
 export const getVentasPorSedePorMes = async (anio) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/ventas/por-sede/por-mes`, {
-      params: { anio }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/ventas/por-sede/por-mes`,
+      {
+        params: { anio },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener ventas por sede y mes:", error);
@@ -204,9 +258,12 @@ export const getVentasPorSedePorMes = async (anio) => {
 
 export const getVentasPorSedePorDia = async (fechaInicio, fechaFin) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/ventas/por-sede/por-dia`, {
-      params: { fechaInicio, fechaFin }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/ventas/por-sede/por-dia`,
+      {
+        params: { fechaInicio, fechaFin },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener ventas por sede y día:", error);
@@ -216,7 +273,9 @@ export const getVentasPorSedePorDia = async (fechaInicio, fechaFin) => {
 
 export const getClientesConPagosPendientes = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/clientes/con-pagos-pendientes`);
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/clientes/con-pagos-pendientes`
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener clientes con pagos pendientes:", error);
@@ -226,9 +285,12 @@ export const getClientesConPagosPendientes = async () => {
 
 export const getTopClientesPorMonto = async (limite = 10) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/clientes/top-por-monto`, {
-      params: { limite }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/clientes/top-por-monto`,
+      {
+        params: { limite },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener top clientes por monto:", error);
@@ -238,9 +300,12 @@ export const getTopClientesPorMonto = async (limite = 10) => {
 
 export const getPagosProveedoresTotales = async (fechaInicio, fechaFin) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/proveedores/pagos-totales`, {
-      params: { fechaInicio, fechaFin }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/proveedores/pagos-totales`,
+      {
+        params: { fechaInicio, fechaFin },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener pagos a proveedores:", error);
@@ -250,9 +315,12 @@ export const getPagosProveedoresTotales = async (fechaInicio, fechaFin) => {
 
 export const getPagosProveedoresPorMes = async (anio) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/proveedores/pagos-por-mes`, {
-      params: { anio }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/proveedores/pagos-por-mes`,
+      {
+        params: { anio },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener pagos a proveedores por mes:", error);
@@ -262,9 +330,12 @@ export const getPagosProveedoresPorMes = async (anio) => {
 
 export const getNominaPorSedeYRol = async (fechaInicio, fechaFin) => {
   try {
-    const response = await axios.get(`${BASE_URL}/estadisticas/nomina/por-sede-y-rol`, {
-      params: { fechaInicio, fechaFin }
-    });
+    const response = await axios.get(
+      `${BASE_URL}/estadisticas/nomina/por-sede-y-rol`,
+      {
+        params: { fechaInicio, fechaFin },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error al obtener datos de nómina:", error);
@@ -281,21 +352,21 @@ export const cargarDatosEstadisticasProductos = async () => {
       productosPorValor,
       productosFrecuentes,
       stockVsVentas,
-      productosObsoletos
+      productosObsoletos,
     ] = await Promise.all([
       obtenerTopProductosPorCantidad(),
       obtenerTopProductosPorValor(),
       obtenerProductosFrecuentes(),
       obtenerStockVsVentas(),
-      obtenerProductosObsoletos()
+      obtenerProductosObsoletos(),
     ]);
-    
+
     return {
       productosPorCantidad,
       productosPorValor,
       productosFrecuentes,
       stockVsVentas,
-      productosObsoletos
+      productosObsoletos,
     };
   } catch (error) {
     console.error("Error al cargar datos de estadísticas de productos:", error);
@@ -304,7 +375,7 @@ export const cargarDatosEstadisticasProductos = async () => {
       productosPorValor: [],
       productosFrecuentes: [],
       stockVsVentas: [],
-      productosObsoletos: []
+      productosObsoletos: [],
     };
   }
 };
@@ -316,21 +387,21 @@ export const cargarDatosEstadisticasClientes = async () => {
       clientesPorCantidad,
       clientesPorFrecuencia,
       clientesFrecuentesVsEsporadicos,
-      clientesConPagosPendientes
+      clientesConPagosPendientes,
     ] = await Promise.all([
       obtenerTopClientesPorMonto(),
       obtenerTopClientesPorCantidad(),
       obtenerTopClientesPorFrecuencia(),
       obtenerClientesFrecuentesVsEsporadicos(),
-      obtenerClientesConPagosPendientes()
+      obtenerClientesConPagosPendientes(),
     ]);
-    
+
     return {
       clientesPorMonto,
       clientesPorCantidad,
       clientesPorFrecuencia,
       clientesFrecuentesVsEsporadicos,
-      clientesConPagosPendientes
+      clientesConPagosPendientes,
     };
   } catch (error) {
     console.error("Error al cargar datos de estadísticas de clientes:", error);
@@ -339,7 +410,7 @@ export const cargarDatosEstadisticasClientes = async () => {
       clientesPorCantidad: [],
       clientesPorFrecuencia: [],
       clientesFrecuentesVsEsporadicos: [],
-      clientesConPagosPendientes: []
+      clientesConPagosPendientes: [],
     };
   }
 };
@@ -348,7 +419,7 @@ export const cargarDatosEstadisticasFinancieras = async (anio) => {
   if (!anio) {
     anio = new Date().getFullYear();
   }
-  
+
   try {
     const [
       ingresosTotales,
@@ -357,7 +428,7 @@ export const cargarDatosEstadisticasFinancieras = async (anio) => {
       ventasPorSede,
       ventasPorSedePorMes,
       pagosProveedoresTotales,
-      pagosProveedoresPorMes
+      pagosProveedoresPorMes,
     ] = await Promise.all([
       getIngresosTotales(),
       getIngresosPorMes(anio),
@@ -365,9 +436,9 @@ export const cargarDatosEstadisticasFinancieras = async (anio) => {
       getVentasPorSede(),
       getVentasPorSedePorMes(anio),
       getPagosProveedoresTotales(),
-      getPagosProveedoresPorMes(anio)
+      getPagosProveedoresPorMes(anio),
     ]);
-    
+
     return {
       ingresosTotales,
       ingresosPorMes,
@@ -375,7 +446,7 @@ export const cargarDatosEstadisticasFinancieras = async (anio) => {
       ventasPorSede,
       ventasPorSedePorMes,
       pagosProveedoresTotales,
-      pagosProveedoresPorMes
+      pagosProveedoresPorMes,
     };
   } catch (error) {
     console.error("Error al cargar datos financieros:", error);
@@ -386,7 +457,7 @@ export const cargarDatosEstadisticasFinancieras = async (anio) => {
       ventasPorSede: [],
       ventasPorSedePorMes: [],
       pagosProveedoresTotales: [],
-      pagosProveedoresPorMes: []
+      pagosProveedoresPorMes: [],
     };
   }
 };
@@ -396,12 +467,12 @@ export const cargarTodasLasEstadisticas = async () => {
   try {
     const [datosProductos, datosClientes] = await Promise.all([
       cargarDatosEstadisticasProductos(),
-      cargarDatosEstadisticasClientes()
+      cargarDatosEstadisticasClientes(),
     ]);
-    
+
     return {
       ...datosProductos,
-      ...datosClientes
+      ...datosClientes,
     };
   } catch (error) {
     console.error("Error al cargar todas las estadísticas:", error);
@@ -414,7 +485,7 @@ export const obtenerDashboardFinanciero = async (anio) => {
   if (!anio) {
     anio = new Date().getFullYear();
   }
-  
+
   try {
     const [
       ingresosTotales,
@@ -422,24 +493,24 @@ export const obtenerDashboardFinanciero = async (anio) => {
       ingresosPorMetodoPago,
       ventasPorSede,
       topClientes,
-      pagosProveedoresTotales
+      pagosProveedoresTotales,
     ] = await Promise.all([
       getIngresosTotales(),
       getIngresosPorMes(anio),
       getIngresosPorMetodoPago(),
       getVentasPorSede(),
       getTopClientesPorMonto(5),
-      getPagosProveedoresTotales()
+      getPagosProveedoresTotales(),
     ]);
-    
+
     // Calcular la rentabilidad (ingresos - pagos a proveedores)
     const totalIngresos = ingresosTotales.ingresos_totales || 0;
     const totalPagos = pagosProveedoresTotales.reduce(
-      (sum, prov) => sum + (prov.total_pagos || 0), 
+      (sum, prov) => sum + (prov.total_pagos || 0),
       0
     );
     const rentabilidad = totalIngresos - totalPagos;
-    
+
     return {
       totalIngresos,
       totalPagos,
@@ -447,7 +518,7 @@ export const obtenerDashboardFinanciero = async (anio) => {
       ingresosPorMes,
       ingresosPorMetodoPago,
       ventasPorSede,
-      topClientes
+      topClientes,
     };
   } catch (error) {
     console.error("Error al obtener dashboard financiero:", error);
@@ -458,7 +529,7 @@ export const obtenerDashboardFinanciero = async (anio) => {
       ingresosPorMes: [],
       ingresosPorMetodoPago: [],
       ventasPorSede: [],
-      topClientes: []
+      topClientes: [],
     };
   }
 };

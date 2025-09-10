@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const BASE_URL = "https://cimove-backend.onrender.com/api";
-const BASE_URL = "http://localhost:4000/api";
+const BASE_URL = "https://cimove-backend.onrender.com/api";
+//const BASE_URL = "http://localhost:4000/api";
 
 // Login de usuario
 export async function loginUsuario(identificacion, contrasena) {
@@ -37,7 +37,6 @@ export const obtenerSedes = async () => {
   return response.data;
 };
 
-
 // Para recuperar la contraseña
 export async function recuperarContrasena(email) {
   const response = await fetch(`${BASE_URL}/usuario/request-password-reset`, {
@@ -52,7 +51,9 @@ export async function recuperarContrasena(email) {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.error || "No se pudo enviar el correo de recuperación");
+    throw new Error(
+      errorData.error || "No se pudo enviar el correo de recuperación"
+    );
   }
 
   return response.json();
