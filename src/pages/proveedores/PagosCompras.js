@@ -257,7 +257,7 @@ const PagosCompras = () => {
           type="secondary"
           style={{ marginBottom: "16px", display: "block" }}
         >
-          Registro de abonos realizados a proveedores
+          Abonos realizados a proveedores
         </Text>
 
         {/* Tarjetas de estadísticas */}

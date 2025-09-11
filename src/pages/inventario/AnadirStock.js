@@ -36,9 +36,6 @@ import {
   ArrowUpOutlined,
 } from "@ant-design/icons";
 import {
-  getTiposMovimiento,
-  getSedes,
-  crearNovedad,
   verificarExistenciaProductoEnSede,
   ajustarInventario,
   registrarInventarioNuevo,

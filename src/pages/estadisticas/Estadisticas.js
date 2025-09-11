@@ -52,6 +52,48 @@ export default function EstadisticasApp() {
   const API_BASE = "http://localhost:4000/api/estadisticas";
   const API_BASE2 = "http://localhost:4000";
 
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
+
+  const handleFechaInicioChange = (e) => {
+    const newFechaInicio = e.target.value;
+    const today = getTodayDate();
+
+    // No permitir fechas futuras
+    if (newFechaInicio > today) {
+      alert("No se pueden seleccionar fechas futuras");
+      return;
+    }
+
+    // Si la fecha fin es menor que la nueva fecha inicio, ajustarla
+    if (fechaFin < newFechaInicio) {
+      setFechaFin(newFechaInicio);
+    }
+
+    setFechaInicio(newFechaInicio);
+  };
+
+  const handleFechaFinChange = (e) => {
+    const newFechaFin = e.target.value;
+    const today = getTodayDate();
+
+    // No permitir fechas futuras
+    if (newFechaFin > today) {
+      alert("No se pueden seleccionar fechas futuras");
+      return;
+    }
+
+    // No permitir que fecha fin sea menor que fecha inicio
+    if (newFechaFin < fechaInicio) {
+      alert("La fecha fin no puede ser menor que la fecha de inicio");
+      return;
+    }
+
+    setFechaFin(newFechaFin);
+  };
+
   const loadData = async () => {
     setLoading(true);
     setApiError(false);
@@ -61,6 +103,7 @@ export default function EstadisticasApp() {
       setLoading(false);
     }, 1000);
   };
+
   const generatePDF = async () => {
     try {
       const response = await fetch(`${API_BASE2}/api/reportes/pdf`, {
@@ -168,7 +211,8 @@ export default function EstadisticasApp() {
                   <Form.Control
                     type="date"
                     value={fechaInicio}
-                    onChange={(e) => setFechaInicio(e.target.value)}
+                    max={getTodayDate()}
+                    onChange={handleFechaInicioChange}
                   />
                 </Form.Group>
               </div>
@@ -178,7 +222,9 @@ export default function EstadisticasApp() {
                   <Form.Control
                     type="date"
                     value={fechaFin}
-                    onChange={(e) => setFechaFin(e.target.value)}
+                    min={fechaInicio}
+                    max={getTodayDate()}
+                    onChange={handleFechaFinChange}
                   />
                 </Form.Group>
               </div>

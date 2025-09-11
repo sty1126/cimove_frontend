@@ -1,12 +1,11 @@
 "use client";
 
 import { useNavigate } from "react-router-dom";
-import { Typography, Card, Row, Col, Divider, Badge } from "antd";
+import { Typography, Card, Row, Col, Divider } from "antd";
 import {
   FileTextOutlined,
   InboxOutlined,
   CalendarOutlined,
-  BellOutlined,
   TeamOutlined,
   ToolOutlined,
   PhoneOutlined,
@@ -46,24 +45,6 @@ const HomeContent = () => {
   useEffect(() => {
     setLoaded(true);
   }, []);
-
-  // Datos de ejemplo para notificaciones
-  const notifications = [
-    {
-      id: 1,
-      title: "Servicio técnico pendiente",
-      description: "3 servicios técnicos programados para hoy",
-      color: colors.warning,
-      time: "Hace 30 minutos",
-    },
-    {
-      id: 2,
-      title: "Inventario bajo",
-      description: "5 productos están por debajo del stock mínimo",
-      color: colors.danger,
-      time: "Hace 2 horas",
-    },
-  ];
 
   return (
     <div className="simple-background">
@@ -433,75 +414,6 @@ const HomeContent = () => {
                 Lista de las ventas
               </Text>
             </Card>
-          </Col>
-        </Row>
-
-        {/* Sección de Notificaciones */}
-        <Title
-          level={4}
-          style={{ marginBottom: "16px", color: colors.primary }}
-        >
-          Notificaciones Recientes
-        </Title>
-        <Row gutter={[24, 24]}>
-          <Col xs={24}>
-            {notifications.map((notification, index) => (
-              <Card
-                key={notification.id}
-                className="simple-notification"
-                style={{
-                  borderRadius: "8px",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
-                  border: "none",
-                  position: "relative",
-                  overflow: "hidden",
-                  marginBottom: "16px",
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: "5px",
-                    background: notification.color,
-                  }}
-                />
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      background: `${notification.color}10`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: "16px",
-                    }}
-                  >
-                    <BellOutlined
-                      style={{ fontSize: "20px", color: notification.color }}
-                    />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <Text strong style={{ fontSize: "16px", display: "block" }}>
-                      {notification.title}
-                    </Text>
-                    <Text type="secondary">{notification.description}</Text>
-                  </div>
-                  <Badge
-                    count={index === 0 ? "Nuevo" : null}
-                    style={{ backgroundColor: notification.color }}
-                  >
-                    <Text type="secondary" style={{ fontSize: "12px" }}>
-                      {notification.time}
-                    </Text>
-                  </Badge>
-                </div>
-              </Card>
-            ))}
           </Col>
         </Row>
       </div>

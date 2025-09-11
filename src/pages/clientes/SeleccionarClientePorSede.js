@@ -65,7 +65,21 @@ const SeleccionarClientePorSede = ({
       try {
         const sedeId = await obtenerIdSedePorNombre(selectedSede);
         const data = await obtenerClientesPorSede(sedeId);
-        setClientes(data);
+
+        // Mapear los datos para que coincidan con los campos usados en la tabla
+        const clientesFormateados = data.map((c) => ({
+          id_cliente: c.id_cliente,
+          nombre_cliente: c.nombre_cliente || null,
+          apellido_cliente: c.apellido_cliente || null,
+          representante_cliente: c.representante_cliente || null,
+          razonsocial_cliente: c.razonsocial_cliente || null,
+          descripcion_tipocliente:
+            c.descripcion_tipocliente === "Persona Jurídica"
+              ? "Empresa"
+              : "Persona Natural",
+        }));
+
+        setClientes(clientesFormateados);
       } catch (err) {
         console.error("Error al obtener clientes por sede:", err);
       } finally {

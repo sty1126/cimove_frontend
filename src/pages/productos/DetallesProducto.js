@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
   Spin,
@@ -18,6 +18,7 @@ import {
   Badge,
   Empty,
   Progress,
+  Button,
 } from "antd";
 import {
   ShoppingOutlined,
@@ -32,6 +33,8 @@ import {
   TeamOutlined,
   PhoneOutlined,
   MailOutlined,
+  PlusOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import {
   obtenerDetalleProducto,
@@ -58,6 +61,7 @@ const DetallesProducto = () => {
   const [loading, setLoading] = useState(true);
   const [proveedores, setProveedores] = useState([]);
   const { productoId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
@@ -79,6 +83,14 @@ const DetallesProducto = () => {
         setLoading(false);
       });
   }, [productoId]);
+
+  const handleAgregarProveedor = () => {
+    navigate(`/asociar-proveedores/${productoId}`);
+  };
+
+  const handleEliminarRelacion = () => {
+    navigate(`/eliminar-proveedores/${productoId}`);
+  };
 
   // Calcular el porcentaje de margen de utilidad
   const calcularPorcentajeMargen = () => {
@@ -436,6 +448,32 @@ const DetallesProducto = () => {
                 boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
               }}
               headStyle={{ borderBottom: `2px solid ${colors.primary}20` }}
+              extra={
+                <Space>
+                  <Button
+                    type="primary"
+                    size="small"
+                    icon={<PlusOutlined />}
+                    onClick={handleAgregarProveedor}
+                    style={{
+                      backgroundColor: colors.secondary,
+                      borderColor: colors.secondary,
+                    }}
+                  >
+                    Añadir Proveedor
+                  </Button>
+
+                  <Button
+                    type="primary"
+                    danger
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    onClick={handleEliminarRelacion}
+                  >
+                    Eliminar Relación
+                  </Button>
+                </Space>
+              }
             >
               {proveedores.length > 0 ? (
                 <Table

@@ -435,7 +435,7 @@ const CrearCliente = () => {
                       },
                     ]}
                   >
-                    <Input placeholder="Ingrese email" maxLength={254} />
+                    <Input placeholder="Ingrese email" maxLength={60} />
                   </Form.Item>
                 </Col>
 
@@ -495,7 +495,7 @@ const CrearCliente = () => {
                       },
                     ]}
                   >
-                    <Input placeholder="Ingrese dirección" maxLength={30} />
+                    <Input placeholder="Ingrese dirección" maxLength={40} />
                   </Form.Item>
                 </Col>
 
@@ -704,6 +704,7 @@ const CrearCliente = () => {
                         {
                           required: tipoCliente === "2",
                           message: "Por favor ingrese la razón social",
+                          
                         },
                         {
                           min: 3,
@@ -714,7 +715,7 @@ const CrearCliente = () => {
                     >
                       <Input
                         placeholder="Ingrese razón social"
-                        maxLength={100}
+                        maxLength={40}
                       />
                     </Form.Item>
                   </Col>
@@ -731,7 +732,7 @@ const CrearCliente = () => {
                     >
                       <Input
                         placeholder="Ingrese nombre comercial"
-                        maxLength={100}
+                        maxLength={50}
                       />
                     </Form.Item>
                   </Col>

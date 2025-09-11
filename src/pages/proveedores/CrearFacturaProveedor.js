@@ -34,6 +34,7 @@ import {
   ExclamationCircleOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
+import ModalSeleccionarOrden from "./SeleccionarOrdenCompra";
 
 const { Title, Text } = Typography;
 
@@ -48,6 +49,8 @@ const CrearFacturaProveedor = () => {
   const [fechaFactura, setFechaFactura] = useState(dayjs());
   const [totalFactura, setTotalFactura] = useState(0);
   const [validationErrors, setValidationErrors] = useState([]);
+  const [showModalOrden, setShowModalOrden] = useState(false);
+
   useEffect(() => {
     const fetchOrdenes = async () => {
       setFetchingData(true);
@@ -63,6 +66,33 @@ const CrearFacturaProveedor = () => {
     };
     fetchOrdenes();
   }, []);
+
+  const handleOrdenSelectFromModal = async (orden) => {
+    setSelectedOrden(orden.id_ordencompra);
+    form.setFieldsValue({ id_ordencompra: orden.id_ordencompra });
+    setShowModalOrden(false);
+
+    setFetchingData(true);
+    try {
+      const res = await obtenerProductosDeOrden(orden.id_ordencompra);
+      const productosConSubtotal = res.map((p) => ({
+        id_producto: p.id_producto,
+        nombre_producto: p.nombre_producto,
+        cantidad_ordenada: p.cantidad_ordenada,
+        precio_unitario: p.preciounitario_detalleordencompra,
+        subtotal: p.cantidad_ordenada * p.preciounitario_detalleordencompra,
+        cantidad_maxima: p.cantidad_ordenada,
+      }));
+      setProductos(productosConSubtotal);
+      calcularTotal(productosConSubtotal);
+      setValidationErrors([]);
+    } catch (error) {
+      message.error("Error al cargar los productos de la orden");
+      console.error(error);
+    } finally {
+      setFetchingData(false);
+    }
+  };
 
   const handleOrdenSelect = async (id_ordencompra) => {
     setSelectedOrden(id_ordencompra);
@@ -331,21 +361,33 @@ const CrearFacturaProveedor = () => {
                 ]}
                 style={{ flex: "1", minWidth: "300px" }}
               >
-                <Select
-                  placeholder="Selecciona una orden"
-                  onChange={handleOrdenSelect}
-                  options={ordenes.map((orden) => ({
-                    label: `OC-${orden.id_ordencompra} | ${
-                      orden.nombre_proveedor
-                    } | ${dayjs(orden.fecha_ordencompra).format("DD/MM/YYYY")}`,
-                    value: orden.id_ordencompra,
-                  }))}
-                  style={{ width: "100%" }}
-                  loading={fetchingData}
-                  size="large"
-                  showSearch
-                  optionFilterProp="label"
-                />
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <Select
+                    placeholder="Selecciona una orden"
+                    onChange={handleOrdenSelect}
+                    options={ordenes.map((orden) => ({
+                      label: `OC-${orden.id_ordencompra} | ${
+                        orden.nombre_proveedor
+                      } | ${dayjs(orden.fecha_ordencompra).format(
+                        "DD/MM/YYYY"
+                      )}`,
+                      value: orden.id_ordencompra,
+                    }))}
+                    style={{ flex: 1 }}
+                    loading={fetchingData}
+                    size="large"
+                    showSearch
+                    optionFilterProp="label"
+                  />
+                  <Button
+                    type="primary"
+                    onClick={() => setShowModalOrden(true)}
+                    size="large"
+                    style={{ minWidth: "120px" }}
+                  >
+                    Seleccionar
+                  </Button>
+                </div>
               </Form.Item>
 
               <Form.Item
@@ -360,7 +402,8 @@ const CrearFacturaProveedor = () => {
                 rules={[
                   {
                     required: true,
-                    message: "Por favor seleccione una fecha del movimiento financiero",
+                    message:
+                      "Por favor seleccione una fecha del movimiento financiero",
                   },
                 ]}
                 style={{ flex: "1", minWidth: "200px" }}
@@ -495,6 +538,13 @@ const CrearFacturaProveedor = () => {
           </div>
         </Form>
       </Card>
+
+      <ModalSeleccionarOrden
+        visible={showModalOrden}
+        onClose={() => setShowModalOrden(false)}
+        onSelect={handleOrdenSelectFromModal}
+        ordenes={ordenes}
+      />
 
       <style jsx global>{`
         .table-row-light {

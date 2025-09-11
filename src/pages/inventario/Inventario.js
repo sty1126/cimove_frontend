@@ -16,6 +16,7 @@ import {
   Divider,
   Tag,
   Avatar,
+  Tabs,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
@@ -31,6 +32,8 @@ import {
   DollarOutlined,
   InboxOutlined,
   SyncOutlined,
+  ToolOutlined,
+  CustomerServiceOutlined,
 } from "@ant-design/icons";
 import {
   obtenerCategorias,
@@ -40,9 +43,11 @@ import {
   crearCategoria,
   eliminarProducto,
 } from "../../services/inventarioService";
+
 const { Search } = Input;
 const { Option } = Select;
 const { Title, Text } = Typography;
+const { TabPane } = Tabs;
 
 // Paleta de colores personalizada - versión más vibrante
 const colors = {
@@ -82,13 +87,21 @@ const Inventario = () => {
     },
   });
 
+  // Estados adicionales para la pestaña de garantía/reparación
+  const [warrantyData, setWarrantyData] = useState([]);
+  const [filteredWarrantyData, setFilteredWarrantyData] = useState([]);
+  const [warrantySearchText, setWarrantySearchText] = useState("");
+  const [warrantyLoading, setWarrantyLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("inventory");
+  const [warrantySelectedSede, setWarrantySelectedSede] = useState("general");
+
   // Definición de columnas con estilos mejorados
   const columns = [
     {
       title: "ID",
       dataIndex: "id_producto",
       sorter: (a, b) => a.id_producto - b.id_producto,
-      width: 70,
+      width: 120,
       render: (id) => (
         <Text strong style={{ color: colors.primary }}>
           #{id}
@@ -197,7 +210,8 @@ const Inventario = () => {
     {
       title: "Acciones",
       key: "acciones",
-      width: 150,
+      width: 120,
+      fixed: "right",
       render: (_, record) => (
         <Space size="small">
           <Button
@@ -215,12 +229,16 @@ const Inventario = () => {
             type="primary"
             shape="circle"
             icon={<EyeOutlined />}
-            size="middle"
-            onClick={() => handleViewDetails(record)}
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/productos/${record.id_producto}`);
+            }}
             style={{
               backgroundColor: colors.secondary,
               borderColor: colors.secondary,
             }}
+            title="Ver detalles"
           />
           <Popconfirm
             title="¿Seguro que deseas eliminar?"
@@ -248,6 +266,135 @@ const Inventario = () => {
             />
           </Popconfirm>
         </Space>
+      ),
+    },
+  ];
+
+  // Columnas para productos en garantía/reparación
+  const warrantyColumns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      sorter: (a, b) => a.id - b.id,
+      width: 120,
+      render: (id) => (
+        <Text strong style={{ color: colors.primary }}>
+          #{id}
+        </Text>
+      ),
+      responsive: ["md"],
+    },
+    {
+      title: "Estado",
+      dataIndex: "estado",
+      width: 100,
+      render: (estado) => {
+        const isGarantia = estado === "G";
+        return (
+          <Tag
+            color={isGarantia ? colors.warning : colors.accent}
+            style={{
+              color: "#fff",
+              padding: "4px 8px",
+              borderRadius: "4px",
+              border: "none",
+              backgroundColor: isGarantia ? colors.warning : colors.accent,
+            }}
+          >
+            {isGarantia ? "GARANTÍA" : "REPARACIÓN"}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: "Producto",
+      dataIndex: "nombre_producto",
+      sorter: (a, b) => a.nombre_producto.localeCompare(b.nombre_producto),
+      ellipsis: true,
+      render: (text, record) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Avatar
+            shape="square"
+            size={{ xs: 32, sm: 40 }}
+            style={{
+              backgroundColor: getProductColor(record.id),
+              marginRight: 8,
+            }}
+            icon={<ToolOutlined style={{ color: "#fff" }} />}
+          />
+          <div>
+            <Text strong style={{ color: colors.text }}>
+              {text}
+            </Text>
+            <div>
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                Código: {record.id_producto}
+              </Text>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Cantidad",
+      dataIndex: "cantidad",
+      sorter: (a, b) => a.cantidad - b.cantidad,
+      render: (cantidad) => (
+        <Badge
+          count={cantidad}
+          showZero
+          style={{
+            backgroundColor: colors.secondary,
+            fontWeight: "bold",
+            fontSize: "14px",
+            padding: "0 8px",
+            borderRadius: "10px",
+          }}
+        />
+      ),
+    },
+    {
+      title: "Sede",
+      dataIndex: "nombre_sede",
+      render: (sede) => (
+        <Tag
+          color={colors.primary}
+          style={{
+            color: "#fff",
+            padding: "2px 8px",
+            borderRadius: "4px",
+            border: "none",
+            backgroundColor: `${colors.primary}90`,
+          }}
+        >
+          {sede}
+        </Tag>
+      ),
+    },
+    {
+      title: "Cliente",
+      dataIndex: "nombre_cliente",
+      render: (nombre, record) => (
+        <div>
+          <Text strong style={{ color: colors.text }}>
+            {nombre} {record.apellido_cliente}
+          </Text>
+          <div>
+            <Text type="secondary" style={{ fontSize: "12px" }}>
+              {record.telefono_cliente}
+            </Text>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Precio",
+      dataIndex: "precioventaact_producto",
+      sorter: (a, b) => a.precioventaact_producto - b.precioventaact_producto,
+      render: (price) => (
+        <Text style={{ color: colors.secondary, fontWeight: "bold" }}>
+          ${Number(price).toLocaleString("es-CO")}
+        </Text>
       ),
     },
   ];
@@ -341,25 +488,45 @@ const Inventario = () => {
     }));
   };
 
-  // Efectos
-  useEffect(() => {
-    const fetchSedesYCategorias = async () => {
-      try {
-        const [categoriesRes, sedesRes] = await Promise.all([
-          obtenerCategorias(),
-          obtenerSedes(),
-        ]);
-        setCategories(categoriesRes);
-        setSedes(sedesRes);
-      } catch (error) {
-        console.error("Error al obtener las sedes y categorías", error);
-        message.error("Error al cargar datos iniciales");
+  // Función para cargar datos de garantía/reparación
+  const fetchWarrantyData = async () => {
+    setWarrantyLoading(true);
+    try {
+      let url = "";
+
+      if (warrantySelectedSede === "general") {
+        // Endpoint que trae todos los productos en garantía/reparación
+        url = "http://localhost:4000/api/inventariolocal/estado";
+      } else {
+        // Buscar sede seleccionada
+        const sedeEncontrada = sedes.find(
+          (sede) => sede.nombre_sede === warrantySelectedSede
+        );
+
+        if (!sedeEncontrada) return;
+
+        url = `http://localhost:4000/api/inventariolocal/estado/sede/${sedeEncontrada.id_sede}`;
       }
-    };
 
-    fetchSedesYCategorias();
-  }, []);
+      const response = await fetch(url);
 
+      if (!response.ok) {
+        throw new Error("Error en la respuesta del servidor");
+      }
+
+      const warrantyProducts = await response.json();
+
+      setWarrantyData(warrantyProducts);
+      setFilteredWarrantyData(warrantyProducts);
+    } catch (error) {
+      console.error("Error al obtener productos en garantía/reparación", error);
+      message.error("Error al cargar productos en garantía/reparación");
+    } finally {
+      setWarrantyLoading(false);
+    }
+  };
+
+  // Función para cargar datos del inventario
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -388,6 +555,25 @@ const Inventario = () => {
     }
   };
 
+  // Efectos
+  useEffect(() => {
+    const fetchSedesYCategorias = async () => {
+      try {
+        const [categoriesRes, sedesRes] = await Promise.all([
+          obtenerCategorias(),
+          obtenerSedes(),
+        ]);
+        setCategories(categoriesRes);
+        setSedes(sedesRes);
+      } catch (error) {
+        console.error("Error al obtener las sedes y categorías", error);
+        message.error("Error al cargar datos iniciales");
+      }
+    };
+
+    fetchSedesYCategorias();
+  }, []);
+
   useEffect(() => {
     if (sedes.length > 0) {
       fetchData();
@@ -404,21 +590,39 @@ const Inventario = () => {
       );
     }
 
-    if (searchText) {
-      filtered = filtered.filter((item) =>
-        item.nombre_producto.toLowerCase().includes(searchText.toLowerCase())
-      );
-    }
-
-    if (searchCode) {
-      const searchNumber = Number.parseInt(searchCode, 10);
-      if (!isNaN(searchNumber)) {
-        filtered = filtered.filter((item) => item.id_producto === searchNumber);
-      }
-    }
+    const query = searchText.toLowerCase();
+    filtered = filtered.filter((item) => {
+      const matchesName = item.nombre_producto.toLowerCase().includes(query);
+      const matchesCode = item.id_producto?.toString().includes(query);
+      return matchesName || matchesCode;
+    });
 
     setFilteredData(filtered);
-  }, [searchCode, searchText, selectedCategory, data]);
+  }, [searchText, selectedCategory, data]);
+
+  useEffect(() => {
+    let filtered = [...warrantyData];
+
+    if (warrantySearchText) {
+      const query = warrantySearchText.toLowerCase();
+      filtered = filtered.filter((item) => {
+        const matchesName = item.nombre_producto.toLowerCase().includes(query);
+        const matchesCode = item.id_producto?.toString().includes(query);
+        const matchesClient = `${item.nombre_cliente} ${item.apellido_cliente}`
+          .toLowerCase()
+          .includes(query);
+        return matchesName || matchesCode || matchesClient;
+      });
+    }
+
+    setFilteredWarrantyData(filtered);
+  }, [warrantySearchText, warrantyData]);
+
+  useEffect(() => {
+    if (activeTab === "warranty") {
+      fetchWarrantyData();
+    }
+  }, [activeTab, warrantySelectedSede]);
 
   // Estadísticas rápidas
   const stats = {
@@ -462,15 +666,17 @@ const Inventario = () => {
           }}
         >
           <Title level={2} style={{ margin: 0, color: colors.primary }}>
-            {selectedSede === "general"
-              ? "Inventario General"
-              : `Inventario de ${selectedSede}`}
+            {activeTab === "inventory"
+              ? selectedSede === "general"
+                ? "Inventario General"
+                : `Inventario de ${selectedSede}`
+              : "  Productos en Garantía y Reparación"}
           </Title>
           <Button
             type="primary"
             icon={<SyncOutlined />}
-            onClick={fetchData}
-            loading={loading}
+            onClick={activeTab === "inventory" ? fetchData : fetchWarrantyData}
+            loading={activeTab === "inventory" ? loading : warrantyLoading}
             style={{
               borderRadius: "6px",
               backgroundColor: colors.primary,
@@ -481,215 +687,356 @@ const Inventario = () => {
           </Button>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "12px",
-            marginBottom: "24px",
-            width: "100%",
-          }}
-        >
-          <Card
-            size="small"
-            style={{
-              width: "100%",
-              maxWidth: "220px",
-              flex: "1 1 220px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-              borderLeft: `4px solid ${colors.primary}`,
-            }}
-          >
-            <Statistic
-              title="Total Productos"
-              value={stats.totalProducts}
-              prefix={<InboxOutlined style={{ color: colors.primary }} />}
-              valueStyle={{ color: colors.primary }}
-            />
-          </Card>
-          <Card
-            size="small"
-            style={{
-              width: "100%",
-              maxWidth: "220px",
-              flex: "1 1 220px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-              borderLeft: `4px solid ${colors.secondary}`,
-            }}
-          >
-            <Statistic
-              title="Existencias Totales"
-              value={stats.totalStock}
-              prefix={<BarChartOutlined style={{ color: colors.secondary }} />}
-              valueStyle={{ color: colors.secondary }}
-            />
-          </Card>
-          <Card
-            size="small"
-            style={{
-              width: "100%",
-              maxWidth: "220px",
-              flex: "1 1 220px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-              borderLeft: `4px solid ${colors.warning}`,
-            }}
-          >
-            <Statistic
-              title="Productos Bajo Stock"
-              value={stats.lowStock}
-              prefix={<FilterOutlined style={{ color: colors.warning }} />}
-              valueStyle={{ color: colors.warning }}
-            />
-          </Card>
-          <Card
-            size="small"
-            style={{
-              width: "100%",
-              maxWidth: "220px",
-              flex: "1 1 220px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-              borderLeft: `4px solid ${colors.accent}`,
-            }}
-          >
-            <Statistic
-              title="Valor Total"
-              value={`$${stats.totalValue.toLocaleString("es-CO")}`}
-              prefix={<DollarOutlined style={{ color: colors.accent }} />}
-              valueStyle={{ color: colors.accent }}
-            />
-          </Card>
-        </div>
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          style={{ marginBottom: "16px" }}
+          items={[
+            {
+              key: "inventory",
+              label: (
+                <span>
+                  <InboxOutlined />
+                  Inventario
+                </span>
+              ),
+            },
+            {
+              key: "warranty",
+              label: (
+                <span>
+                  <CustomerServiceOutlined />
+                  Garantía y Reparación
+                </span>
+              ),
+            },
+          ]}
+        />
 
-        <Divider style={{ margin: "12px 0", borderColor: colors.light }} />
-
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "12px",
-            justifyContent: "space-between",
-            marginBottom: "16px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "8px",
-              flex: "1 1 300px",
-              maxWidth: "100%",
-            }}
-          >
-            <Select
-              defaultValue="general"
-              style={{ width: "180px", borderRadius: "6px" }}
-              onChange={setSelectedSede}
-              placeholder="Seleccionar sede"
-              suffixIcon={<FilterOutlined style={{ color: colors.primary }} />}
+        {activeTab === "inventory" ? (
+          <>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px",
+                marginBottom: "24px",
+                width: "100%",
+              }}
             >
-              <Option value="general">Inventario General</Option>
-              {sedes.map((sede) => (
-                <Option key={sede.id_sede} value={sede.nombre_sede}>
-                  {sede.nombre_sede}
-                </Option>
-              ))}
-            </Select>
+              <Card
+                size="small"
+                style={{
+                  width: "100%",
+                  maxWidth: "220px",
+                  flex: "1 1 220px",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderLeft: `4px solid ${colors.primary}`,
+                }}
+              >
+                <Statistic
+                  title="Total Productos"
+                  value={stats.totalProducts}
+                  prefix={<InboxOutlined style={{ color: colors.primary }} />}
+                  valueStyle={{ color: colors.primary }}
+                />
+              </Card>
+              <Card
+                size="small"
+                style={{
+                  width: "100%",
+                  maxWidth: "220px",
+                  flex: "1 1 220px",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderLeft: `4px solid ${colors.secondary}`,
+                }}
+              >
+                <Statistic
+                  title="Existencias Totales"
+                  value={stats.totalStock}
+                  prefix={
+                    <BarChartOutlined style={{ color: colors.secondary }} />
+                  }
+                  valueStyle={{ color: colors.secondary }}
+                />
+              </Card>
+              <Card
+                size="small"
+                style={{
+                  width: "100%",
+                  maxWidth: "220px",
+                  flex: "1 1 220px",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderLeft: `4px solid ${colors.warning}`,
+                }}
+              >
+                <Statistic
+                  title="Productos Bajo Stock"
+                  value={stats.lowStock}
+                  prefix={<FilterOutlined style={{ color: colors.warning }} />}
+                  valueStyle={{ color: colors.warning }}
+                />
+              </Card>
+              <Card
+                size="small"
+                style={{
+                  width: "100%",
+                  maxWidth: "220px",
+                  flex: "1 1 220px",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderLeft: `4px solid ${colors.accent}`,
+                }}
+              >
+                <Statistic
+                  title="Valor Total"
+                  value={`$${stats.totalValue.toLocaleString("es-CO")}`}
+                  prefix={<DollarOutlined style={{ color: colors.accent }} />}
+                  valueStyle={{ color: colors.accent }}
+                />
+              </Card>
+            </div>
 
-            <Select
-              placeholder="Filtrar por categoría"
-              onChange={setSelectedCategory}
-              style={{ width: "180px", borderRadius: "6px" }}
-              allowClear
-              suffixIcon={<FilterOutlined style={{ color: colors.primary }} />}
+            <Divider style={{ margin: "12px 0", borderColor: colors.light }} />
+
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px",
+                justifyContent: "space-between",
+                marginBottom: "16px",
+              }}
             >
-              {categories.map((cat) => (
-                <Option
-                  key={cat.id_categoria}
-                  value={cat.descripcion_categoria}
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                  flex: "1 1 300px",
+                  maxWidth: "100%",
+                }}
+              >
+                <Select
+                  defaultValue="general"
+                  style={{ width: "180px", borderRadius: "6px" }}
+                  onChange={setSelectedSede}
+                  placeholder="Seleccionar sede"
+                  suffixIcon={
+                    <FilterOutlined style={{ color: colors.primary }} />
+                  }
                 >
-                  {cat.descripcion_categoria}
-                </Option>
-              ))}
-            </Select>
+                  <Option value="general">Inventario General</Option>
+                  {sedes.map((sede) => (
+                    <Option key={sede.id_sede} value={sede.nombre_sede}>
+                      {sede.nombre_sede}
+                    </Option>
+                  ))}
+                </Select>
 
-            <Search
-              placeholder="Buscar por nombre"
-              onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: "180px", borderRadius: "6px" }}
-              allowClear
-            />
+                <Select
+                  placeholder="Filtrar por categoría"
+                  onChange={setSelectedCategory}
+                  style={{ width: "180px", borderRadius: "6px" }}
+                  allowClear
+                  suffixIcon={
+                    <FilterOutlined style={{ color: colors.primary }} />
+                  }
+                >
+                  {categories.map((cat) => (
+                    <Option
+                      key={cat.id_categoria}
+                      value={cat.descripcion_categoria}
+                    >
+                      {cat.descripcion_categoria}
+                    </Option>
+                  ))}
+                </Select>
 
-            <Search
-              placeholder="Buscar por código"
-              onChange={(e) => setSearchCode(e.target.value)}
-              style={{ width: "180px", borderRadius: "6px" }}
-              allowClear
-            />
-          </div>
+                <Search
+                  placeholder="Buscar por nombre"
+                  onChange={(e) => setSearchText(e.target.value)}
+                  style={{ width: "220px", borderRadius: "6px" }}
+                  allowClear
+                />
+              </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "8px",
-              marginTop: "8px",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => navigate("/registro-producto")}
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                  marginTop: "8px",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => navigate("/registro-producto")}
+                  style={{
+                    borderRadius: "6px",
+                    backgroundColor: colors.primary,
+                    borderColor: colors.primary,
+                  }}
+                >
+                  Añadir Producto
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<AppstoreAddOutlined />}
+                  onClick={() => navigate("/anadir-novedad")}
+                  style={{
+                    borderRadius: "6px",
+                    backgroundColor: colors.secondary,
+                    borderColor: colors.secondary,
+                  }}
+                >
+                  Añadir Novedad
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<TagsOutlined />}
+                  onClick={() => setIsModalVisible(true)}
+                  style={{
+                    borderRadius: "6px",
+                    backgroundColor: colors.accent,
+                    borderColor: colors.accent,
+                  }}
+                >
+                  Crear Categoría
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<ShoppingCartOutlined />}
+                  onClick={() => navigate("/anadir-stock")}
+                  style={{
+                    borderRadius: "6px",
+                    backgroundColor: "#5B9A82",
+                    borderColor: "#5B9A82",
+                  }}
+                >
+                  Añadir Stock
+                </Button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div
               style={{
-                borderRadius: "6px",
-                backgroundColor: colors.primary,
-                borderColor: colors.primary,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px",
+                marginBottom: "24px",
+                width: "100%",
               }}
             >
-              Añadir Producto
-            </Button>
-            <Button
-              type="primary"
-              icon={<AppstoreAddOutlined />}
-              onClick={() => navigate("/anadir-novedad")}
+              <Card
+                size="small"
+                style={{
+                  width: "100%",
+                  maxWidth: "220px",
+                  flex: "1 1 220px",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderLeft: `4px solid ${colors.warning}`,
+                }}
+              >
+                <Statistic
+                  title="En Garantía"
+                  value={
+                    filteredWarrantyData.filter((item) => item.estado === "G")
+                      .length
+                  }
+                  prefix={
+                    <CustomerServiceOutlined
+                      style={{ color: colors.warning }}
+                    />
+                  }
+                  valueStyle={{ color: colors.warning }}
+                />
+              </Card>
+              <Card
+                size="small"
+                style={{
+                  width: "100%",
+                  maxWidth: "220px",
+                  flex: "1 1 220px",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderLeft: `4px solid ${colors.accent}`,
+                }}
+              >
+                <Statistic
+                  title="En Reparación"
+                  value={
+                    filteredWarrantyData.filter((item) => item.estado === "R")
+                      .length
+                  }
+                  prefix={<ToolOutlined style={{ color: colors.accent }} />}
+                  valueStyle={{ color: colors.accent }}
+                />
+              </Card>
+              <Card
+                size="small"
+                style={{
+                  width: "100%",
+                  maxWidth: "220px",
+                  flex: "1 1 220px",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderLeft: `4px solid ${colors.primary}`,
+                }}
+              >
+                <Statistic
+                  title="Total Productos"
+                  value={filteredWarrantyData.length}
+                  prefix={<InboxOutlined style={{ color: colors.primary }} />}
+                  valueStyle={{ color: colors.primary }}
+                />
+              </Card>
+            </div>
+
+            <Divider style={{ margin: "12px 0", borderColor: colors.light }} />
+
+            <div
               style={{
-                borderRadius: "6px",
-                backgroundColor: colors.secondary,
-                borderColor: colors.secondary,
+                marginBottom: "16px",
+                display: "flex",
+                gap: "12px",
+                flexWrap: "wrap",
               }}
             >
-              Añadir Novedad
-            </Button>
-            <Button
-              type="primary"
-              icon={<TagsOutlined />}
-              onClick={() => setIsModalVisible(true)}
-              style={{
-                borderRadius: "6px",
-                backgroundColor: colors.accent,
-                borderColor: colors.accent,
-              }}
-            >
-              Crear Categoría
-            </Button>
-            <Button
-              type="primary"
-              icon={<ShoppingCartOutlined />}
-              onClick={() => navigate("/anadir-stock")}
-              style={{
-                borderRadius: "6px",
-                backgroundColor: "#5B9A82",
-                borderColor: "#5B9A82",
-              }}
-            >
-              Añadir Stock
-            </Button>
-          </div>
-        </div>
+              <Select
+                defaultValue="general"
+                style={{ width: "180px", borderRadius: "6px" }}
+                onChange={setWarrantySelectedSede}
+                placeholder="Seleccionar sede"
+                suffixIcon={
+                  <FilterOutlined style={{ color: colors.primary }} />
+                }
+              >
+                <Option value="general">Todas las Sedes</Option>
+                {sedes.map((sede) => (
+                  <Option key={sede.id_sede} value={sede.nombre_sede}>
+                    {sede.nombre_sede}
+                  </Option>
+                ))}
+              </Select>
+
+              <Search
+                placeholder="Buscar por producto, código o cliente"
+                onChange={(e) => setWarrantySearchText(e.target.value)}
+                style={{ width: "300px", borderRadius: "6px" }}
+                allowClear
+              />
+            </div>
+          </>
+        )}
       </Card>
 
       <Card
@@ -698,9 +1045,11 @@ const Inventario = () => {
         bodyStyle={{ padding: "0" }}
       >
         <Table
-          columns={columns}
-          dataSource={filteredData}
-          loading={loading}
+          columns={activeTab === "inventory" ? columns : warrantyColumns}
+          dataSource={
+            activeTab === "inventory" ? filteredData : filteredWarrantyData
+          }
+          loading={activeTab === "inventory" ? loading : warrantyLoading}
           onChange={handleTableChange}
           pagination={{
             ...tableParams.pagination,

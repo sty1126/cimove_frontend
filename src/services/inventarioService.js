@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const BASE_URL = "https://cimove-backend.onrender.com/api";
-const BASE_URL = "http://localhost:4000/api";
+const BASE_URL = "https://cimove-backend.onrender.com/api";
+//const BASE_URL = "http://localhost:4000/api";
 
 // Obtener tipos de movimiento
 export const getTiposMovimiento = async () => {
