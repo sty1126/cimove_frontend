@@ -65,21 +65,7 @@ const SeleccionarClientePorSede = ({
       try {
         const sedeId = await obtenerIdSedePorNombre(selectedSede);
         const data = await obtenerClientesPorSede(sedeId);
-
-        // Mapear los datos para que coincidan con los campos usados en la tabla
-        const clientesFormateados = data.map((c) => ({
-          id_cliente: c.id_cliente,
-          nombre_cliente: c.nombre_cliente || null,
-          apellido_cliente: c.apellido_cliente || null,
-          representante_cliente: c.representante_cliente || null,
-          razonsocial_cliente: c.razonsocial_cliente || null,
-          descripcion_tipocliente:
-            c.descripcion_tipocliente === "Persona Jurídica"
-              ? "Empresa"
-              : "Persona Natural",
-        }));
-
-        setClientes(clientesFormateados);
+        setClientes(data); // Ahora usamos los datos tal como llegan
       } catch (err) {
         console.error("Error al obtener clientes por sede:", err);
       } finally {
@@ -91,29 +77,22 @@ const SeleccionarClientePorSede = ({
   }, [show, selectedSede]);
 
   const clientesFiltrados = clientes.filter((c) => {
-    const nombreCompleto = `${c.nombre_cliente || ""} ${
-      c.apellido_cliente || ""
-    }`.toLowerCase();
-    const razonSocial = (c.razonsocial_cliente || "").toLowerCase();
-    const id = c.id_cliente?.toString() || "";
+    const nombre = (c.nombre || "").toLowerCase();
+    const razonSocial = (c.razon_social || "").toLowerCase();
+    const id = c.id?.toString() || "";
 
     return (
-      nombreCompleto.includes(search.toLowerCase()) ||
+      nombre.includes(search.toLowerCase()) ||
       razonSocial.includes(search.toLowerCase()) ||
       id.includes(search)
     );
   });
 
   const handleSelect = (cliente) => {
-    const nombreCompleto =
-      cliente.descripcion_tipocliente === "Persona Jurídica"
-        ? cliente.razonsocial_cliente
-        : `${cliente.nombre_cliente} ${cliente.apellido_cliente}`;
-
     setCliente({
-      id_cliente: cliente.id_cliente,
-      nombre_razon: nombreCompleto,
-      documento: cliente.id_cliente,
+      id_cliente: cliente.id,
+      nombre_razon: cliente.nombre,
+      documento: cliente.id,
     });
     handleClose();
   };
@@ -131,8 +110,8 @@ const SeleccionarClientePorSede = ({
           ID
         </Space>
       ),
-      dataIndex: "id_cliente",
-      key: "id_cliente",
+      dataIndex: "id",
+      key: "id",
       width: 100,
     },
     {
@@ -142,11 +121,8 @@ const SeleccionarClientePorSede = ({
           Nombre
         </Space>
       ),
+      dataIndex: "nombre",
       key: "nombre",
-      render: (record) =>
-        record.nombre_cliente
-          ? `${record.nombre_cliente} ${record.apellido_cliente}`
-          : `${record.representante_cliente}`,
     },
     {
       title: (
@@ -155,8 +131,8 @@ const SeleccionarClientePorSede = ({
           Razón Social
         </Space>
       ),
-      dataIndex: "razonsocial_cliente",
-      key: "razonsocial_cliente",
+      dataIndex: "razon_social",
+      key: "razon_social",
       render: (razon) => razon || "No aplica",
     },
     {
@@ -166,12 +142,13 @@ const SeleccionarClientePorSede = ({
           Tipo
         </Space>
       ),
-      dataIndex: "descripcion_tipocliente",
-      key: "descripcion_tipocliente",
+      dataIndex: "tipo",
+      key: "tipo",
       width: 150,
       render: (tipo) => {
-        const color = tipo === "Empresa" ? colors.primary : colors.secondary;
-        return <Tag color={color}>{tipo}</Tag>;
+        const tipoTexto = tipo === "N" ? "Natural" : "Jurídico";
+        const color = tipo === "J" ? colors.primary : colors.secondary;
+        return <Tag color={color}>{tipoTexto}</Tag>;
       },
     },
     {
@@ -198,7 +175,7 @@ const SeleccionarClientePorSede = ({
               type="primary"
               shape="circle"
               icon={<EyeOutlined />}
-              onClick={() => verDetalles(record.id_cliente)}
+              onClick={() => verDetalles(record.id)}
               style={{
                 backgroundColor: colors.accent,
                 borderColor: colors.accent,
@@ -251,7 +228,7 @@ const SeleccionarClientePorSede = ({
         <Table
           columns={columns}
           dataSource={clientesFiltrados}
-          rowKey={(record) => record.id_cliente}
+          rowKey={(record) => record.id}
           pagination={{
             pageSize: 5,
             showTotal: (total) => `Total: ${total} clientes`,
