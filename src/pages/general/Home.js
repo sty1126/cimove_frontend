@@ -39,7 +39,8 @@ const HomeContent = () => {
   const handleCalendarioClick = () => navigate("/calendario");
   const handleClientesClick = () => navigate("/clientes");
   const handleServicioTecnicoClick = () => navigate("/servicio-tecnico");
-  const handleContactoClick = () => navigate("/contacto");
+  const handleVentasClick = () => navigate("/facturacion-ventas"); // Cambiado de "/contacto" a "/facturacion-ventas"
+
 
   // Efecto para animar las tarjetas con retraso
   useEffect(() => {
@@ -381,7 +382,7 @@ const HomeContent = () => {
           <Col xs={24} sm={12} md={8}>
             <Card
               hoverable
-              onClick={handleContactoClick}
+              onClick={handleVentasClick}
               className="simple-card"
               style={{
                 height: "180px",
@@ -416,7 +417,7 @@ const HomeContent = () => {
                 className="icon-container"
                 style={{ background: `${colors.accent}10` }}
               >
-                <PhoneOutlined
+                <FileTextOutlined 
                   style={{ fontSize: "32px", color: colors.accent }}
                 />
               </div>
@@ -424,12 +425,12 @@ const HomeContent = () => {
                 level={3}
                 style={{ margin: 0, color: colors.accent, textAlign: "center" }}
               >
-                Contacto
+                Lista Ventas
               </Title>
               <Text
                 style={{ textAlign: "center", marginTop: "8px", color: "#666" }}
               >
-                Directorio y mensajes
+                Lista de las ventas
               </Text>
             </Card>
           </Col>
