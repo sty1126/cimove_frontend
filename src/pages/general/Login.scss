@@ -491,3 +491,22 @@ $gradient-end: #4d8a52;
   display: block;
   font-weight: 500;
 }
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    flex: 1;
+    padding-right: 2.5rem; // espacio para el ojito
+  }
+
+  .password-toggle-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #555;
+  }
+}

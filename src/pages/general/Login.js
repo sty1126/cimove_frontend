@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Swal from "sweetalert2"
-import { FiMail, FiLock, FiLogIn, FiSmartphone, FiArrowLeft } from "react-icons/fi"
+import { FiMail, FiLock, FiLogIn, FiSmartphone, FiArrowLeft, FiEye, FiEyeOff} from "react-icons/fi"
 import "./Login.scss"
 import { loginUsuario, recuperarContrasena } from "../../services/generalService"
 
@@ -18,6 +18,8 @@ const Login = () => {
   const [showRecovery, setShowRecovery] = useState(false)
   const [recoveryEmail, setRecoveryEmail] = useState("")
   const [recoveryError, setRecoveryError] = useState("")
+  const [showPassword, setShowPassword] = useState(false)  // Nuevo estado para mostrar/ocultar contraseña
+
   const navigate = useNavigate()
 
   const validateEmail = (email) => {
@@ -221,7 +223,7 @@ const Login = () => {
                   <div className="input-with-icon">
                     <FiLock className="input-icon" />
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}  // Cambia el type según showPassword
                       id="contrasena"
                       value={contrasena}
                       onChange={handlePasswordChange}
@@ -230,9 +232,17 @@ const Login = () => {
                       minLength={6}
                       maxLength={25}
                     />
+                    <span
+                      className="password-toggle-icon"
+                      onClick={() => setShowPassword(!showPassword)} // Cambia el estado al hacer clic
+                      style={{ cursor: "pointer" }}
+                    >
+                      {showPassword ? <FiEyeOff /> : <FiEye />}
+                    </span>
                   </div>
                   {errors.contrasena && <span className="error-message">{errors.contrasena}</span>}
                 </div>
+
 
                 <div className="form-options">
                   <div className="remember-me">
