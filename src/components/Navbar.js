@@ -143,6 +143,10 @@ const Navbar = () => {
     setTimeout(() => setUserIconAnimated(false), 1000);
   };
 
+  const handleProfileClick = () => {
+  window.location.href = "/mi-perfil";
+};
+
   const handleLogout = () => {
     // Elimina el token o el estado de autenticación (esto depende de tu implementación)
     localStorage.removeItem("token"); // o el método que uses para gestionar la sesión
@@ -215,6 +219,8 @@ const Navbar = () => {
                   profile: false,
                 })
               }
+              onClick={handleProfileClick}
+
             >
               <FaIcons.FaUserEdit
                 style={{
@@ -227,37 +233,7 @@ const Navbar = () => {
               />
               Mi perfil
             </DropdownItem>
-            <DropdownItem
-              style={{
-                ...styles.dropdownItem,
-                ...(dropdownItemsHovered.settings
-                  ? styles.dropdownItemHover
-                  : {}),
-              }}
-              onMouseEnter={() =>
-                setDropdownItemsHovered({
-                  ...dropdownItemsHovered,
-                  settings: true,
-                })
-              }
-              onMouseLeave={() =>
-                setDropdownItemsHovered({
-                  ...dropdownItemsHovered,
-                  settings: false,
-                })
-              }
-            >
-              <FaIcons.FaUserCog
-                style={{
-                  ...styles.dropdownItemIcon,
-                  ...(dropdownItemsHovered.settings
-                    ? styles.dropdownItemIconHover
-                    : {}),
-                  color: "#4D8A52",
-                }}
-              />
-              Configuraciones
-            </DropdownItem>
+
             <DropdownItem divider style={styles.divider} />
             <DropdownItem
               style={{

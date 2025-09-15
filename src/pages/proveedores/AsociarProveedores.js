@@ -42,15 +42,15 @@ const { Title, Text } = Typography;
 
 // Paleta de colores personalizada
 const colors = {
-  primary: "#0D7F93", // Teal más vibrante
-  secondary: "#4D8A52", // Verde más vibrante
-  accent: "#7FBAD6", // Azul más vibrante
-  light: "#C3D3C6", // Verde menta claro
-  background: "#E8EAEC", // Gris muy claro
-  text: "#2A3033", // Texto oscuro
-  success: "#4D8A52", // Verde más vibrante para éxito
-  warning: "#E0A458", // Naranja apagado para advertencias
-  danger: "#C25F48", // Rojo más vibrante para peligro
+  primary: "#0D7F93",
+  secondary: "#4D8A52",
+  accent: "#7FBAD6",
+  light: "#C3D3C6",
+  background: "#E8EAEC",
+  text: "#2A3033",
+  success: "#4D8A52",
+  warning: "#E0A458",
+  danger: "#C25F48",
 };
 
 const AsociarProveedores = () => {
@@ -76,7 +76,11 @@ const AsociarProveedores = () => {
 
         try {
           const asociados = await obtenerProveedoresAsociados(idProducto);
-          setProveedoresAsociados(asociados.map((p) => p.id_proveedor));
+          const idsAsociados = asociados.map(p => p.id_proveedor);
+          setProveedoresAsociados(idsAsociados);
+          
+          // Pre-seleccionar los proveedores ya asociados
+          setProveedoresSeleccionados(idsAsociados);
         } catch (error) {
           console.error("Error al obtener proveedores asociados:", error);
           setProveedoresAsociados([]);
@@ -96,16 +100,18 @@ const AsociarProveedores = () => {
   const proveedoresFiltrados = proveedores.filter(
     (prov) =>
       prov.nombre_proveedor?.toLowerCase().includes(searchText.toLowerCase()) ||
-      prov.id_proveedor?.toLowerCase().includes(searchText.toLowerCase()) ||
-      prov.telefono_proveedor
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase()) ||
-      (prov.email_proveedor &&
-        prov.email_proveedor.toLowerCase().includes(searchText.toLowerCase()))
+      String(prov.id_proveedor).toLowerCase().includes(searchText.toLowerCase()) ||
+      String(prov.telefono_proveedor || "").toLowerCase().includes(searchText.toLowerCase()) ||
+      String(prov.email_proveedor || "").toLowerCase().includes(searchText.toLowerCase())
   );
 
   // Alternar selección de proveedor
   const toggleProveedor = (idProveedor) => {
+    // No permitir cambiar la selección de un proveedor ya asociado
+    if (proveedoresAsociados.includes(idProveedor)) {
+      return;
+    }
+    
     setProveedoresSeleccionados((prev) =>
       prev.includes(idProveedor)
         ? prev.filter((id) => id !== idProveedor)
@@ -113,34 +119,57 @@ const AsociarProveedores = () => {
     );
   };
 
-  // Seleccionar/deseleccionar todos los proveedores
+  // Seleccionar/deseleccionar todos los proveedores (excepto los ya asociados)
   const toggleSelectAll = () => {
-    if (proveedoresSeleccionados.length === proveedoresFiltrados.length) {
-      setProveedoresSeleccionados([]);
-    } else {
-      setProveedoresSeleccionados(
-        proveedoresFiltrados.map((prov) => prov.id_proveedor)
+    // Obtener solo los proveedores que no están ya asociados
+    const proveedoresNoAsociados = proveedoresFiltrados
+      .filter(prov => !proveedoresAsociados.includes(prov.id_proveedor))
+      .map(prov => prov.id_proveedor);
+    
+    // Verificar si todos los proveedores no asociados están seleccionados
+    const todosSeleccionados = proveedoresNoAsociados.every(id => 
+      proveedoresSeleccionados.includes(id)
+    );
+    
+    if (todosSeleccionados) {
+      // Deseleccionar todos los no asociados, mantener los ya asociados
+      setProveedoresSeleccionados(prev => 
+        prev.filter(id => proveedoresAsociados.includes(id))
       );
+    } else {
+      // Seleccionar todos los no asociados, manteniendo los ya asociados
+      const nuevaSeleccion = [...proveedoresSeleccionados];
+      proveedoresNoAsociados.forEach(id => {
+        if (!nuevaSeleccion.includes(id)) {
+          nuevaSeleccion.push(id);
+        }
+      });
+      setProveedoresSeleccionados(nuevaSeleccion);
     }
   };
 
   // Enviar formulario
   const handleSubmit = async () => {
-    if (proveedoresSeleccionados.length === 0) {
-      message.warning("Seleccione al menos un proveedor");
+    // Filtrar los proveedores ya asociados de la selección
+    const nuevosProveedores = proveedoresSeleccionados.filter(
+      id => !proveedoresAsociados.includes(id)
+    );
+    
+    if (nuevosProveedores.length === 0) {
+      message.warning("Seleccione al menos un nuevo proveedor para asociar");
       return;
     }
 
     setSubmitting(true);
     try {
       await Promise.all(
-        proveedoresSeleccionados.map((idProveedor) =>
+        nuevosProveedores.map((idProveedor) =>
           asociarProveedorAProducto(idProveedor, idProducto)
         )
       );
 
       message.success({
-        content: "Proveedores asociados correctamente",
+        content: `${nuevosProveedores.length} proveedores asociados correctamente`,
         icon: <CheckCircleIcon />,
         style: { marginTop: "20px" },
       });
@@ -165,12 +194,15 @@ const AsociarProveedores = () => {
       title: (
         <Checkbox
           checked={
-            proveedoresFiltrados.length > 0 &&
-            proveedoresSeleccionados.length === proveedoresFiltrados.length
+            proveedoresFiltrados.filter(p => !proveedoresAsociados.includes(p.id_proveedor)).length > 0 &&
+            proveedoresFiltrados.filter(p => !proveedoresAsociados.includes(p.id_proveedor)).every(p => 
+              proveedoresSeleccionados.includes(p.id_proveedor)
+            )
           }
           indeterminate={
-            proveedoresSeleccionados.length > 0 &&
-            proveedoresSeleccionados.length < proveedoresFiltrados.length
+            proveedoresSeleccionados.filter(id => !proveedoresAsociados.includes(id)).length > 0 &&
+            proveedoresSeleccionados.filter(id => !proveedoresAsociados.includes(id)).length < 
+            proveedoresFiltrados.filter(p => !proveedoresAsociados.includes(p.id_proveedor)).length
           }
           onChange={toggleSelectAll}
           disabled={submitting}
@@ -180,13 +212,18 @@ const AsociarProveedores = () => {
       key: "seleccionar",
       width: 60,
       align: "center",
-      render: (id) => (
-        <Checkbox
-          checked={proveedoresSeleccionados.includes(id)}
-          onChange={() => toggleProveedor(id)}
-          disabled={submitting}
-        />
-      ),
+      render: (id, record) => {
+        // Verificar si este proveedor ya está asociado
+        const yaAsociado = proveedoresAsociados.includes(id);
+        
+        return (
+          <Checkbox
+            checked={proveedoresSeleccionados.includes(id)}
+            onChange={() => toggleProveedor(id)}
+            disabled={submitting || yaAsociado}
+          />
+        );
+      },
     },
     {
       title: "ID",
@@ -238,6 +275,11 @@ const AsociarProveedores = () => {
       ),
     },
   ];
+
+  // Contar proveedores nuevos seleccionados (no asociados previamente)
+  const nuevosProveedoresCount = proveedoresSeleccionados.filter(
+    id => !proveedoresAsociados.includes(id)
+  ).length;
 
   if (loading) {
     return (
@@ -330,7 +372,10 @@ const AsociarProveedores = () => {
             <Col xs={24} md={12} style={{ textAlign: "right" }}>
               <Text type="secondary">
                 <InfoCircleOutlined style={{ marginRight: "8px" }} />
-                {proveedoresSeleccionados.length} proveedores seleccionados
+                {nuevosProveedoresCount} nuevos proveedores seleccionados
+                {proveedoresAsociados.length > 0 && (
+                  <> ({proveedoresAsociados.length} ya asociados)</>
+                )}
               </Text>
             </Col>
           </Row>
@@ -383,6 +428,7 @@ const AsociarProveedores = () => {
                 borderColor: colors.primary,
                 minWidth: "180px",
               }}
+              disabled={nuevosProveedoresCount === 0}
             >
               Guardar Asociación
             </Button>

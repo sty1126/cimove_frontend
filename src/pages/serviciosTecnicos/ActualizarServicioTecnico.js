@@ -310,13 +310,7 @@ const ActualizarServicioTecnico = () => {
 
   // Función para cancelar y volver atrás
   const handleCancel = () => {
-    Modal.confirm({
-      title: "¿Está seguro que desea cancelar?",
-      content: "Los cambios no guardados se perderán",
-      okText: "Sí, cancelar",
-      cancelText: "No, continuar editando",
-      onOk: () => navigate("/facturacion-ventas"),
-    });
+    navigate("/facturacion-ventas")
   };
 
   if (dataLoading) {

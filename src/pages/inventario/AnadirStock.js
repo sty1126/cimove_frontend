@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -19,6 +20,7 @@ import {
   Table,
   Empty,
   Tag,
+  Alert,
 } from "antd";
 import {
   PlusOutlined,
@@ -348,24 +350,33 @@ const AnadirStock = () => {
       ),
     },
     {
-      title: "Cantidad",
-      dataIndex: "cantidad",
-      key: "cantidad",
+      title: "Stock Máximo",
+      dataIndex: "stockMaximo",
+      key: "stockMaximo",
       width: 150,
-      render: (text, record) => (
-        <InputNumber
-          style={{ width: "100%" }}
-          min={record.existe ? 1 : record.stockMinimo || 1}
-          max={record.existe ? 5000 : record.stockMaximo || 5000}
-          value={text}
-          onChange={(value) =>
-            actualizarCantidad(record.key, "cantidad", value)
-          }
-          placeholder="Cantidad"
-          disabled={submitting}
-          prefix={<NumberOutlined style={{ color: colors.primary }} />}
-        />
-      ),
+      render: (text, record) => {
+        if (record.existe) {
+          return (
+            <Text type="secondary" italic>
+              No aplicable
+            </Text>
+          );
+        }
+        return (
+          <InputNumber
+            style={{ width: "100%" }}
+            min={1}
+            max={5000}
+            value={text}
+            onChange={(value) =>
+              actualizarCantidad(record.key, "stockMaximo", value)
+            }
+            placeholder="Máximo"
+            disabled={submitting}
+            prefix={<ArrowUpOutlined style={{ color: colors.success }} />}
+          />
+        );
+      },
     },
     {
       title: "Stock Mínimo",
@@ -397,33 +408,24 @@ const AnadirStock = () => {
       },
     },
     {
-      title: "Stock Máximo",
-      dataIndex: "stockMaximo",
-      key: "stockMaximo",
+      title: "Cantidad",
+      dataIndex: "cantidad",
+      key: "cantidad",
       width: 150,
-      render: (text, record) => {
-        if (record.existe) {
-          return (
-            <Text type="secondary" italic>
-              No aplicable
-            </Text>
-          );
-        }
-        return (
-          <InputNumber
-            style={{ width: "100%" }}
-            min={1}
-            max={5000}
-            value={text}
-            onChange={(value) =>
-              actualizarCantidad(record.key, "stockMaximo", value)
-            }
-            placeholder="Máximo"
-            disabled={submitting}
-            prefix={<ArrowUpOutlined style={{ color: colors.success }} />}
-          />
-        );
-      },
+      render: (text, record) => (
+        <InputNumber
+          style={{ width: "100%" }}
+          min={record.existe ? 1 : record.stockMinimo || 1}
+          max={record.existe ? 5000 : record.stockMaximo || 5000}
+          value={text}
+          onChange={(value) =>
+            actualizarCantidad(record.key, "cantidad", value)
+          }
+          placeholder="Cantidad"
+          disabled={submitting}
+          prefix={<NumberOutlined style={{ color: colors.primary }} />}
+        />
+      ),
     },
     {
       title: "Acciones",
@@ -576,6 +578,28 @@ const AnadirStock = () => {
               </Form.Item>
             </Col>
           </Row>
+
+          {/* Alerta informativa sobre el orden de llenado */}
+          {stockPorSede.length > 0 && stockPorSede.some(s => !s.existe) && (
+            <Alert
+              message="Orden recomendado para productos nuevos"
+              description={
+                <Text>
+                  Para una mejor configuración de productos nuevos, complete los campos en este orden:
+                  <br />
+                  <b>1.</b> Stock Máximo → <b>2.</b> Stock Mínimo → <b>3.</b> Cantidad
+                </Text>
+              }
+              type="info"
+              showIcon
+              icon={<InfoCircleOutlined style={{ color: colors.primary }} />}
+              style={{ 
+                marginBottom: "24px", 
+                borderColor: colors.accent,
+                backgroundColor: "#f0f8ff" 
+              }}
+            />
+          )}
 
           <div style={{ marginTop: "24px", marginBottom: "24px" }}>
             {stockPorSede.length > 0 ? (

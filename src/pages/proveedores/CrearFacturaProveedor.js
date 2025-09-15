@@ -7,7 +7,6 @@ import {
   Button,
   DatePicker,
   message,
-  Select,
   Table,
   Card,
   Typography,
@@ -43,6 +42,7 @@ const CrearFacturaProveedor = () => {
   const navigate = useNavigate();
   const [ordenes, setOrdenes] = useState([]);
   const [productos, setProductos] = useState([]);
+  const [isFormValid, setIsFormValid] = useState(false);
   const [selectedOrden, setSelectedOrden] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
@@ -68,38 +68,29 @@ const CrearFacturaProveedor = () => {
   }, []);
 
   const handleOrdenSelectFromModal = async (orden) => {
-    setSelectedOrden(orden.id_ordencompra);
-    form.setFieldsValue({ id_ordencompra: orden.id_ordencompra });
+    console.log("Orden seleccionada desde modal:", orden);
+
+    if (!orden || !orden.id_orden) {
+      message.error("La orden seleccionada no tiene ID válido");
+      return;
+    }
+
+    // Guardar todo el objeto de la orden
+    setSelectedOrden(orden);
+    form.setFieldsValue({ id_ordencompra: orden.id_orden });
+
+    // Cerrar modal
     setShowModalOrden(false);
 
     setFetchingData(true);
     try {
-      const res = await obtenerProductosDeOrden(orden.id_ordencompra);
-      const productosConSubtotal = res.map((p) => ({
-        id_producto: p.id_producto,
-        nombre_producto: p.nombre_producto,
-        cantidad_ordenada: p.cantidad_ordenada,
-        precio_unitario: p.preciounitario_detalleordencompra,
-        subtotal: p.cantidad_ordenada * p.preciounitario_detalleordencompra,
-        cantidad_maxima: p.cantidad_ordenada,
-      }));
-      setProductos(productosConSubtotal);
-      calcularTotal(productosConSubtotal);
-      setValidationErrors([]);
-    } catch (error) {
-      message.error("Error al cargar los productos de la orden");
-      console.error(error);
-    } finally {
-      setFetchingData(false);
-    }
-  };
+      const res = await obtenerProductosDeOrden(orden.id_orden);
+      console.log("Productos obtenidos:", res);
 
-  const handleOrdenSelect = async (id_ordencompra) => {
-    setSelectedOrden(id_ordencompra);
-    setFetchingData(true);
-    try {
-      const res = await obtenerProductosDeOrden(id_ordencompra);
-      const productosConSubtotal = res.map((p) => ({
+      // Asegurarse de que res sea un array
+      const productosArray = Array.isArray(res) ? res : [];
+
+      const productosConSubtotal = productosArray.map((p) => ({
         id_producto: p.id_producto,
         nombre_producto: p.nombre_producto,
         cantidad_ordenada: p.cantidad_ordenada,
@@ -107,7 +98,11 @@ const CrearFacturaProveedor = () => {
         subtotal: p.cantidad_ordenada * p.preciounitario_detalleordencompra,
         cantidad_maxima: p.cantidad_ordenada,
       }));
+
       setProductos(productosConSubtotal);
+      const valid = validateProductos(productosConSubtotal);
+      setIsFormValid(valid);
+
       calcularTotal(productosConSubtotal);
       setValidationErrors([]);
     } catch (error) {
@@ -119,34 +114,28 @@ const CrearFacturaProveedor = () => {
   };
 
   const calcularTotal = (productosActualizados) => {
-    const total = productosActualizados.reduce((sum, p) => sum + p.subtotal, 0);
+    const total = productosActualizados.reduce((sum, p) => sum + (p.subtotal ?? 0), 0);
     setTotalFactura(total);
   };
 
   const handleProductoChange = (value, record, field) => {
-    // Validar que el valor sea un número
     if (value === null || isNaN(value)) {
       message.warning("Por favor ingrese un valor numérico válido");
       return;
     }
 
-    // Validar que la cantidad no exceda el máximo permitido
     if (field === "cantidad_ordenada" && value > record.cantidad_maxima) {
       message.warning(`La cantidad no puede exceder ${record.cantidad_maxima}`);
       value = record.cantidad_maxima;
     }
 
-    // Asegurar que el valor sea un entero positivo para cantidad
     if (field === "cantidad_ordenada") {
       value = Math.max(1, Math.floor(value));
     }
 
     const nuevosProductos = productos.map((p) => {
       if (p.id_producto === record.id_producto) {
-        const actualizado = {
-          ...p,
-          [field]: value,
-        };
+        const actualizado = { ...p, [field]: value };
         actualizado.subtotal =
           (field === "cantidad_ordenada" ? value : p.cantidad_ordenada) *
           (field === "precio_unitario" ? value : p.precio_unitario);
@@ -155,13 +144,19 @@ const CrearFacturaProveedor = () => {
       return p;
     });
 
-    console.log("Updated productos:", nuevosProductos);
     setProductos(nuevosProductos);
+    const valid = validateProductos(nuevosProductos);
+    setIsFormValid(valid);
+
     calcularTotal(nuevosProductos);
     validateProductos(nuevosProductos);
   };
 
-  // Función para validar todos los productos
+  const checkFormValidity = (orden, fecha) => {
+    const formValido = !!orden && !!fecha;
+    setIsFormValid(formValido);
+  };
+
   const validateProductos = (productosActuales) => {
     const errores = [];
 
@@ -184,25 +179,17 @@ const CrearFacturaProveedor = () => {
   };
 
   const validateForm = () => {
-    // Validar que haya una orden seleccionada
     if (!selectedOrden) {
       message.error("Debe seleccionar una orden de compra");
       return false;
     }
 
-    // Validar que haya una fecha de factura
     if (!fechaFactura) {
       message.error("Debe seleccionar una fecha de factura");
       return false;
     }
 
-    // Validar que haya productos y que sean válidos
-    if (productos.length === 0) {
-      message.error("No hay productos para facturar");
-      return false;
-    }
-
-    return validateProductos(productos);
+    return true;
   };
 
   const handleFinish = async () => {
@@ -211,7 +198,7 @@ const CrearFacturaProveedor = () => {
     try {
       setLoading(true);
       const dataToSend = {
-        id_ordencompra: selectedOrden,
+        id_ordencompra: selectedOrden.id_orden,
         fecha_facturaproveedor: fechaFactura.format("YYYY-MM-DD"),
         monto_facturaproveedor: totalFactura,
         productos: productos.map((p) => ({
@@ -266,9 +253,8 @@ const CrearFacturaProveedor = () => {
           style={{ width: "100%" }}
           size="middle"
           controls
-          precision={0} // Solo números enteros
+          precision={0}
           parser={(value) => {
-            // Asegurar que solo se acepten números enteros positivos
             const parsed = Number.parseInt(value || "0", 10);
             if (isNaN(parsed)) return 1;
             return parsed;
@@ -298,7 +284,7 @@ const CrearFacturaProveedor = () => {
       dataIndex: "subtotal",
       render: (text) => (
         <Text strong style={{ color: "#1890ff" }}>
-          $ {text.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          $ {Number(text ?? 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
         </Text>
       ),
     },
@@ -341,10 +327,9 @@ const CrearFacturaProveedor = () => {
           onFinish={handleFinish}
           requiredMark="optional"
         >
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "24px" }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+              {/* Orden de compra solo con botón */}
               <Form.Item
                 label={
                   <Space>
@@ -361,29 +346,19 @@ const CrearFacturaProveedor = () => {
                 ]}
                 style={{ flex: "1", minWidth: "300px" }}
               >
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <Select
-                    placeholder="Selecciona una orden"
-                    onChange={handleOrdenSelect}
-                    options={ordenes.map((orden) => ({
-                      label: `OC-${orden.id_ordencompra} | ${
-                        orden.nombre_proveedor
-                      } | ${dayjs(orden.fecha_ordencompra).format(
-                        "DD/MM/YYYY"
-                      )}`,
-                      value: orden.id_ordencompra,
-                    }))}
-                    style={{ flex: 1 }}
-                    loading={fetchingData}
-                    size="large"
-                    showSearch
-                    optionFilterProp="label"
-                  />
+                <div
+                  style={{ display: "flex", gap: "8px", alignItems: "center" }}
+                >
+                  <span style={{ flex: 1, fontWeight: "500" }}>
+                    {selectedOrden ? selectedOrden.numero_orden : "Ninguna orden seleccionada"}
+                  </span>
+
+
                   <Button
                     type="primary"
                     onClick={() => setShowModalOrden(true)}
                     size="large"
-                    style={{ minWidth: "120px" }}
+                    style={{ minWidth: "140px" }}
                   >
                     Seleccionar
                   </Button>
@@ -415,17 +390,12 @@ const CrearFacturaProveedor = () => {
                   style={{ width: "100%" }}
                   size="large"
                 />
+
               </Form.Item>
             </div>
 
             {fetchingData && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  padding: "40px",
-                }}
-              >
+              <div style={{ display: "flex", justifyContent: "center", padding: "40px" }}>
                 <Spin size="large" tip="Cargando datos..." />
               </div>
             )}
@@ -489,10 +459,7 @@ const CrearFacturaProveedor = () => {
                             <Text strong>Total:</Text>
                           </Table.Summary.Cell>
                           <Table.Summary.Cell index={1}>
-                            <Text
-                              strong
-                              style={{ fontSize: "16px", color: "#1890ff" }}
-                            >
+                            <Text strong style={{ fontSize: "16px", color: "#1890ff" }}>
                               ${" "}
                               {totalFactura
                                 .toFixed(2)
@@ -529,12 +496,14 @@ const CrearFacturaProveedor = () => {
                   maxWidth: "300px",
                   borderRadius: "6px",
                 }}
-                disabled={productos.length === 0 || validationErrors.length > 0}
+                disabled={!selectedOrden || !fechaFactura} // ✅ aquí cambiamos
                 icon={<CheckCircleOutlined />}
               >
                 Registrar movimiento
               </Button>
             </Form.Item>
+
+
           </div>
         </Form>
       </Card>

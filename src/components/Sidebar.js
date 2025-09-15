@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Layout, Menu, Button } from "antd";
+import { Layout, Menu, Button, Tooltip } from "antd";
 import { NavLink, useLocation } from "react-router-dom";
 import * as FaIcons from "react-icons/fa";
 
@@ -54,9 +54,6 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
     }
   }, [location]);
 
-  // Estilos personalizados para el menú
-
-
   // Estilo personalizado para el título del grupo
   const groupTitleStyle = {
     color: colors.text,
@@ -80,6 +77,79 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
     borderRadius: "0 2px 2px 0",
   };
 
+  // Función para renderizar los elementos de menú con tooltips cuando está colapsado
+  const getMenuItem = (key, icon, label, path) => {
+    const content = (
+      <NavLink
+        to={path}
+        style={{ color: colors.text, fontWeight: "bold" }}
+        className="menu-link"
+      >
+        {label}
+      </NavLink>
+    );
+
+    return {
+      key,
+      icon,
+      label: collapsed ? (
+        <Tooltip placement="right" title={label}>
+          <NavLink to={path} className="icon-only-link">
+            {/* Este span vacío es solo para que el tooltip tenga un objetivo */}
+            <span className="tooltip-target"></span>
+          </NavLink>
+        </Tooltip>
+      ) : content,
+    };
+  };
+
+  // Generar los elementos del menú con tooltips
+  const menuItems = [
+    getMenuItem("1", <FaIcons.FaHome />, "Inicio", "/home"),
+    {
+      type: "group",
+      label: (
+        <div style={groupTitleStyle} className="group-title">
+          <div style={groupIndicatorStyle}></div>
+          <span style={{ marginLeft: "10px" }}>Ventas</span>
+        </div>
+      ),
+      children: [
+        getMenuItem("2", <FaIcons.FaFileInvoiceDollar />, "Movimientos", "/facturacion-ventas"),
+        getMenuItem("4", <FaIcons.FaUsers />, "Clientes", "/clientes"),
+      ],
+    },
+    {
+      type: "group",
+      label: (
+        <div style={groupTitleStyle} className="group-title">
+          <div style={groupIndicatorStyle}></div>
+          <span style={{ marginLeft: "10px" }}>Compras</span>
+        </div>
+      ),
+      children: [
+        getMenuItem("5", <FaIcons.FaFileInvoice />, "Movimientos", "/facturacion-proveedor"),
+        getMenuItem("7", <FaIcons.FaTruck />, "Proveedores", "/proveedores"),
+        getMenuItem("8", <FaIcons.FaBoxOpen />, "Catálogo", "/catalogo"),
+        getMenuItem("9", <FaIcons.FaWarehouse />, "Inventario", "/inventario"),
+      ],
+    },
+    {
+      type: "group",
+      label: (
+        <div style={groupTitleStyle} className="group-title">
+          <div style={groupIndicatorStyle}></div>
+          <span style={{ marginLeft: "10px" }}>Monitoreo</span>
+        </div>
+      ),
+      children: [
+        getMenuItem("11", <FaIcons.FaCalendarAlt />, "Calendario", "/calendario"),
+        getMenuItem("12", <FaIcons.FaChartBar />, "Estadísticas", "/estadisticas"),
+        getMenuItem("13", <FaIcons.FaUsers />, "Empleados", "/empleados"),
+      ],
+    },
+  ];
+
   return (
     <Sider
       collapsible
@@ -90,11 +160,11 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
         height: "100vh",
         backgroundColor: colors.primary,
         position: "relative",
-        overflow: "hidden auto", // Permite scroll pero mantiene el fondo fijo
+        overflow: "hidden auto",
         boxShadow: "2px 0 10px rgba(0, 0, 0, 0.1)",
       }}
       trigger={null}
-      className="custom-scrollbar" // Clase para personalizar la barra de desplazamiento
+      className="custom-scrollbar"
     >
       {/* Botón de colapsar */}
       <div
@@ -134,172 +204,16 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
         mode="inline"
         selectedKeys={selectedKeys}
         style={{
-          backgroundColor: "transparent", // Transparente para que se vea el fondo del Sider
+          backgroundColor: "transparent",
           fontSize: "15px",
           border: "none",
           padding: "0 8px",
         }}
-        // Personalización de los elementos del menú
-        items={[
-          {
-            key: "1",
-            icon: <FaIcons.FaHome />,
-            label: !collapsed && (
-              <NavLink
-                to="/home"
-                style={{ color: colors.text, fontWeight: "bold" }}
-              >
-                Inicio
-              </NavLink>
-            ),
-          },
-          {
-            type: "group",
-            label: !collapsed ? (
-              <div style={groupTitleStyle}>
-                <div style={groupIndicatorStyle}></div>
-                <span style={{ marginLeft: "10px" }}>Ventas</span>
-              </div>
-            ) : null,
-            children: [
-              {
-                key: "2",
-                icon: <FaIcons.FaFileInvoiceDollar />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/facturacion-ventas"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Movimientos 
-                  </NavLink>
-                ),
-              },
-              {
-                key: "4",
-                icon: <FaIcons.FaUsers />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/clientes"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Clientes
-                  </NavLink>
-                ),
-              },
-            ],
-          },
-          {
-            type: "group",
-            label: !collapsed ? (
-              <div style={groupTitleStyle}>
-                <div style={groupIndicatorStyle}></div>
-                <span style={{ marginLeft: "10px" }}>Compras</span>
-              </div>
-            ) : null,
-            children: [
-              {
-                key: "5",
-                icon: <FaIcons.FaFileInvoice />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/facturacion-proveedor"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Movimientos
-                  </NavLink>
-                ),
-              },
-              {
-                key: "7",
-                icon: <FaIcons.FaTruck />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/proveedores"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Proveedores
-                  </NavLink>
-                ),
-              },
-              {
-                key: "8",
-                icon: <FaIcons.FaBoxOpen />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/catalogo"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Catálogo
-                  </NavLink>
-                ),
-              },
-              {
-                key: "9",
-                icon: <FaIcons.FaWarehouse />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/inventario"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Inventario
-                  </NavLink>
-                ),
-              },
-            ],
-          },
-          {
-            type: "group",
-            label: !collapsed ? (
-              <div style={groupTitleStyle}>
-                <div style={groupIndicatorStyle}></div>
-                <span style={{ marginLeft: "10px" }}>Monitoreo</span>
-              </div>
-            ) : null,
-            children: [
-              {
-                key: "11",
-                icon: <FaIcons.FaCalendarAlt />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/calendario"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Calendario
-                  </NavLink>
-                ),
-              },
-              {
-                key: "12",
-                icon: <FaIcons.FaChartBar />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/estadisticas"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Estadísticas
-                  </NavLink>
-                ),
-              },
-              {
-                key: "13",
-                icon: <FaIcons.FaUsers />,
-                label: !collapsed && (
-                  <NavLink
-                    to="/empleados"
-                    style={{ color: colors.text, fontWeight: "bold" }}
-                  >
-                    Empleados
-                  </NavLink>
-                ),
-              },
-            ],
-          },
-        ]}
-        // Personalización de los estilos de los elementos del menú
+        items={menuItems}
         className="custom-menu"
       />
 
-      {/* Estilos globales para personalizar el menú y la barra de desplazamiento */}
+      {/* Estilos globales */}
       <style>
         {`
           /* Personalización del menú */
@@ -341,28 +255,73 @@ const Sidebar = ({ externalCollapsed, setExternalCollapsed }) => {
             background-color: rgba(0, 0, 0, 0.3);
           }
           
-          /* Asegurar que el fondo del menú sea consistente */
-          .ant-menu-inline, .ant-menu-vertical, .ant-menu-vertical-left {
-            background-color: transparent !important;
-          }
-          
-          /* Estilo para los grupos de menú */
-          .ant-menu-item-group-title {
-            padding: 10px 16px 5px !important;
-          }
-          
-          /* Animación para el botón de colapso */
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(180deg); }
-          }
-
           /* Ocultar títulos de grupo cuando el sidebar está colapsado */
-          .ant-layout-sider-collapsed .ant-menu-item-group-title {
+          .ant-layout-sider-collapsed .group-title {
             display: none !important;
             padding: 0 !important;
             height: 0 !important;
             overflow: hidden !important;
+          }
+          
+          /* Ajustar padding de los grupos cuando está colapsado */
+          .ant-layout-sider-collapsed .ant-menu-item-group-list {
+            padding: 0 !important;
+          }
+          
+          /* Ocultar completamente los títulos de grupo colapsados */
+          .ant-layout-sider-collapsed .ant-menu-item-group-title {
+            display: none !important;
+            height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          
+          /* Arreglos para el modo colapsado */
+          .ant-layout-sider-collapsed .ant-menu-item .anticon,
+          .ant-layout-sider-collapsed .ant-menu-submenu-title .anticon {
+            margin-inline-end: 0 !important;
+          }
+          
+          /* Centrar los íconos cuando está colapsado */
+          .ant-layout-sider-collapsed .ant-menu-item {
+            padding-inline: 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            height: 40px !important;
+          }
+          
+          /* Estilos para tooltips */
+          .ant-tooltip {
+            z-index: 1050;
+          }
+          
+          .ant-tooltip-inner {
+            padding: 6px 12px;
+            color: white;
+            font-weight: 500;
+            border-radius: 4px;
+          }
+          
+          /* Para que el tooltip funcione bien con el link */
+          .icon-only-link {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+          }
+          
+          /* Ajustar el tamaño del tooltip target para cubrir toda el área del ítem del menú */
+          .tooltip-target {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
           }
         `}
       </style>

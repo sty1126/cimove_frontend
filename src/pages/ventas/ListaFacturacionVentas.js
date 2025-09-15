@@ -619,38 +619,6 @@ const ListaFacturacionVentas = () => {
         );
       },
     },
-    {
-      title: "Acciones",
-      key: "acciones",
-      width: 160,
-      align: "right",
-      render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            size="small"
-            onClick={() => navigate(`/editar-venta/${record.id_factura}`)}
-            style={{
-              backgroundColor: colors.secondary,
-              borderColor: colors.secondary,
-            }}
-            title="Editar"
-          />
-          <Button
-            type="primary"
-            icon={<FilePdfOutlined />}
-            size="small"
-            onClick={() => generarPDF(record.id_factura, "factura")}
-            style={{
-              backgroundColor: colors.accent,
-              borderColor: colors.accent,
-            }}
-            title="Generar PDF"
-          />
-        </Space>
-      ),
-    },
   ];
 
   // Columnas para la tabla de servicios técnicos
@@ -949,7 +917,7 @@ const ListaFacturacionVentas = () => {
           <TabPane
             tab={
               <span>
-                <FileTextOutlined /> Facturas
+                <FileTextOutlined /> Movimientos
               </span>
             }
             key="facturas"
@@ -968,7 +936,7 @@ const ListaFacturacionVentas = () => {
                   }}
                 >
                   <Statistic
-                    title="Total Facturas"
+                    title="Total Movimientos"
                     value={estadisticasFacturas.totalFacturas}
                     prefix={
                       <FileTextOutlined style={{ color: colors.primary }} />

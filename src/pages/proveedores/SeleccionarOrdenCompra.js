@@ -1,66 +1,47 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Modal,
-  Table,
-  Button,
-  Input,
-  Space,
-  Typography,
-  Tag,
-  Spin,
-  message,
-  Empty,
-} from "antd";
-import {
-  SearchOutlined,
-  ShoppingCartOutlined,
-  CalendarOutlined,
-  UserOutlined,
-  DollarOutlined,
-} from "@ant-design/icons";
-import dayjs from "dayjs";
+import { Table, Input, Button, Space, Tag, message, Modal } from "antd";
+import { ReloadOutlined, EyeOutlined } from "@ant-design/icons";
 
-const { Text } = Typography;
-
-// API Routes - Acomodar según sea necesario
-// GET /api/ordenes-compra - Obtener todas las órdenes de compra
-// GET /api/ordenes-compra/proveedor/:id - Obtener órdenes por proveedor
-
-const ModalSeleccionarOrden = ({
-  visible,
-  onClose,
-  onSelect,
-  proveedorId = null,
-}) => {
+export default function OrdenesCompraModal({ proveedorId, visible, onClose, onSelect }) {
   const [ordenes, setOrdenes] = useState([]);
   const [filteredOrdenes, setFilteredOrdenes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [detalleVisible, setDetalleVisible] = useState(false);
+  const [selectedOrden, setSelectedOrden] = useState(null);
 
   useEffect(() => {
-    if (visible) {
-      fetchOrdenes();
-    }
-  }, [visible, proveedorId]);
+    if (visible) fetchOrdenes();
+  }, [proveedorId, visible]);
 
+  // 🔹 Obtener órdenes de compra
   const fetchOrdenes = async () => {
     setLoading(true);
     try {
-      // Aquí va la llamada a la API
       const url = proveedorId
-        ? `/api/ordenes-compra/proveedor/${proveedorId}`
-        : "/api/ordenes-compra";
+        ? `http://localhost:4000/api/proveedor/${proveedorId}`
+        : "http://localhost:4000/api/ordenes";
 
-      // const response = await fetch(url);
-      // const data = await response.json();
-      // setOrdenes(data);
-      // setFilteredOrdenes(data);
+      const response = await fetch(url);
+      const data = await response.json();
 
-      // Temporal - remover cuando se conecte la API
-      setOrdenes([]);
-      setFilteredOrdenes([]);
+      const mapped = data.map((orden) => ({
+        id_orden: orden.id_ordencompra,
+        numero_orden: `OC-${orden.id_ordencompra}`,
+        fecha_orden: orden.fecha_ordencompra,
+        total_orden: orden.total_ordencompra,
+        estado_orden:
+          orden.estado_facturaproveedor === "A"
+            ? "PENDIENTE"
+            : orden.estado_facturaproveedor,
+        nombre_proveedor: orden.nombre_proveedor,
+        detalles: orden.detalles || [],
+      }));
+
+      setOrdenes(mapped);
+      setFilteredOrdenes(mapped);
     } catch (error) {
       console.error("Error al obtener órdenes:", error);
       message.error("Error al cargar las órdenes de compra");
@@ -69,141 +50,166 @@ const ModalSeleccionarOrden = ({
     }
   };
 
+  // 🔹 Buscar por número o proveedor
   const handleSearch = (value) => {
     setSearchText(value);
     const filtered = ordenes.filter(
       (orden) =>
-        orden.numero_orden?.toLowerCase().includes(value.toLowerCase()) ||
-        orden.nombre_proveedor?.toLowerCase().includes(value.toLowerCase()) ||
-        orden.estado_orden?.toLowerCase().includes(value.toLowerCase())
+        orden.numero_orden.toLowerCase().includes(value.toLowerCase()) ||
+        orden.nombre_proveedor.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredOrdenes(filtered);
   };
 
-  const handleSelect = (orden) => {
-    onSelect(orden);
-    onClose();
+  // 🔹 Reset filtros
+  const resetFilters = () => {
+    setSearchText("");
+    setFilteredOrdenes(ordenes);
   };
 
+  // 🔹 Columnas de la tabla principal
   const columns = [
     {
-      title: "Número de Orden",
+      title: "Número Orden",
       dataIndex: "numero_orden",
       key: "numero_orden",
-      render: (text) => (
-        <Space>
-          <ShoppingCartOutlined style={{ color: "#1890ff" }} />
-          <Text strong>{text}</Text>
-        </Space>
-      ),
-    },
-    {
-      title: "Proveedor",
-      dataIndex: "nombre_proveedor",
-      key: "nombre_proveedor",
-      render: (text) => (
-        <Space>
-          <UserOutlined style={{ color: "#52c41a" }} />
-          <Text>{text}</Text>
-        </Space>
-      ),
     },
     {
       title: "Fecha",
       dataIndex: "fecha_orden",
       key: "fecha_orden",
-      render: (text) => (
-        <Space>
-          <CalendarOutlined style={{ color: "#faad14" }} />
-          <Text>{dayjs(text).format("DD/MM/YYYY")}</Text>
-        </Space>
-      ),
+      render: (text) => (text ? new Date(text).toLocaleDateString() : "-"),
+    },
+    {
+      title: "Proveedor",
+      dataIndex: "nombre_proveedor",
+      key: "nombre_proveedor",
     },
     {
       title: "Total",
       dataIndex: "total_orden",
       key: "total_orden",
-      render: (text) => (
-        <Space>
-          <DollarOutlined style={{ color: "#13c2c2" }} />
-          <Text strong>${text?.toFixed(2)}</Text>
-        </Space>
-      ),
+      render: (text) => `$${(text ?? 0).toLocaleString()}`,
     },
     {
       title: "Estado",
       dataIndex: "estado_orden",
       key: "estado_orden",
-      render: (estado) => {
-        let color = "default";
-        if (estado === "PENDIENTE") color = "orange";
-        if (estado === "COMPLETADA") color = "green";
-        if (estado === "CANCELADA") color = "red";
-
-        return <Tag color={color}>{estado}</Tag>;
-      },
+      render: (estado) => (
+        <Tag color={estado === "PENDIENTE" ? "orange" : "green"}>
+          {estado}
+        </Tag>
+      ),
     },
     {
       title: "Acciones",
       key: "acciones",
       render: (_, record) => (
-        <Button
-          type="primary"
-          size="small"
-          onClick={() => handleSelect(record)}
-        >
-          Seleccionar
-        </Button>
+        <Space>
+          <Button
+            type="link"
+            icon={<EyeOutlined />}
+            onClick={() => {
+              setSelectedOrden(record);
+              setDetalleVisible(true);
+            }}
+          >
+            Ver detalles
+          </Button>
+
+          <Button
+            type="primary"
+            onClick={() => {
+              console.log("📤 Orden enviada al padre:", record); // 👈 debug
+              message.success(`Orden ${record.numero_orden} seleccionada`);
+              onSelect?.(record); // 🔹 Devuelve la orden al padre
+            }}
+          >
+            Seleccionar
+          </Button>
+
+        </Space>
       ),
     },
   ];
 
+  // 🔹 Columnas de la tabla de detalles (usa los campos correctos del backend)
+  const detalleColumns = [
+    {
+      title: "Producto",
+      dataIndex: "nombre_producto",
+      key: "nombre_producto",
+    },
+    {
+      title: "Cantidad",
+      dataIndex: "cantidad",
+      key: "cantidad",
+      render: (cantidad) => cantidad ?? 0,
+    },
+    {
+      title: "Precio Unitario",
+      dataIndex: "precio_unitario",
+      key: "precio_unitario",
+      render: (precio) => `$${(precio ?? 0).toLocaleString()}`,
+    },
+    {
+      title: "Subtotal",
+      dataIndex: "subtotal",
+      key: "subtotal",
+      render: (subtotal) => `$${(subtotal ?? 0).toLocaleString()}`,
+    },
+  ];
+
   return (
-    <Modal
-      title={
-        <Space>
-          <ShoppingCartOutlined />
-          <span>Seleccionar Orden de Compra</span>
+    <>
+      {/* 🔹 Modal principal de órdenes */}
+      <Modal
+        title="Órdenes de Compra"
+        open={visible}
+        onCancel={() => onClose?.()}
+        footer={null}
+        width={1000}
+      >
+        <Space style={{ marginBottom: 16 }}>
+          <Input.Search
+            placeholder="Buscar por número o proveedor"
+            value={searchText}
+            onChange={(e) => handleSearch(e.target.value)}
+            style={{ width: 250 }}
+          />
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={resetFilters}
+            disabled={!searchText}
+          >
+            Reset
+          </Button>
         </Space>
-      }
-      open={visible}
-      onCancel={onClose}
-      footer={null}
-      width={1000}
-      style={{ top: 20 }}
-    >
-      <Space direction="vertical" style={{ width: "100%", marginBottom: 16 }}>
-        <Input
-          placeholder="Buscar por número de orden, proveedor o estado..."
-          prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={(e) => handleSearch(e.target.value)}
-          allowClear
+
+        <Table
+          columns={columns}
+          dataSource={filteredOrdenes}
+          loading={loading}
+          rowKey={(record) => record.id_orden}
+          pagination={{ pageSize: 5 }}
         />
-      </Space>
+      </Modal>
 
-      <Spin spinning={loading}>
-        {filteredOrdenes.length > 0 ? (
-          <Table
-            columns={columns}
-            dataSource={filteredOrdenes}
-            rowKey="id_orden"
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: false,
-              showQuickJumper: true,
-            }}
-            scroll={{ x: 800 }}
-          />
-        ) : (
-          <Empty
-            description="No hay órdenes de compra disponibles"
-            style={{ margin: "40px 0" }}
-          />
-        )}
-      </Spin>
-    </Modal>
+      {/* 🔹 Modal secundario para ver detalles */}
+      <Modal
+        title={`Detalles de ${selectedOrden?.numero_orden || ""}`}
+        open={detalleVisible}
+        onCancel={() => setDetalleVisible(false)}
+        footer={null}
+        width={800}
+      >
+        <Table
+          columns={detalleColumns}
+          dataSource={selectedOrden?.detalles || []}
+          pagination={false}
+          rowKey={(row) => row.id_detalleordencompra}
+        />
+      </Modal>
+    </>
   );
-};
-
-export default ModalSeleccionarOrden;
+}
