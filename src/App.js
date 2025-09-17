@@ -33,6 +33,7 @@ import Home from "./pages/general/Home";
 import LandingPage from "./pages/general/LandingPage";
 import Login from "./pages/general/Login";
 import ResetPassword from "./pages/general/ResetPassword";
+import MiPerfil from "./pages/general/MiPerfil";
 
 // Inventario
 import AnadirNovedad from "./pages/inventario/AnadirNovedad";
@@ -61,6 +62,7 @@ import PagosCompras from "./pages/proveedores/PagosCompras";
 import ProcesarPedido from "./pages/proveedores/ProcesarPedido";
 import RegistroProveedor from "./pages/proveedores/RegistroProveedor";
 import SeleccionarProveedor from "./pages/proveedores/SeleccionarProveedor";
+import EliminarProveedor from "./pages/proveedores/EliminarProveedor";
 
 // Servicios Técnicos
 import ActualizarServicioTecnico from "./pages/serviciosTecnicos/ActualizarServicioTecnico";
@@ -96,11 +98,18 @@ function App() {
           {/* LOGIN */}
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          
+
           {/* TODAS LAS DEMÁS PÁGINAS */}
           <Route path="/*" element={<Layout />}>
             {/* Rutas protegidas por autenticación */}
             <Route path="home" element={<PrivateRoute element={<Home />} />} />
+            
+            {/* Mi Perfil - Sin parámetro en la ruta */}
+            <Route
+              path="mi-perfil"
+              element={<PrivateRoute element={<MiPerfil />} />}
+            />
+            
             <Route
               path="inventario"
               element={<PrivateRoute element={<Inventario />} />}
@@ -234,6 +243,10 @@ function App() {
             <Route
               path="calendario"
               element={<PrivateRoute element={<Calendario />} />}
+            />
+            <Route
+              path="eliminar-proveedores/:idProducto"
+              element={<PrivateRoute element={<EliminarProveedor />} />}
             />
           </Route>
         </Routes>

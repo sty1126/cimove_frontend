@@ -615,18 +615,6 @@ const FacturacionProveedor = () => {
               }}
             />
           </Tooltip>
-          <Tooltip title="Notificar">
-            <Button
-              type="primary"
-              shape="circle"
-              icon={<BellOutlined />}
-              size="small"
-              style={{
-                backgroundColor: colors.warning,
-                borderColor: colors.warning,
-              }}
-            />
-          </Tooltip>
           <Tooltip title="Eliminar">
             <Button
               type="primary"

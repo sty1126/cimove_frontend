@@ -232,7 +232,7 @@ const Inventario = () => {
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/productos/${record.id_producto}`);
+              navigate(`/detalles-producto/${record.id_producto}`);
             }}
             style={{
               backgroundColor: colors.secondary,

@@ -16,7 +16,6 @@ import {
   Divider,
   InputNumber,
   Modal,
-  Tabs,
   Badge,
   Spin,
   Empty,
@@ -28,10 +27,8 @@ import {
   MinusOutlined,
   DeleteOutlined,
   SearchOutlined,
-  BarcodeOutlined,
   UserOutlined,
   DollarOutlined,
-  CameraOutlined,
   CheckCircleOutlined,
   ReloadOutlined,
   TagOutlined,
@@ -49,7 +46,6 @@ import SeleccionarClientePorSede from "../clientes/SeleccionarClientePorSede";
 
 const { Title, Text } = Typography;
 const { Header, Content, Sider } = Layout;
-const { TabPane } = Tabs;
 const { Option } = Select;
 const { Search } = Input;
 
@@ -95,7 +91,6 @@ const Ventas = () => {
   const [clientes, setClientes] = useState([]);
   const [clientesLoading, setClientesLoading] = useState(false);
   const [busquedaProducto, setBusquedaProducto] = useState("");
-  const [activeTab, setActiveTab] = useState("productos");
   const [showModalCliente, setShowModalCliente] = useState(false);
 
   const navigate = useNavigate();
@@ -276,7 +271,6 @@ const Ventas = () => {
   };
 
   // Buscar producto por código
-
   const buscarPorCodigo = async () => {
     if (!codigoInput.trim()) return;
 
@@ -503,200 +497,151 @@ const Ventas = () => {
               }}
               bodyStyle={{ padding: "12px" }}
             >
-              <Tabs
-                activeKey={activeTab}
-                onChange={setActiveTab}
-                tabBarExtraContent={
-                  <Space>
-                    <Button
-                      icon={<ReloadOutlined />}
-                      onClick={() => {
-                        setFiltroCategoria(null);
-                        setBusquedaProducto("");
-                      }}
-                    >
-                      Limpiar filtros
-                    </Button>
-                  </Space>
-                }
+              <div style={{ marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Input
+                  placeholder="Buscar producto por nombre o código"
+                  prefix={<SearchOutlined />}
+                  value={busquedaProducto}
+                  onChange={(e) => setBusquedaProducto(e.target.value)}
+                  allowClear
+                  style={{ width: "calc(100% - 120px)" }}
+                />
+                <Button
+                  icon={<ReloadOutlined />}
+                  onClick={() => {
+                    setFiltroCategoria(null);
+                    setBusquedaProducto("");
+                  }}
+                >
+                  Limpiar
+                </Button>
+              </div>
+
+              <div
+                style={{
+                  marginBottom: "16px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                }}
               >
-                <TabPane tab="Productos" key="productos">
-                  <div style={{ marginBottom: "16px" }}>
-                    <Input
-                      placeholder="Buscar producto por nombre o código"
-                      prefix={<SearchOutlined />}
-                      value={busquedaProducto}
-                      onChange={(e) => setBusquedaProducto(e.target.value)}
-                      allowClear
-                    />
-                  </div>
-
-                  <div
-                    style={{
-                      marginBottom: "16px",
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: "8px",
-                    }}
+                <Button
+                  type={filtroCategoria === null ? "primary" : "default"}
+                  onClick={() => setFiltroCategoria(null)}
+                  style={
+                    filtroCategoria === null
+                      ? {
+                          backgroundColor: colors.primary,
+                          borderColor: colors.primary,
+                        }
+                      : {}
+                  }
+                >
+                  Todos
+                </Button>
+                {categorias.map((cat) => (
+                  <Button
+                    key={cat.id_categoria}
+                    type={
+                      filtroCategoria === cat.id_categoria
+                        ? "primary"
+                        : "default"
+                    }
+                    onClick={() => setFiltroCategoria(cat.id_categoria)}
+                    style={
+                      filtroCategoria === cat.id_categoria
+                        ? {
+                            backgroundColor: colors.primary,
+                            borderColor: colors.primary,
+                          }
+                        : {}
+                    }
                   >
-                    <Button
-                      type={filtroCategoria === null ? "primary" : "default"}
-                      onClick={() => setFiltroCategoria(null)}
-                      style={
-                        filtroCategoria === null
-                          ? {
-                              backgroundColor: colors.primary,
-                              borderColor: colors.primary,
-                            }
-                          : {}
-                      }
-                    >
-                      Todos
-                    </Button>
-                    {categorias.map((cat) => (
-                      <Button
-                        key={cat.id_categoria}
-                        type={
-                          filtroCategoria === cat.id_categoria
-                            ? "primary"
-                            : "default"
-                        }
-                        onClick={() => setFiltroCategoria(cat.id_categoria)}
-                        style={
-                          filtroCategoria === cat.id_categoria
-                            ? {
-                                backgroundColor: colors.primary,
-                                borderColor: colors.primary,
-                              }
-                            : {}
-                        }
-                      >
-                        {cat.descripcion_categoria}
-                      </Button>
-                    ))}
-                  </div>
+                    {cat.descripcion_categoria}
+                  </Button>
+                ))}
+              </div>
 
-                  {loading ? (
-                    <div style={{ textAlign: "center", padding: "40px 0" }}>
-                      <Spin size="large" />
-                    </div>
-                  ) : productosFiltrados.length === 0 ? (
-                    <Empty description="No hay productos disponibles" />
-                  ) : (
-                    <Row gutter={[12, 12]}>
-                      {productosFiltrados.map((producto) => (
-                        <Col xs={24} sm={12} md={8} lg={6} key={producto.id}>
-                          <Card
-                            hoverable
-                            style={{ height: "100%" }}
-                            cover={
-                              <div
-                                style={{
-                                  padding: "12px",
-                                  textAlign: "center",
-                                  height: "104px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  backgroundColor: "#f5f5f5",
-                                }}
-                              >
-                                {getProductIcon(producto.id)}
-                              </div>
-                            }
-                            onClick={() => agregarProducto(producto)}
+              {loading ? (
+                <div style={{ textAlign: "center", padding: "40px 0" }}>
+                  <Spin size="large" />
+                </div>
+              ) : productosFiltrados.length === 0 ? (
+                <Empty description="No hay productos disponibles" />
+              ) : (
+                <Row gutter={[12, 12]}>
+                  {productosFiltrados.map((producto) => (
+                    <Col xs={24} sm={12} md={8} lg={6} key={producto.id}>
+                      <Card
+                        hoverable
+                        style={{ height: "100%" }}
+                        cover={
+                          <div
+                            style={{
+                              padding: "12px",
+                              textAlign: "center",
+                              height: "104px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: "#f5f5f5",
+                            }}
                           >
-                            <Card.Meta
-                              title={
-                                <div
-                                  style={{
-                                    whiteSpace: "normal",
-                                    minHeight: "40px",
-                                    maxHeight: "60px",
-                                    overflow: "visible",
-                                    wordBreak: "break-word",
-                                    lineHeight: "1.2",
-                                  }}
-                                >
-                                  {producto.nombre}
-                                </div>
-                              }
-                              description={
-                                <div>
-                                  <Text
-                                    strong
-                                    style={{ color: colors.primary }}
-                                  >
-                                    ${producto.precio.toFixed(2)}
-                                  </Text>
-                                  <br />
-                                  <Text type="secondary">
-                                    Stock: {producto.stock}
-                                  </Text>
-                                </div>
-                              }
-                            />
-                            <div
-                              style={{ marginTop: "8px", textAlign: "center" }}
-                            >
-                              <Button
-                                type="primary"
-                                icon={<PlusOutlined />}
-                                size="small"
-                                style={{
-                                  backgroundColor: colors.secondary,
-                                  borderColor: colors.secondary,
-                                }}
-                              >
-                                Agregar
-                              </Button>
-                            </div>
-                          </Card>
-                        </Col>
-                      ))}
-                    </Row>
-                  )}
-                </TabPane>
-                <TabPane tab="Código" key="codigo">
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      padding: "40px 0",
-                    }}
-                  >
-                    <Title level={4}>Buscar por código</Title>
-                    <div
-                      style={{
-                        display: "flex",
-                        width: "100%",
-                        maxWidth: "400px",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      <Input
-                        placeholder="Ingrese código del producto"
-                        value={codigoInput}
-                        onChange={(e) => setCodigoInput(e.target.value)}
-                        onPressEnter={buscarPorCodigo}
-                        prefix={<BarcodeOutlined />}
-                        style={{ marginRight: "8px" }}
-                      />
-                      <Button
-                        type="primary"
-                        onClick={buscarPorCodigo}
-                        icon={<PlusOutlined />}
+                            {getProductIcon(producto.id)}
+                          </div>
+                        }
+                        onClick={() => agregarProducto(producto)}
                       >
-                        Agregar
-                      </Button>
-                    </div>
-                    <Button icon={<CameraOutlined />} size="large">
-                      Escanear código
-                    </Button>
-                  </div>
-                </TabPane>
-              </Tabs>
+                        <Card.Meta
+                          title={
+                            <div
+                              style={{
+                                whiteSpace: "normal",
+                                minHeight: "40px",
+                                maxHeight: "60px",
+                                overflow: "visible",
+                                wordBreak: "break-word",
+                                lineHeight: "1.2",
+                              }}
+                            >
+                              {producto.nombre}
+                            </div>
+                          }
+                          description={
+                            <div>
+                              <Text
+                                strong
+                                style={{ color: colors.primary }}
+                              >
+                                ${producto.precio.toFixed(2)}
+                              </Text>
+                              <br />
+                              <Text type="secondary">
+                                Stock: {producto.stock}
+                              </Text>
+                            </div>
+                          }
+                        />
+                        <div
+                          style={{ marginTop: "8px", textAlign: "center" }}
+                        >
+                          <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            size="small"
+                            style={{
+                              backgroundColor: colors.secondary,
+                              borderColor: colors.secondary,
+                            }}
+                          >
+                            Agregar
+                          </Button>
+                        </div>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              )}
             </Card>
           </Col>
 
@@ -922,7 +867,7 @@ const Ventas = () => {
         </Row>
       </Content>
 
-      {/* Modal de selección de cliente - MANTENIDO EXACTAMENTE COMO ESTABA */}
+      {/* Modal de selección de cliente */}
       <SeleccionarClientePorSede
         show={showModalCliente}
         handleClose={() => setShowModalCliente(false)}

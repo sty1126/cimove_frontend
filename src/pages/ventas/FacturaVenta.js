@@ -229,7 +229,6 @@ const FacturaVenta = () => {
       const response = await registrarVenta(venta);
 
       if (response.status === 201) {
-        setFacturaId(response.data.id || "00001");
         setExito("¡Venta registrada exitosamente!");
         setShowSuccessModal(true);
       } else {
@@ -656,7 +655,7 @@ const FacturaVenta = () => {
     </Card>
   );
 
-  // Modal de éxito
+  // Modal de éxito con cambios solicitados
   const successModal = (
     <Modal
       open={showSuccessModal}
@@ -668,7 +667,6 @@ const FacturaVenta = () => {
       <Result
         status="success"
         title="¡Venta Registrada Exitosamente!"
-        subTitle={`Factura #${facturaId} creada correctamente.`}
         extra={[
           <Button
             type="primary"
@@ -684,9 +682,6 @@ const FacturaVenta = () => {
             onClick={() => navigate("/facturacion-ventas")}
           >
             Ver Facturas
-          </Button>,
-          <Button key="print" icon={<PrinterOutlined />}>
-            Imprimir Factura
           </Button>,
         ]}
       />
@@ -740,9 +735,6 @@ const FacturaVenta = () => {
                 >
                   Volver a Ventas
                 </Button>
-                <Tooltip title="Imprimir vista previa">
-                  <Button icon={<PrinterOutlined />} />
-                </Tooltip>
               </Space>
             </Col>
           </Row>
@@ -790,7 +782,7 @@ const FacturaVenta = () => {
         </Content>
 
         <Footer style={{ textAlign: "center", background: "#fff" }}>
-          Sistema de Facturación © {new Date().getFullYear()}
+          CIMOVE © {new Date().getFullYear()}
         </Footer>
       </Layout>
 

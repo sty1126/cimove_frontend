@@ -32,29 +32,46 @@ import {
 import {
   obtenerProductoPorId,
   obtenerProveedoresAsociados,
-  eliminarProveedorDeProducto,
 } from "../../services/proveedoresService";
+import axios from "axios";
 
 const { Title, Text } = Typography;
-
-// API Routes - Rutas para eliminar proveedores
-// DELETE http://localhost:4000/api/productos/eliminar-proveedor-producto
+const BASE_URL = "http://localhost:4000/api";
 
 // Paleta de colores personalizada
 const colors = {
-  primary: "#0D7F93", // Teal más vibrante
-  secondary: "#4D8A52", // Verde más vibrante
-  accent: "#7FBAD6", // Azul más vibrante
-  light: "#C3D3C6", // Verde menta claro
-  background: "#E8EAEC", // Gris muy claro
-  text: "#2A3033", // Texto oscuro
-  success: "#4D8A52", // Verde más vibrante para éxito
-  warning: "#E0A458", // Naranja apagado para advertencias
-  danger: "#C25F48", // Rojo más vibrante para peligro
+  primary: "#0D7F93",
+  secondary: "#4D8A52",
+  accent: "#7FBAD6",
+  light: "#C3D3C6",
+  background: "#E8EAEC",
+  text: "#2A3033",
+  success: "#4D8A52",
+  warning: "#E0A458",
+  danger: "#C25F48",
+};
+
+// Implementación correcta de eliminarProveedorDeProducto
+const eliminarProveedorDeProducto = async (idProveedor, idProducto) => {
+  try {
+    console.log(`Eliminando relación: proveedor=${idProveedor}, producto=${idProducto}`);
+    const response = await axios.put(`${BASE_URL}/proveedor-producto/inactivar`, {
+      id_proveedor: idProveedor,
+      id_producto: idProducto
+    });
+    
+    console.log("Respuesta de eliminación:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error en eliminarProveedorDeProducto:", error.response || error);
+    throw new Error(error.response?.data?.error || "Error al eliminar la asociación");
+  }
 };
 
 const EliminarProveedores = () => {
-  const { idProducto } = useParams();
+  // Asegúrate de que estás extrayendo el parámetro correctamente
+  // según cómo esté definida la ruta en tu react-router
+  const { idProducto } = useParams(); // Debería coincidir con cómo está definido en tus rutas
   const navigate = useNavigate();
   const [proveedores, setProveedores] = useState([]);
   const [proveedoresSeleccionados, setProveedoresSeleccionados] = useState([]);
@@ -62,19 +79,33 @@ const EliminarProveedores = () => {
   const [submitting, setSubmitting] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [producto, setProducto] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Depurar el valor del parámetro
+  console.log("ID de producto desde parámetros:", idProducto);
 
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const producto = await obtenerProductoPorId(idProducto);
-        setProducto(producto);
+        // Validación adicional del ID de producto
+        if (!idProducto) {
+          throw new Error("ID de producto no válido o no encontrado");
+        }
 
+        console.log("Obteniendo datos del producto:", idProducto);
+        const productoData = await obtenerProductoPorId(idProducto);
+        console.log("Datos del producto obtenidos:", productoData);
+        setProducto(productoData);
+
+        console.log("Obteniendo proveedores asociados al producto:", idProducto);
         const asociados = await obtenerProveedoresAsociados(idProducto);
+        console.log("Proveedores asociados obtenidos:", asociados);
         setProveedores(asociados);
       } catch (error) {
         console.error("Error al obtener datos:", error);
-        message.error("Error al cargar datos iniciales");
+        message.error(`Error al cargar datos iniciales: ${error.message}`);
+        setError(error.message || "Error al cargar datos");
       } finally {
         setLoading(false);
       }
@@ -83,16 +114,15 @@ const EliminarProveedores = () => {
     fetchData();
   }, [idProducto]);
 
+  // Resto del código sigue igual...
+
   // Filtrar proveedores según el texto de búsqueda
   const proveedoresFiltrados = proveedores.filter(
     (prov) =>
       prov.nombre_proveedor?.toLowerCase().includes(searchText.toLowerCase()) ||
-      prov.id_proveedor?.toLowerCase().includes(searchText.toLowerCase()) ||
-      prov.telefono_proveedor
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase()) ||
-      (prov.email_proveedor &&
-        prov.email_proveedor.toLowerCase().includes(searchText.toLowerCase()))
+      String(prov.id_proveedor).toLowerCase().includes(searchText.toLowerCase()) ||
+      String(prov.telefono_proveedor || "").toLowerCase().includes(searchText.toLowerCase()) ||
+      String(prov.email_proveedor || "").toLowerCase().includes(searchText.toLowerCase())
   );
 
   // Alternar selección de proveedor
@@ -122,28 +152,87 @@ const EliminarProveedores = () => {
       return;
     }
 
+    if (!idProducto) {
+      message.error("ID de producto no disponible");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      await Promise.all(
-        proveedoresSeleccionados.map((idProveedor) =>
-          eliminarProveedorDeProducto(idProveedor, idProducto)
-        )
-      );
-
-      message.success({
-        content: "Relaciones eliminadas correctamente",
-        icon: <CheckCircleOutlined />,
-        style: { marginTop: "20px" },
+      // Mostrar mensaje de procesamiento
+      message.loading({
+        content: 'Eliminando relaciones...',
+        key: 'processing',
+        duration: 0,
       });
 
-      setTimeout(() => {
-        navigate("/inventario");
-      }, 1500);
+      // Crear un array para almacenar resultados
+      const results = [];
+      
+      // Procesar uno por uno para mejor manejo de errores
+      for (const idProveedor of proveedoresSeleccionados) {
+        try {
+          const result = await eliminarProveedorDeProducto(idProveedor, idProducto);
+          results.push({ idProveedor, success: true, result });
+        } catch (err) {
+          console.error(`Error al eliminar relación con proveedor ${idProveedor}:`, err);
+          results.push({ idProveedor, success: false, error: err.message });
+        }
+      }
+      
+      // Cerrar mensaje de procesamiento
+      message.destroy('processing');
+      
+      // Contar éxitos y errores
+      const successCount = results.filter(r => r.success).length;
+      const failCount = results.length - successCount;
+      
+      // Mostrar mensaje apropiado
+      if (successCount === results.length) {
+        message.success({
+          content: `${successCount} relaciones eliminadas correctamente`,
+          icon: <CheckCircleOutlined />,
+          style: { marginTop: "20px" },
+        });
+        
+        // Actualizar lista de proveedores
+        const nuevosProveedores = proveedores.filter(
+          prov => !proveedoresSeleccionados.includes(prov.id_proveedor)
+        );
+        setProveedores(nuevosProveedores);
+        setProveedoresSeleccionados([]);
+        
+        // Opcional: redirigir después de un éxito completo
+        setTimeout(() => {
+          navigate("/inventario");
+        }, 1500);
+      } else if (successCount > 0) {
+        message.warning({
+          content: `Se eliminaron ${successCount} relaciones, pero ${failCount} fallaron`,
+          duration: 5,
+        });
+        
+        // Actualizar parcialmente la lista si algunos tuvieron éxito
+        const proveedoresEliminados = results
+          .filter(r => r.success)
+          .map(r => r.idProveedor);
+          
+        const nuevosProveedores = proveedores.filter(
+          prov => !proveedoresEliminados.includes(prov.id_proveedor)
+        );
+        setProveedores(nuevosProveedores);
+        setProveedoresSeleccionados(prev => prev.filter(id => !proveedoresEliminados.includes(id)));
+      } else {
+        message.error({
+          content: "No se pudo eliminar ninguna relación",
+          duration: 5,
+        });
+      }
     } catch (error) {
-      console.error("Error al eliminar relaciones:", error);
+      console.error("Error general al eliminar relaciones:", error);
       message.error(
         "Error al eliminar relaciones: " +
-          (error.response?.data?.message || error.message)
+          (error.response?.data?.error || error.message)
       );
     } finally {
       setSubmitting(false);
@@ -232,6 +321,24 @@ const EliminarProveedores = () => {
         }}
       >
         <Spin size="large" tip="Cargando datos..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: "24px" }}>
+        <Alert 
+          type="error"
+          message="Error al cargar datos" 
+          description={error}
+          showIcon
+          action={
+            <Button type="primary" onClick={() => navigate("/inventario")}>
+              Volver al inventario
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -367,6 +474,7 @@ const EliminarProveedores = () => {
               style={{
                 minWidth: "180px",
               }}
+              disabled={proveedoresSeleccionados.length === 0}
             >
               Eliminar Relaciones
             </Button>

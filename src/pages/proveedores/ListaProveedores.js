@@ -45,6 +45,9 @@ import {
 const { Title, Text } = Typography;
 const { Option } = Select;
 
+// ID del proveedor temporal que no debe mostrarse
+const PROVEEDOR_TEMPORAL_ID = "PROV_TEMP_123";
+
 // Paleta de colores personalizada
 const colors = {
   primary: "#0D7F93", // Teal más vibrante
@@ -92,8 +95,13 @@ const ListaProveedores = () => {
         getTiposProveedor(),
       ]);
 
-      setData(providersRes);
-      setFilteredData(providersRes);
+      // Filtrar el proveedor temporal
+      const filteredProviders = providersRes.filter(
+        provider => provider.id_proveedor !== PROVEEDOR_TEMPORAL_ID
+      );
+
+      setData(filteredProviders);
+      setFilteredData(filteredProviders);
       setTiposProveedor(typesRes);
     } catch (error) {
       console.error("Error al obtener los datos:", error);
@@ -697,3 +705,4 @@ const Statistic = ({ title, value, prefix, valueStyle }) => {
 };
 
 export default ListaProveedores;
+

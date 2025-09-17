@@ -38,6 +38,9 @@ import { useCart } from "../../context/CartContext"; // Ajusta la ruta según tu
 
 const { Title, Text } = Typography;
 
+// ID del proveedor temporal que no debe mostrarse
+const PROVEEDOR_TEMPORAL_ID = "PROV_TEMP_123";
+
 // Paleta de colores personalizada
 const colors = {
   primary: "#0D7F93", // Teal más vibrante
@@ -72,10 +75,13 @@ const ProcesarPedido = () => {
       try {
         const data = await getProveedoresPorProductos(ids);
 
-        // Agrupar proveedores por producto
+        // Agrupar proveedores por producto y filtrar el proveedor temporal
         const agrupado = cart.map((prod) => {
           const proveedoresDelProducto = data
-            .filter((prov) => prov.id_producto === prod.id_producto)
+            .filter((prov) => 
+              prov.id_producto === prod.id_producto && 
+              prov.id_proveedor !== PROVEEDOR_TEMPORAL_ID // Filtrar el proveedor temporal
+            )
             .map((prov) => ({
               ...prov,
               cantidad: 0,

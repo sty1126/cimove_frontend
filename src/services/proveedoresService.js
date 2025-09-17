@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = "https://cimove-backend.onrender.com/api";
-//const BASE_URL = "http://localhost:4000/api";
+//const BASE_URL = "https://cimove-backend.onrender.com/api";
+const BASE_URL = "http://localhost:4000/api";
 
 // Obtener abonos
 export const getAbonos = async () => {
@@ -69,19 +69,21 @@ export const obtenerOrdenesCompra = async () => {
 };
 
 export const obtenerProductosDeOrden = async (idOrden) => {
-  const response = await axios.get(
-    `${BASE_URL}/facturas-proveedor/facturas/orden/${idOrden}`
-  );
+  console.log("ID de orden recibido en service:", idOrden); // <--- aquí imprimimos
+
+  const response = await axios.get(`${BASE_URL}/ordenes/${idOrden}`);
   return response.data;
 };
 
+
 export const registrarFacturaProveedor = async (dataFactura) => {
   const response = await axios.post(
-    `${BASE_URL}/facturas-proveedor/generar-desde-orden`,
+    `${BASE_URL}/facturas-proveedor`,
     dataFactura
   );
   return response.data;
 };
+
 
 export const obtenerDetalleProveedor = async (id) => {
   const response = await axios.get(`${BASE_URL}/proveedores/${id}`);
@@ -214,4 +216,52 @@ export const registrarProveedor = async (data) => {
 export const getTodosProveedores = async () => {
   const response = await fetch(`${BASE_URL}/proveedores/all`);
   return await response.json();
+};
+
+export const eliminarProveedorDeProducto = async (idProveedor, idProducto) => {
+  try {
+    console.log(`Eliminando relación: proveedor=${idProveedor}, producto=${idProducto}`);
+
+    if (!idProveedor || !idProducto) {
+      throw new Error("ID de proveedor o producto inválido");
+    }
+
+    const response = await axios.put(`${BASE_URL}/proveedor-producto/inactivar`, {
+      id_proveedor: idProveedor,
+      id_producto: idProducto,
+    });
+
+    console.log("Respuesta de eliminación:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error en eliminarProveedorDeProducto:", error);
+    
+    // More detailed error logging
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      console.error("Error response headers:", error.response.headers);
+      
+      let errorMsg = "Error al desasociar proveedor del producto";
+      if (typeof error.response.data === 'object' && error.response.data !== null) {
+        // If data is an object, extract error details
+        errorMsg = error.response.data.error || 
+                   error.response.data.message || 
+                   error.response.data.details || 
+                   `Error ${error.response.status}: ${error.response.statusText}`;
+        
+        // Log the full error stack if available
+        if (error.response.data.stack) {
+          console.error("Error stack:", error.response.data.stack);
+        }
+      }
+      throw new Error(errorMsg);
+    } else if (error.request) {
+      console.error("No se recibió respuesta del servidor:", error.request);
+      throw new Error("No se recibió respuesta del servidor");
+    } else {
+      console.error("Error de configuración:", error.message);
+      throw new Error(error.message || "Error al desasociar proveedor del producto");
+    }
+  }
 };
