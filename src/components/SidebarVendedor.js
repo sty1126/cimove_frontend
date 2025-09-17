@@ -125,7 +125,7 @@ const SidebarVendedor = ({ externalCollapsed, setExternalCollapsed }) => {
                 to="/facturacion-ventas"
                 style={{ color: colors.text, fontWeight: "bold" }}
               >
-                Facturación y Ventas
+                Movimientos y Ventas
               </NavLink>
             ),
           },

@@ -119,12 +119,12 @@ const HomeContent = () => {
                   textAlign: "center",
                 }}
               >
-                Facturar
+                Movimientos
               </Title>
               <Text
                 style={{ textAlign: "center", marginTop: "8px", color: "#666" }}
               >
-                Ventas y facturas
+                Movimientos y ventas
               </Text>
             </Card>
           </Col>
