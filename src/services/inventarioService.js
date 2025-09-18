@@ -16,8 +16,13 @@ export const getSedes = async () => {
 };
 
 // Registrar una novedad (movimiento)
-export const crearNovedad = async (novedad) => {
-  const response = await axios.post(`${BASE_URL}/movimientos`, novedad);
+export const crearNovedad = async (novedad, idEmpleado) => {
+  const payload = {
+    ...novedad,
+    idEmpleado, // 👈 aquí mandas el empleado responsable
+  };
+
+  const response = await axios.post(`${BASE_URL}/movimientos`, payload);
   return response.data;
 };
 

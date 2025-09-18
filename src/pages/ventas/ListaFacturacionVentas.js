@@ -266,11 +266,6 @@ const ListaFacturacionVentas = () => {
     });
   };
 
-  // Generar PDF (placeholder)
-  const generarPDF = (id, tipo) => {
-    console.log(`Generando PDF para ${tipo} con ID: ${id}`);
-    // Aquí iría la lógica para generar el PDF
-  };
 
   // Calcular estadísticas para facturas
   const calcularEstadisticasFacturas = () => {
@@ -831,17 +826,6 @@ const ListaFacturacionVentas = () => {
               borderColor: colors.secondary,
             }}
             title="Editar"
-          />
-          <Button
-            type="primary"
-            icon={<FilePdfOutlined />}
-            size="small"
-            onClick={() => generarPDF(record.id_serviciotecnico, "servicio")}
-            style={{
-              backgroundColor: colors.accent,
-              borderColor: colors.accent,
-            }}
-            title="Generar PDF"
           />
         </Space>
       ),

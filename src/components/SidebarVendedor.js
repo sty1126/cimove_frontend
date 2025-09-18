@@ -140,7 +140,6 @@ const SidebarVendedor = ({ externalCollapsed, setExternalCollapsed }) => {
           border: "none",
           padding: "0 8px",
         }}
-<<<<<<< HEAD
         items={[
           {
             key: "1",
@@ -203,10 +202,7 @@ const SidebarVendedor = ({ externalCollapsed, setExternalCollapsed }) => {
             ),
           },
         ]}
-=======
-        items={menuItems}
         className="custom-menu"
->>>>>>> 600d27baaf1854e9bdb5578e874b9097b8510c3a
       />
 
       {/* Estilos globales para personalizar el menú */}

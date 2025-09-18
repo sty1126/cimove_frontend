@@ -24,6 +24,7 @@ import ActualizarEmpleado from "./pages/empleados/ActualizarEmpleado";
 import CrearEmpleado from "./pages/empleados/CrearEmpleado";
 import DetallesEmpleado from "./pages/empleados/DetallesEmpleado";
 import ListaEmpleados from "./pages/empleados/ListaEmpleados";
+import Auditoria from "./pages/empleados/Auditoria";
 
 // Estadísticas
 import Estadisticas from "./pages/estadisticas/Estadisticas";
@@ -103,13 +104,13 @@ function App() {
           <Route path="/*" element={<Layout />}>
             {/* Rutas protegidas por autenticación */}
             <Route path="home" element={<PrivateRoute element={<Home />} />} />
-            
+
             {/* Mi Perfil - Sin parámetro en la ruta */}
             <Route
               path="mi-perfil"
               element={<PrivateRoute element={<MiPerfil />} />}
             />
-            
+
             <Route
               path="inventario"
               element={<PrivateRoute element={<Inventario />} />}
@@ -205,6 +206,10 @@ function App() {
             <Route
               path="empleados/editar/:id"
               element={<PrivateRoute element={<ActualizarEmpleado />} />}
+            />
+            <Route
+              path="auditoria-empleados"
+              element={<PrivateRoute element={<Auditoria />} />}
             />
             <Route
               path="registro-abono/:idFactura"

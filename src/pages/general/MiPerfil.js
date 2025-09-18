@@ -60,13 +60,13 @@ function MiPerfil() {
       try {
         // Obtener ID del empleado desde localStorage
         const idEmpleado = localStorage.getItem("idEmpleado");
-        
+
         if (!idEmpleado) {
           setError("No se ha encontrado información del usuario. Por favor, inicie sesión nuevamente.");
           setLoading(false);
           return;
         }
-        
+
         setLoading(true);
         const response = await axios.get(`http://localhost:4000/api/empleados/${idEmpleado}`);
         setEmpleado(response.data);
@@ -83,7 +83,7 @@ function MiPerfil() {
 
   // Redireccionar a la página de cambio de contraseña
   const handleIrACambiarPassword = () => {
-    navigate("/reset-password");
+    navigate("/login");
   };
 
   // Obtener iniciales para el avatar
@@ -100,12 +100,12 @@ function MiPerfil() {
   // Componente de carga mientras se obtienen los datos
   if (loading) {
     return (
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "center", 
-        alignItems: "center", 
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
         height: "100vh",
-        backgroundColor: colors.background 
+        backgroundColor: colors.background
       }}>
         <Spin size="large" />
       </div>
@@ -115,13 +115,13 @@ function MiPerfil() {
   // Mostrar error si ocurrió uno
   if (error) {
     return (
-      <div style={{ 
-        padding: "24px", 
-        backgroundColor: colors.background, 
+      <div style={{
+        padding: "24px",
+        backgroundColor: colors.background,
         minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
-        alignItems: "center" 
+        alignItems: "center"
       }}>
         <Alert
           message="Error"
@@ -130,8 +130,8 @@ function MiPerfil() {
           showIcon
           icon={<ExclamationCircleOutlined />}
           action={
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               onClick={() => navigate("/login")}
               danger
             >
@@ -146,10 +146,10 @@ function MiPerfil() {
   // Si no hay empleado después de cargar
   if (!empleado) {
     return (
-      <div style={{ 
-        padding: "24px", 
-        backgroundColor: colors.background, 
-        minHeight: "100vh" 
+      <div style={{
+        padding: "24px",
+        backgroundColor: colors.background,
+        minHeight: "100vh"
       }}>
         <Alert
           message="No se encontraron datos"
@@ -162,10 +162,10 @@ function MiPerfil() {
   }
 
   return (
-    <div style={{ 
-      padding: "24px", 
-      backgroundColor: colors.background, 
-      minHeight: "100vh" 
+    <div style={{
+      padding: "24px",
+      backgroundColor: colors.background,
+      minHeight: "100vh"
     }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         <Card
@@ -178,8 +178,8 @@ function MiPerfil() {
           }}
         >
           {/* Encabezado del perfil */}
-          <div style={{ 
-            backgroundColor: colors.primary, 
+          <div style={{
+            backgroundColor: colors.primary,
             margin: "-24px -24px 0",
             padding: "40px 24px 100px",
             position: "relative"
@@ -202,9 +202,9 @@ function MiPerfil() {
           >
             <Row gutter={[24, 24]} align="middle">
               <Col xs={24} sm={8} style={{ textAlign: "center" }}>
-                <Avatar 
-                  size={120} 
-                  style={{ 
+                <Avatar
+                  size={120}
+                  style={{
                     backgroundColor: colors.secondary,
                     fontSize: "48px",
                     boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
@@ -224,15 +224,21 @@ function MiPerfil() {
 
               <Col xs={24} sm={16}>
                 <Tabs defaultActiveKey="personal">
-                  <TabPane 
+                  <TabPane
                     tab={
                       <span>
                         <UserOutlined /> Información Personal
                       </span>
-                    } 
+                    }
                     key="personal"
                   >
-                    <Descriptions bordered column={{ xs: 1, sm: 2 }} size="small">
+                    <Descriptions
+                      bordered
+                      column={2}
+                      size="small"
+                      labelStyle={{ width: "160px", whiteSpace: "nowrap" }}
+                      contentStyle={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                    >
                       <Descriptions.Item label={<><IdcardOutlined /> ID</>}>
                         {empleado.id_empleado}
                       </Descriptions.Item>
@@ -248,11 +254,15 @@ function MiPerfil() {
                       <Descriptions.Item label={<><TeamOutlined /> Tipo de usuario</>}>
                         {empleado.descripcion_tipousuario}
                       </Descriptions.Item>
-                      <Descriptions.Item label={<><DollarOutlined /> Salario</>}>
-                        {empleado.monto_salario ? 
-                          `$${empleado.monto_salario.toLocaleString()} - ${empleado.tipopago_salario}` : 
+                      <Descriptions.Item
+                        label={<><DollarOutlined /> Salario</>}
+                        contentStyle={{ whiteSpace: "normal", wordBreak: "break-word" }}
+                      >
+                        {empleado.monto_salario ?
+                          `$${empleado.monto_salario.toLocaleString()} - ${empleado.tipopago_salario}` :
                           "No disponible"}
                       </Descriptions.Item>
+
                     </Descriptions>
 
                     <div style={{ marginTop: "24px", textAlign: "right" }}>
@@ -267,15 +277,28 @@ function MiPerfil() {
                       >
                         Cambiar Contraseña
                       </Button>
+
+                      <Alert
+                        style={{ marginTop: "12px", textAlign: "left" }}
+                        message="Nota"
+                        description={
+                          <>
+                            Para recuperar tu contraseña, haz clic en <b>Olvidé mi contraseña</b> desde la pantalla de inicio de sesión e ingresa tu correo.
+                          </>
+                        }
+                        type="info"
+                        showIcon
+                      />
                     </div>
+
                   </TabPane>
 
-                  <TabPane 
+                  <TabPane
                     tab={
                       <span>
                         <SafetyCertificateOutlined /> Acceso
                       </span>
-                    } 
+                    }
                     key="acceso"
                   >
                     <Descriptions bordered column={1} size="small">

@@ -87,7 +87,7 @@ const Login = () => {
 
       localStorage.setItem("token", token)
       localStorage.setItem("rol", user.tipo_usuario)
-      localStorage.setItem("id_empleado", user.id)
+      localStorage.setItem("idEmpleado", user.id)
       localStorage.setItem("id_sede", user.sede)
       localStorage.setItem("email", user.email)
 
