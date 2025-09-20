@@ -500,19 +500,6 @@ const FacturacionProveedor = () => {
               }
             />
           </Tooltip>
-
-          <Tooltip title="Generar PDF">
-            <Button
-              type="primary"
-              shape="circle"
-              icon={<FilePdfOutlined />}
-              size="small"
-              style={{
-                backgroundColor: colors.accent,
-                borderColor: colors.accent,
-              }}
-            />
-          </Tooltip>
         </Space>
       ),
     },
