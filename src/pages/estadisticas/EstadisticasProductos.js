@@ -64,12 +64,12 @@ export default function EstadisticasProductos({
       const formattedFechaFin = formatDateForAPI(fechaFin);
 
       const masVendidosResponse = await fetch(
-        `http://localhost:4000/api/estadisticas/productos/mas-vendidos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&ordenarPor=unidades&limite=10`
+        `https://cimove-backend.onrender.com/api/estadisticas/productos/mas-vendidos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&ordenarPor=unidades&limite=10`
       );
       const masVendidosData = await masVendidosResponse.json();
 
       const bajoStockResponse = await fetch(
-        `http://localhost:4000/api/estadisticas/productos/bajo-stock?limite=20`
+        `https://cimove-backend.onrender.com/api/estadisticas/productos/bajo-stock?limite=20`
       );
       const bajoStockData = await bajoStockResponse.json();
 

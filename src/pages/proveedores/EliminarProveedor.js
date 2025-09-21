@@ -36,7 +36,7 @@ import {
 import axios from "axios";
 
 const { Title, Text } = Typography;
-const BASE_URL = "http://localhost:4000/api";
+const BASE_URL = "https://cimove-backend.onrender.com/api";
 
 // Paleta de colores personalizada
 const colors = {

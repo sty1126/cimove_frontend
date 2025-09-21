@@ -64,12 +64,12 @@ export default function EstadisticasGeneral({
       const formattedFechaFin = formatDateForAPI(fechaFin);
 
       const rentabilidadResponse = await fetch(
-        `http://localhost:4000/api/estadisticas/generales/rentabilidad?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
+        `https://cimove-backend.onrender.com/api/estadisticas/generales/rentabilidad?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
       );
       const rentabilidadData = await rentabilidadResponse.json();
 
       const evolucionResponse = await fetch(
-        `http://localhost:4000/api/estadisticas/generales/rentabilidad-evolucion?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
+        `https://cimove-backend.onrender.com/api/estadisticas/generales/rentabilidad-evolucion?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
       );
       const evolucionData = await evolucionResponse.json();
 

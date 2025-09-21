@@ -68,7 +68,7 @@ function MiPerfil() {
         }
 
         setLoading(true);
-        const response = await axios.get(`http://localhost:4000/api/empleados/${idEmpleado}`);
+        const response = await axios.get(`https://cimove-backend.onrender.com/api/empleados/${idEmpleado}`);
         setEmpleado(response.data);
       } catch (error) {
         console.error("Error al cargar datos del empleado:", error);

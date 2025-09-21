@@ -66,17 +66,17 @@ export default function EstadisticasClientes({
       const formattedFechaFin = formatDateForAPI(fechaFin);
 
       const clientesActivosResponse = await fetch(
-        `http://localhost:4000/api/estadisticas/clientes/clientes-activos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
+        `https://cimove-backend.onrender.com/api/estadisticas/clientes/clientes-activos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
       );
       const clientesActivosData = await clientesActivosResponse.json();
 
       const mejoresClientesResponse = await fetch(
-        `http://localhost:4000/api/estadisticas/clientes/mejores-clientes?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&limite=10`
+        `https://cimove-backend.onrender.com/api/estadisticas/clientes/mejores-clientes?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&limite=10`
       );
       const mejoresClientesData = await mejoresClientesResponse.json();
 
       const clientesPorSedeResponse = await fetch(
-        `http://localhost:4000/api/estadisticas/clientes/clientes-por-sede`
+        `https://cimove-backend.onrender.com/api/estadisticas/clientes/clientes-por-sede`
       );
       const clientesPorSedeData = await clientesPorSedeResponse.json();
 

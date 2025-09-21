@@ -21,8 +21,8 @@ export default function OrdenesCompraModal({ proveedorId, visible, onClose, onSe
     setLoading(true);
     try {
       const url = proveedorId
-        ? `http://localhost:4000/api/proveedor/${proveedorId}`
-        : "http://localhost:4000/api/ordenes";
+        ? `https://cimove-backend.onrender.com/api/proveedor/${proveedorId}`
+        : "https://cimove-backend.onrender.com/api/ordenes";
 
       const response = await fetch(url);
       const data = await response.json();

@@ -11,7 +11,7 @@ const Auditoria = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/auditoria");
+        const res = await axios.get("https://cimove-backend.onrender.com/api/auditoria");
         setAuditorias(res.data);
       } catch (err) {
         console.error("Error cargando auditorías", err);

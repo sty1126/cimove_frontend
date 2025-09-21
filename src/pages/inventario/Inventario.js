@@ -496,7 +496,7 @@ const Inventario = () => {
 
       if (warrantySelectedSede === "general") {
         // Endpoint que trae todos los productos en garantía/reparación
-        url = "http://localhost:4000/api/inventariolocal/estado";
+        url = "https://cimove-backend.onrender.com/api/inventariolocal/estado";
       } else {
         // Buscar sede seleccionada
         const sedeEncontrada = sedes.find(
@@ -505,7 +505,7 @@ const Inventario = () => {
 
         if (!sedeEncontrada) return;
 
-        url = `http://localhost:4000/api/inventariolocal/estado/sede/${sedeEncontrada.id_sede}`;
+        url = `https://cimove-backend.onrender.com/api/inventariolocal/estado/sede/${sedeEncontrada.id_sede}`;
       }
 
       const response = await fetch(url);

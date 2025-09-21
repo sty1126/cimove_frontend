@@ -49,8 +49,8 @@ export default function EstadisticasApp() {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(false);
 
-  const API_BASE = "http://localhost:4000/api/estadisticas";
-  const API_BASE2 = "http://localhost:4000";
+  const API_BASE = "https://cimove-backend.onrender.com/api/estadisticas";
+  const API_BASE2 = "https://cimove-backend.onrender.com/api";
 
   const getTodayDate = () => {
     const today = new Date();

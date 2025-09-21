@@ -63,12 +63,12 @@ export default function EstadisticasEgresos({
       const formattedFechaFin = formatDateForAPI(fechaFin);
 
       const egresosResponse = await fetch(
-        `http://localhost:4000/api/estadisticas/egresos/egresos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
+        `https://cimove-backend.onrender.com/api/estadisticas/egresos/egresos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
       );
       const egresosData = await egresosResponse.json();
 
       const principalesEgresosResponse = await fetch(
-        `http://localhost:4000/api/estadisticas/egresos/principales-egresos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&limite=10`
+        `https://cimove-backend.onrender.com/api/estadisticas/egresos/principales-egresos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&limite=10`
       );
       const principalesEgresosData = await principalesEgresosResponse.json();
 

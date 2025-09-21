@@ -73,16 +73,16 @@ export default function EstadisticasIngresos({
         metodoPagoResponse,
       ] = await Promise.all([
         fetch(
-          `http://localhost:4000/api/estadisticas/ingresos/ventas-dia-semana?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
+          `https://cimove-backend.onrender.com/api/estadisticas/ingresos/ventas-dia-semana?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
         ),
         fetch(
-          `http://localhost:4000/api/estadisticas/ingresos/ingresos-periodo?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
+          `https://cimove-backend.onrender.com/api/estadisticas/ingresos/ingresos-periodo?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
         ),
         fetch(
-          `http://localhost:4000/api/estadisticas/ingresos/ingresos-categoria?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&limite=10`
+          `https://cimove-backend.onrender.com/api/estadisticas/ingresos/ingresos-categoria?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&limite=10`
         ),
         fetch(
-          `http://localhost:4000/api/estadisticas/ingresos/ingresos-metodo-pago?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
+          `https://cimove-backend.onrender.com/api/estadisticas/ingresos/ingresos-metodo-pago?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
         ),
       ]);
 
