@@ -1,7 +1,6 @@
 import axios from "axios";
 
-//const BASE_URL = "https://cimove-backend.onrender.com/api";
-const BASE_URL = "http://localhost:4000/api";
+const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 // Obtener cliente por ID
 export async function obtenerClientePorId(id) {
@@ -60,16 +59,13 @@ export const obtenerClientes = async () => {
   return await response.json();
 };
 
-// Cambiar estado de cliente (eliminar lógico)
 export const eliminarCliente = async (id) => {
   const response = await fetch(`${BASE_URL}/clientes/eliminar/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
   });
   if (!response.ok) throw new Error("Error al eliminar el cliente");
-  return await response.json();
+  return response.json();
 };
 
 // Obtener clientes formateados (usado para selectores)

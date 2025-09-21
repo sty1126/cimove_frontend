@@ -68,7 +68,6 @@ const CrearFacturaProveedor = () => {
   }, []);
 
   const handleOrdenSelectFromModal = async (orden) => {
-    console.log("Orden seleccionada desde modal:", orden);
 
     if (!orden || !orden.id_orden) {
       message.error("La orden seleccionada no tiene ID válido");
@@ -85,7 +84,6 @@ const CrearFacturaProveedor = () => {
     setFetchingData(true);
     try {
       const res = await obtenerProductosDeOrden(orden.id_orden);
-      console.log("Productos obtenidos:", res);
 
       // Asegurarse de que res sea un array
       const productosArray = Array.isArray(res) ? res : [];

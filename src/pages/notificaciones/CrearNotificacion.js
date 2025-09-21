@@ -56,7 +56,7 @@ const ModalCrearNotificacion = ({
   selectedMonth,
   selectedYear,
 }) => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm(); // ✅ Solución aquí
   const [loading, setLoading] = useState(false);
   const [masDeUnDia, setMasDeUnDia] = useState(false);
   const [todoElDia, setTodoElDia] = useState(false);
@@ -110,9 +110,7 @@ const ModalCrearNotificacion = ({
       if (
         values.fechafin_notificacion.isBefore(values.fechainicio_notificacion)
       ) {
-        message.error(
-          "La fecha de fin no puede ser anterior a la fecha de inicio"
-        );
+        message.error("La fecha de fin no puede ser anterior a la fecha de inicio");
         setLoading(false);
         return;
       }
@@ -124,18 +122,9 @@ const ModalCrearNotificacion = ({
         return;
       }
 
-      if (
-        values.fechainicio_notificacion.isSame(
-          values.fechafin_notificacion,
-          "day"
-        )
-      ) {
-        if (
-          values.horafin_notificacion.isBefore(values.horainicio_notificacion)
-        ) {
-          message.error(
-            "La hora de fin no puede ser anterior a la hora de inicio"
-          );
+      if (values.fechainicio_notificacion.isSame(values.fechafin_notificacion, "day")) {
+        if (values.horafin_notificacion.isBefore(values.horainicio_notificacion)) {
+          message.error("La hora de fin no puede ser anterior a la hora de inicio");
           setLoading(false);
           return;
         }
@@ -145,16 +134,12 @@ const ModalCrearNotificacion = ({
         nombre_notificacion: values.nombre_notificacion,
         descripcion_notificacion: values.descripcion_notificacion,
         urgencia_notificacion: values.urgencia_notificacion,
-        fechainicio_notificacion:
-          values.fechainicio_notificacion.format("YYYY-MM-DD"),
-        fechafin_notificacion:
-          values.fechafin_notificacion.format("YYYY-MM-DD"),
-        horainicio_notificacion:
-          values.horainicio_notificacion.format("HH:mm:ss"),
+        fechainicio_notificacion: values.fechainicio_notificacion.format("YYYY-MM-DD"),
+        fechafin_notificacion: values.fechafin_notificacion.format("YYYY-MM-DD"),
+        horainicio_notificacion: values.horainicio_notificacion.format("HH:mm:ss"),
         horafin_notificacion: values.horafin_notificacion.format("HH:mm:ss"),
         estado_notificacion: "P", // Pendiente por defecto
       };
-
       await crearNotificacion(notificacionData);
       message.success("Notificación creada exitosamente");
       form.resetFields();
@@ -163,9 +148,7 @@ const ModalCrearNotificacion = ({
       onSuccess();
     } catch (error) {
       console.error("Error al crear notificación:", error);
-      message.error(
-        error?.response?.data?.error || "Error al crear la notificación"
-      );
+      message.error(error?.response?.data?.error || "Error al crear la notificación");
     } finally {
       setLoading(false);
     }
@@ -202,9 +185,7 @@ const ModalCrearNotificacion = ({
     <Modal
       title={
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <PlusCircleOutlined
-            style={{ color: colors.success, fontSize: "24px" }}
-          />
+          <PlusCircleOutlined style={{ color: colors.success, fontSize: "24px" }} />
           <div>
             <Title level={4} style={{ margin: 0, color: colors.text }}>
               Crear Nueva Notificación
@@ -227,7 +208,7 @@ const ModalCrearNotificacion = ({
       }}
     >
       <Form
-        form={form}
+        form={form} // ✅ Aquí pasamos el form
         layout="vertical"
         onFinish={handleSubmit}
         requiredMark={false}

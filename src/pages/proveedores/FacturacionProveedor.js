@@ -15,6 +15,7 @@ import {
   Divider,
   Row,
   Col,
+  Popconfirm,
   Statistic,
   message,
   Tabs,
@@ -47,6 +48,7 @@ import {
   obtenerFacturasProveedor,
   obtenerOrdenesCompra,
   obtenerTodosProveedores,
+  eliminarOrdenCompra,
 } from "../../services/proveedoresService";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
@@ -143,6 +145,17 @@ const FacturacionProveedor = () => {
   //Crear nueva factura
   const handleNewFactura = () => {
     navigate("/nueva-Factura-proveedor");
+  };
+
+  const handleEliminarOrden = async (id) => {
+    try {
+      await eliminarOrdenCompra(id);
+      message.success("Orden eliminada correctamente");
+      fetchOrdenes(); // refresca la lista
+    } catch (error) {
+      console.error("Error eliminando la orden:", error);
+      message.error("No se pudo eliminar la orden");
+    }
   };
 
   // Formatear moneda
@@ -261,8 +274,8 @@ const FacturacionProveedor = () => {
       // Asegurarse de que total_abonado sea un número válido
       const abonado =
         f.total_abonado !== null &&
-        f.total_abonado !== undefined &&
-        !isNaN(f.total_abonado)
+          f.total_abonado !== undefined &&
+          !isNaN(f.total_abonado)
           ? Number(f.total_abonado)
           : 0;
       return sum + abonado;
@@ -602,7 +615,12 @@ const FacturacionProveedor = () => {
               }}
             />
           </Tooltip>
-          <Tooltip title="Eliminar">
+          <Popconfirm
+            title="¿Estás seguro de eliminar esta orden?"
+            onConfirm={() => handleEliminarOrden(record.id_ordencompra)}
+            okText="Sí"
+            cancelText="No"
+          >
             <Button
               type="primary"
               shape="circle"
@@ -610,7 +628,9 @@ const FacturacionProveedor = () => {
               size="small"
               danger
             />
-          </Tooltip>
+          </Popconfirm>
+
+
         </Space>
       ),
     },
@@ -1064,7 +1084,7 @@ const FacturacionProveedor = () => {
                     <Text style={{ color: colors.danger }}>
                       {formatCurrency(
                         detalleSeleccionado.monto_facturaproveedor -
-                          detalleSeleccionado.total_abonado
+                        detalleSeleccionado.total_abonado
                       )}
                     </Text>
                   </Descriptions.Item>
@@ -1072,12 +1092,12 @@ const FacturacionProveedor = () => {
                     <Tag
                       color={
                         detalleSeleccionado.estado_facturaproveedor?.toLowerCase() ===
-                        "pagada"
+                          "pagada"
                           ? colors.success
                           : detalleSeleccionado.estado_facturaproveedor?.toLowerCase() ===
                             "pendiente"
-                          ? colors.danger
-                          : colors.warning
+                            ? colors.danger
+                            : colors.warning
                       }
                       style={{ borderRadius: "12px", padding: "2px 10px" }}
                     >
@@ -1100,11 +1120,10 @@ const FacturacionProveedor = () => {
                           />
                         }
                         title={`Producto ID: ${item.id_producto}`}
-                        description={`Cantidad: ${
-                          item.cantidad
-                        } | Precio unitario: ${formatCurrency(
-                          item.precio_unitario
-                        )}`}
+                        description={`Cantidad: ${item.cantidad
+                          } | Precio unitario: ${formatCurrency(
+                            item.precio_unitario
+                          )}`}
                       />
                       <div>
                         <Text strong>{formatCurrency(item.subtotal)}</Text>

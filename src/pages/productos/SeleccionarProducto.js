@@ -87,7 +87,6 @@ const SeleccionarProducto = ({ show, handleClose, setProducto, idSede }) => {
 
   // Seleccionar un producto
   const handleSelect = (producto) => {
-    console.log("Producto seleccionado:", producto);
     setProducto(producto);
     handleClose();
   };

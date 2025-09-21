@@ -1,7 +1,6 @@
 import axios from "axios";
 
-//const BASE_URL = "https://cimove-backend.onrender.com/api";
-const BASE_URL = "http://localhost:4000/api";
+const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 // Login de usuario
 export async function loginUsuario(identificacion, contrasena) {

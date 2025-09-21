@@ -1,7 +1,6 @@
 import axios from "axios";
 
-//const BASE_URL = "https://cimove-backend.onrender.com/api";
-const BASE_URL = "http://localhost:4000/api";
+const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 // Obtener abonos
 export const getAbonos = async () => {
@@ -179,9 +178,10 @@ export const crearTipoProveedor = async (nombre) => {
   return response.data;
 };
 
-// Desactivar proveedor
 export const desactivarProveedor = async (id) => {
+  console.log("🔴 Llamando a backend para desactivar proveedor con id:", id);
   const response = await axios.put(`${BASE_URL}/proveedores/eliminar/${id}`);
+  console.log("✅ Respuesta del backend:", response.data);
   return response.data;
 };
 
@@ -264,4 +264,13 @@ export const eliminarProveedorDeProducto = async (idProveedor, idProducto) => {
       throw new Error(error.message || "Error al desasociar proveedor del producto");
     }
   }
+};
+
+export const eliminarOrdenCompra = async (id) => {
+  const response = await fetch(`${BASE_URL}/ordenes/eliminar/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!response.ok) throw new Error("Error al eliminar el cliente");
+  return response.json();
 };

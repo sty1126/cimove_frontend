@@ -54,13 +54,11 @@ const colors = {
 // Implementación correcta de eliminarProveedorDeProducto
 const eliminarProveedorDeProducto = async (idProveedor, idProducto) => {
   try {
-    console.log(`Eliminando relación: proveedor=${idProveedor}, producto=${idProducto}`);
     const response = await axios.put(`${BASE_URL}/proveedor-producto/inactivar`, {
       id_proveedor: idProveedor,
       id_producto: idProducto
     });
     
-    console.log("Respuesta de eliminación:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error en eliminarProveedorDeProducto:", error.response || error);
@@ -81,9 +79,6 @@ const EliminarProveedores = () => {
   const [producto, setProducto] = useState(null);
   const [error, setError] = useState(null);
 
-  // Depurar el valor del parámetro
-  console.log("ID de producto desde parámetros:", idProducto);
-
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
@@ -93,14 +88,10 @@ const EliminarProveedores = () => {
           throw new Error("ID de producto no válido o no encontrado");
         }
 
-        console.log("Obteniendo datos del producto:", idProducto);
         const productoData = await obtenerProductoPorId(idProducto);
-        console.log("Datos del producto obtenidos:", productoData);
         setProducto(productoData);
 
-        console.log("Obteniendo proveedores asociados al producto:", idProducto);
         const asociados = await obtenerProveedoresAsociados(idProducto);
-        console.log("Proveedores asociados obtenidos:", asociados);
         setProveedores(asociados);
       } catch (error) {
         console.error("Error al obtener datos:", error);

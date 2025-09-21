@@ -71,8 +71,6 @@ const DetallesProducto = () => {
       obtenerProveedoresPorProducto(productoId),
     ])
       .then(([productoData, proveedoresData]) => {
-        console.log("Datos recibidos en el frontend:", productoData);
-        console.log("Proveedores recibidos:", proveedoresData);
         setProduct(productoData);
         setProveedores(proveedoresData);
       })

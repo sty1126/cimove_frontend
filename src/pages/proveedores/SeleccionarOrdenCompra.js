@@ -120,7 +120,6 @@ export default function OrdenesCompraModal({ proveedorId, visible, onClose, onSe
           <Button
             type="primary"
             onClick={() => {
-              console.log("📤 Orden enviada al padre:", record); // 👈 debug
               message.success(`Orden ${record.numero_orden} seleccionada`);
               onSelect?.(record); // 🔹 Devuelve la orden al padre
             }}

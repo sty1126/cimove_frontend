@@ -73,7 +73,6 @@ const SeleccionarProductoGeneral = ({ show, handleClose, setProducto }) => {
   });
 
   const handleSelect = (producto) => {
-    console.log("Producto seleccionado:", producto);
     setProducto(producto);
     handleClose();
   };

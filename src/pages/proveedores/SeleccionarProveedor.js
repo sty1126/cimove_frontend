@@ -83,7 +83,6 @@ export default function SeleccionarProveedor({
       id_proveedor: proveedor.id_proveedor,
       nombre_proveedor: proveedor.nombre_proveedor || "Sin nombre",
     };
-    console.log("Proveedor seleccionado:", proveedorInfo);
     setProveedor(proveedorInfo);
     handleClose();
   };

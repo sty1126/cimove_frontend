@@ -73,7 +73,6 @@ const DetallesProveedor = () => {
           const dataProductos = await obtenerProductosDeProveedor(id);
           setProductos(dataProductos);
         } catch (error) {
-          console.log("No se pudieron cargar los productos asociados");
           setProductos([]);
         }
       } catch (error) {

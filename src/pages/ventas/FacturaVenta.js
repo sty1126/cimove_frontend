@@ -223,9 +223,6 @@ const FacturaVenta = () => {
             : null,
       };
 
-      console.log("Datos de la venta:", venta);
-      console.log("Sede seleccionada:", cart[0]?.idSede);
-
       const response = await registrarVenta(venta);
 
       if (response.status === 201) {
