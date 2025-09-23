@@ -38,15 +38,18 @@ export const obtenerSedes = async () => {
 
 // Para recuperar la contraseña
 export async function recuperarContrasena(email) {
-  const response = await fetch(`${BASE_URL}/usuario/request-password-reset`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email_usuario: email,
-    }),
-  });
+  const response = await fetch(
+    `https://cimove-backend.onrender.com/usuario/request-password-reset`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email_usuario: email,
+      }),
+    }
+  );
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -59,16 +62,19 @@ export async function recuperarContrasena(email) {
 }
 
 export async function resetearContrasena(token, contrasenaNueva) {
-  const response = await fetch(`${BASE_URL}/usuario/reset-password`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      token,
-      contrasena_nueva: contrasenaNueva,
-    }),
-  });
+  const response = await fetch(
+    `https://cimove-backend.onrender.com/usuario/reset-password`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token,
+        contrasena_nueva: contrasenaNueva,
+      }),
+    }
+  );
 
   if (!response.ok) {
     const errorData = await response.json();
