@@ -111,23 +111,27 @@ const Calendario = () => {
     cargarNotificacionesCompletadas()
   }, [currentDate])
 
-  const getDayNotifications = (day, month, year) => {
-    const dayDate = new Date(year, month, day)
-    const pendingNotifications = notificaciones.filter((notif) => {
-      // Only include non-completed notifications
-      if (notif.estado_notificacion === "C") return false
+const getDayNotifications = (day, month, year) => {
+  const dayDate = new Date(year, month, day);
 
-      const fechaInicio = new Date(notif.fechainicio_notificacion)
-      const fechaFin = new Date(notif.fechafin_notificacion)
-      return dayDate >= fechaInicio && dayDate <= fechaFin
-    })
+  const pendingNotifications = notificaciones.filter((notif) => {
+    // Excluir completadas
+    if (notif.estado_notificacion === "C") return false;
 
-    // Sort by urgency: U (Urgent) first, then N (Normal), then B (Low)
-    return pendingNotifications.sort((a, b) => {
-      const urgencyOrder = { U: 0, N: 1, B: 2 }
-      return urgencyOrder[a.urgencia_notificacion] - urgencyOrder[b.urgencia_notificacion]
-    })
-  }
+    const fechaInicio = new Date(notif.fechainicio_notificacion);
+    const fechaFin = new Date(notif.fechafin_notificacion);
+
+    // Ver si la fecha cae dentro del rango
+    return dayDate >= fechaInicio && dayDate <= fechaFin;
+  });
+
+  // Ordenar por urgencia (U > N > B)
+  return pendingNotifications.sort((a, b) => {
+    const urgencyOrder = { U: 0, N: 1, B: 2 };
+    return urgencyOrder[a.urgencia_notificacion] - urgencyOrder[b.urgencia_notificacion];
+  });
+};
+
 
   // Función para obtener el color del borde del día según la urgencia más alta
   const getDayBorderColor = (dayNotifications) => {

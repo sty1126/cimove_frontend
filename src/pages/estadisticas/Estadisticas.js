@@ -49,8 +49,6 @@ export default function EstadisticasApp() {
   const [fechaFin, setFechaFin] = useState("2025-09-22");
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-
 
   const getTodayDate = () => {
     const today = new Date();
@@ -104,34 +102,30 @@ export default function EstadisticasApp() {
     }, 1000);
   };
 
+
   const generatePDF = async () => {
-    try {
-      const response = await estadisticasService.generatePDF({
-        fechaInicio,
-        fechaFin,
-        seccion: activeTab,
-      });
+  try {
+    const blob = await estadisticasService.generatePDF({
+      fechaInicio,
+      fechaFin,
+      seccion: activeTab,
+    });
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `estadisticas-${activeTab}-${fechaInicio}-${fechaFin}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      // ✅ Mostrar alerta
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000); // se oculta en 3s
-    } catch (error) {
-      console.error("Error generando PDF:", error);
-    }
-  };
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `estadisticas-${activeTab}-${fechaInicio}-${fechaFin}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    setApiError(true);
+  }
+};
 
 
   return (
-
     <div
       style={{
         backgroundColor: colors.background,
@@ -321,11 +315,6 @@ export default function EstadisticasApp() {
           </Card.Body>
         </Card>
       </Container>
-      {showAlert && (
-        <Alert variant="success" onClose={() => setShowAlert(false)} dismissible>
-          📄 El reporte se esta descargado.
-        </Alert>
-      )}
     </div>
   );
 }
