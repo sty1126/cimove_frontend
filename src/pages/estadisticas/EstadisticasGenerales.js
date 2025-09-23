@@ -14,6 +14,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { estadisticasService } from "../../services/estadisticasService";
+
 
 ChartJS.register(
   CategoryScale,
@@ -57,30 +59,31 @@ export default function EstadisticasGeneral({
     return `${year}-${month}-${day}`;
   };
 
-  const fetchData = async () => {
-    setLoadingData(true);
-    try {
-      const formattedFechaInicio = formatDateForAPI(fechaInicio);
-      const formattedFechaFin = formatDateForAPI(fechaFin);
+  
+const fetchData = async () => {
+  setLoadingData(true);
+  try {
+    const formattedFechaInicio = formatDateForAPI(fechaInicio);
+    const formattedFechaFin = formatDateForAPI(fechaFin);
 
-      const rentabilidadResponse = await fetch(
-        `https://cimove-backend.onrender.com/api/estadisticas/generales/rentabilidad?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
-      );
-      const rentabilidadData = await rentabilidadResponse.json();
+    const rentabilidadData = await estadisticasService.getRentabilidad(
+      formattedFechaInicio,
+      formattedFechaFin
+    );
 
-      const evolucionResponse = await fetch(
-        `https://cimove-backend.onrender.com/api/estadisticas/generales/rentabilidad-evolucion?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
-      );
-      const evolucionData = await evolucionResponse.json();
+    const evolucionData = await estadisticasService.getRentabilidadEvolucion(
+      formattedFechaInicio,
+      formattedFechaFin
+    );
 
-      setRentabilidad(rentabilidadData);
-      setEvolucion(evolucionData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoadingData(false);
-    }
-  };
+    setRentabilidad(rentabilidadData);
+    setEvolucion(evolucionData);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  } finally {
+    setLoadingData(false);
+  }
+};
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("es-CO", {

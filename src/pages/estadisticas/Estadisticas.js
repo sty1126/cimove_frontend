@@ -25,6 +25,7 @@ import EstadisticasIngresos from "./EstadisticasIngresos";
 import EstadisticasEgresos from "./EstadisticasEgresos";
 import EstadisticasProductos from "./EstadisticasProductos";
 import EstadisticasClientes from "./EstadisticasClientes";
+import { estadisticasService } from "../../services/estadisticasService";
 
 // Paleta de colores personalizada
 const colors = {
@@ -44,13 +45,12 @@ const colors = {
 
 export default function EstadisticasApp() {
   const [activeTab, setActiveTab] = useState("general");
-  const [fechaInicio, setFechaInicio] = useState("2025-08-17");
-  const [fechaFin, setFechaFin] = useState("2025-08-31");
+  const [fechaInicio, setFechaInicio] = useState("2025-08-22");
+  const [fechaFin, setFechaFin] = useState("2025-09-22");
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
-  const API_BASE = "https://cimove-backend.onrender.com/api/estadisticas";
-  const API_BASE2 = "https://cimove-backend.onrender.com/api";
 
   const getTodayDate = () => {
     const today = new Date();
@@ -106,38 +106,32 @@ export default function EstadisticasApp() {
 
   const generatePDF = async () => {
     try {
-      const response = await fetch(`${API_BASE2}/api/reportes/pdf`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fechaInicio,
-          fechaFin,
-          seccion: activeTab, // si tu backend lo usa
-        }),
+      const response = await estadisticasService.generatePDF({
+        fechaInicio,
+        fechaFin,
+        seccion: activeTab,
       });
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `estadisticas-${activeTab}-${fechaInicio}-${fechaFin}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        const text = await response.text();
-        console.error("Error en la respuesta del servidor:", text);
-      }
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `estadisticas-${activeTab}-${fechaInicio}-${fechaFin}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      // ✅ Mostrar alerta
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000); // se oculta en 3s
     } catch (error) {
       console.error("Error generando PDF:", error);
     }
   };
 
+
   return (
+
     <div
       style={{
         backgroundColor: colors.background,
@@ -149,9 +143,7 @@ export default function EstadisticasApp() {
         {apiError && (
           <Alert variant="info" className="mb-4">
             <AlertCircle size={16} className="me-2" />
-            No se pudo conectar con la API en {API_BASE}. Mostrando datos de
-            ejemplo. Para conectar con tu API real, asegúrate de que esté
-            corriendo en el puerto 4000.
+            No se pudo conectar con la API
           </Alert>
         )}
 
@@ -329,6 +321,11 @@ export default function EstadisticasApp() {
           </Card.Body>
         </Card>
       </Container>
+      {showAlert && (
+        <Alert variant="success" onClose={() => setShowAlert(false)} dismissible>
+          📄 El reporte se esta descargado.
+        </Alert>
+      )}
     </div>
   );
 }

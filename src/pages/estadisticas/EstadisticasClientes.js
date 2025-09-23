@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { Card, Row, Col, Spinner, Table, Badge } from "react-bootstrap";
 import { Line, Bar, Doughnut } from "react-chartjs-2";
@@ -15,6 +13,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { estadisticasService } from "../../services/estadisticasService";
 
 ChartJS.register(
   CategoryScale,
@@ -28,23 +27,13 @@ ChartJS.register(
   Legend
 );
 
-const colors = {
-  primary: "#0D7F93",
-  secondary: "#4D8A52",
-  accent: "#7FBAD6",
-  warning: "#E0A458",
-  danger: "#C25F48",
-};
-
-export default function EstadisticasClientes({
-  fechaInicio,
-  fechaFin,
-  loading,
-}) {
+export default function EstadisticasClientes({ fechaInicio, fechaFin, loading }) {
   const [clientesActivos, setClientesActivos] = useState([]);
   const [mejoresClientes, setMejoresClientes] = useState([]);
   const [clientesPorSede, setClientesPorSede] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
+  const colors = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
 
   useEffect(() => {
     fetchData();
@@ -65,20 +54,17 @@ export default function EstadisticasClientes({
       const formattedFechaInicio = formatDateForAPI(fechaInicio);
       const formattedFechaFin = formatDateForAPI(fechaFin);
 
-      const clientesActivosResponse = await fetch(
-        `https://cimove-backend.onrender.com/api/estadisticas/clientes/clientes-activos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
+      const clientesActivosData = await estadisticasService.getClientesActivos(
+        formattedFechaInicio,
+        formattedFechaFin
       );
-      const clientesActivosData = await clientesActivosResponse.json();
-
-      const mejoresClientesResponse = await fetch(
-        `https://cimove-backend.onrender.com/api/estadisticas/clientes/mejores-clientes?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&limite=10`
+      const mejoresClientesData = await estadisticasService.getMejoresClientes(
+        formattedFechaInicio,
+        formattedFechaFin,
+        10
       );
-      const mejoresClientesData = await mejoresClientesResponse.json();
-
-      const clientesPorSedeResponse = await fetch(
-        `https://cimove-backend.onrender.com/api/estadisticas/clientes/clientes-por-sede`
-      );
-      const clientesPorSedeData = await clientesPorSedeResponse.json();
+      const clientesPorSedeData =
+        await estadisticasService.getClientesPorSede();
 
       setClientesActivos(clientesActivosData);
       setMejoresClientes(mejoresClientesData);
@@ -89,7 +75,7 @@ export default function EstadisticasClientes({
       setLoadingData(false);
     }
   };
-
+  
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",

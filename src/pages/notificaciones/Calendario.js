@@ -364,7 +364,9 @@ const Calendario = () => {
   }
 
   // Obtener notificaciones del día seleccionado
-  const selectedDayNotifications = selectedDay ? getDayNotifications(selectedDay, month, year) : []
+  const selectedDayNotifications = selectedDay
+    ? getDayNotifications(selectedDay, month, year)
+    : notificaciones // 👈 ahora muestra todas si no hay día elegido
 
   return (
     <div
@@ -552,7 +554,15 @@ const Calendario = () => {
                   justifyContent: "center",
                   borderRadius: "6px",
                   cursor: dayInfo.isCurrentMonth ? "pointer" : "default",
-                  backgroundColor: isSelected ? colors.primary : isToday ? `${colors.accent}40` : "transparent",
+                  backgroundColor: isSelected ? colors.primary :
+                    isToday ? `${colors.accent}40` : "transparent",
+                  border: isSelected
+                    ? `3px solid ${colors.secondary}` // 👈 cambia al verde secundario
+                    : isToday && !isSelected
+                      ? `2px solid ${colors.accent}`
+                      : dayNotifications.length > 0
+                        ? `2px solid ${borderColor}`
+                        : "2px solid transparent",
                   color: isSelected ? colors.white : dayInfo.isCurrentMonth ? colors.text : colors.mediumGray,
                   fontWeight: isToday || isSelected ? "600" : "400",
                   fontSize: window.innerWidth <= 768 ? "14px" : "16px",
@@ -570,14 +580,14 @@ const Calendario = () => {
                 }}
                 onMouseEnter={(e) => {
                   if (dayInfo.isCurrentMonth && !isSelected) {
-                    e.target.style.backgroundColor = `${colors.light}60`
+                    e.currentTarget.style.backgroundColor = `${colors.light}60`
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (dayInfo.isCurrentMonth && !isSelected && !isToday) {
-                    e.target.style.backgroundColor = "transparent"
+                    e.currentTarget.style.backgroundColor = "transparent"
                   } else if (isToday && !isSelected) {
-                    e.target.style.backgroundColor = `${colors.accent}40`
+                    e.currentTarget.style.backgroundColor = `${colors.accent}40`
                   }
                 }}
               >

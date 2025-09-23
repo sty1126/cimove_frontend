@@ -15,6 +15,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { estadisticasService } from "../../services/estadisticasService";
 
 ChartJS.register(
   CategoryScale,
@@ -59,48 +60,34 @@ export default function EstadisticasIngresos({
     const day = String(d.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
+const fetchData = async () => {
+  setLoadingData(true);
+  try {
+    const formattedFechaInicio = formatDateForAPI(fechaInicio);
+    const formattedFechaFin = formatDateForAPI(fechaFin);
 
-  const fetchData = async () => {
-    setLoadingData(true);
-    try {
-      const formattedFechaInicio = formatDateForAPI(fechaInicio);
-      const formattedFechaFin = formatDateForAPI(fechaFin);
+    const [
+      ventasDiaData,
+      ingresosPeriodoData,
+      ingresosCategoriaData,
+      ingresosMetodoPagoData,
+    ] = await Promise.all([
+      estadisticasService.getVentasDiaSemana(formattedFechaInicio, formattedFechaFin),
+      estadisticasService.getIngresosPeriodo(formattedFechaInicio, formattedFechaFin),
+      estadisticasService.getIngresosCategoria(formattedFechaInicio, formattedFechaFin, 10),
+      estadisticasService.getIngresosMetodoPago(formattedFechaInicio, formattedFechaFin),
+    ]);
 
-      const [
-        ventasDiaResponse,
-        ingresosPeriodoResponse,
-        categoriaResponse,
-        metodoPagoResponse,
-      ] = await Promise.all([
-        fetch(
-          `https://cimove-backend.onrender.com/api/estadisticas/ingresos/ventas-dia-semana?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
-        ),
-        fetch(
-          `https://cimove-backend.onrender.com/api/estadisticas/ingresos/ingresos-periodo?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
-        ),
-        fetch(
-          `https://cimove-backend.onrender.com/api/estadisticas/ingresos/ingresos-categoria?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&limite=10`
-        ),
-        fetch(
-          `https://cimove-backend.onrender.com/api/estadisticas/ingresos/ingresos-metodo-pago?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
-        ),
-      ]);
-
-      const ventasDiaData = await ventasDiaResponse.json();
-      const ingresosPeriodoData = await ingresosPeriodoResponse.json();
-      const ingresosCategoriaData = await categoriaResponse.json();
-      const ingresosMetodoPagoData = await metodoPagoResponse.json();
-
-      setVentasDiaSemana(ventasDiaData);
-      setIngresosPeriodo(ingresosPeriodoData);
-      setIngresosCategoria(ingresosCategoriaData);
-      setIngresosMetodoPago(ingresosMetodoPagoData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoadingData(false);
-    }
-  };
+    setVentasDiaSemana(ventasDiaData);
+    setIngresosPeriodo(ingresosPeriodoData);
+    setIngresosCategoria(ingresosCategoriaData);
+    setIngresosMetodoPago(ingresosMetodoPagoData);
+  } catch (error) {
+    console.error("Error cargando estadísticas de ingresos:", error);
+  } finally {
+    setLoadingData(false);
+  }
+};
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("es-CO", {

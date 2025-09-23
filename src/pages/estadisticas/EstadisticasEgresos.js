@@ -14,6 +14,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { estadisticasService } from "../../services/estadisticasService";
+
 
 ChartJS.register(
   CategoryScale,
@@ -56,21 +58,21 @@ export default function EstadisticasEgresos({
     return `${year}-${month}-${day}`;
   };
 
-  const fetchData = async () => {
+const fetchData = async () => {
     setLoadingData(true);
     try {
       const formattedFechaInicio = formatDateForAPI(fechaInicio);
       const formattedFechaFin = formatDateForAPI(fechaFin);
 
-      const egresosResponse = await fetch(
-        `https://cimove-backend.onrender.com/api/estadisticas/egresos/egresos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}`
+      const egresosData = await estadisticasService.getEgresos(
+        formattedFechaInicio,
+        formattedFechaFin
       );
-      const egresosData = await egresosResponse.json();
-
-      const principalesEgresosResponse = await fetch(
-        `https://cimove-backend.onrender.com/api/estadisticas/egresos/principales-egresos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&limite=10`
+      const principalesEgresosData = await estadisticasService.getPrincipalesEgresos(
+        formattedFechaInicio,
+        formattedFechaFin,
+        10
       );
-      const principalesEgresosData = await principalesEgresosResponse.json();
 
       setEgresos(egresosData);
       setPrincipalesEgresos(principalesEgresosData);

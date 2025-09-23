@@ -14,6 +14,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { estadisticasService } from "../../services/estadisticasService";
 
 ChartJS.register(
   CategoryScale,
@@ -57,30 +58,26 @@ export default function EstadisticasProductos({
     return `${year}-${month}-${day}`;
   };
 
-  const fetchData = async () => {
-    setLoadingData(true);
-    try {
-      const formattedFechaInicio = formatDateForAPI(fechaInicio);
-      const formattedFechaFin = formatDateForAPI(fechaFin);
+const fetchData = async () => {
+  setLoadingData(true);
+  try {
+    const formattedFechaInicio = formatDateForAPI(fechaInicio);
+    const formattedFechaFin = formatDateForAPI(fechaFin);
 
-      const masVendidosResponse = await fetch(
-        `https://cimove-backend.onrender.com/api/estadisticas/productos/mas-vendidos?fechaInicio=${formattedFechaInicio}&fechaFin=${formattedFechaFin}&ordenarPor=unidades&limite=10`
-      );
-      const masVendidosData = await masVendidosResponse.json();
+    const [masVendidosData, bajoStockData] = await Promise.all([
+      estadisticasService.getProductosMasVendidos(formattedFechaInicio, formattedFechaFin, "unidades", 10),
+      estadisticasService.getProductosBajoStock(20),
+    ]);
 
-      const bajoStockResponse = await fetch(
-        `https://cimove-backend.onrender.com/api/estadisticas/productos/bajo-stock?limite=20`
-      );
-      const bajoStockData = await bajoStockResponse.json();
+    setMasVendidos(masVendidosData);
+    setBajoStock(bajoStockData);
+  } catch (error) {
+    console.error("Error cargando estadísticas de productos:", error);
+  } finally {
+    setLoadingData(false);
+  }
+};
 
-      setMasVendidos(masVendidosData);
-      setBajoStock(bajoStockData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoadingData(false);
-    }
-  };
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("es-CO", {
