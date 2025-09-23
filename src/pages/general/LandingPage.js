@@ -514,7 +514,7 @@ const LandingPage = () => {
           </p>
           <div className="d-flex justify-content-center gap-3 mb-4">
             <a
-              href="https://www.instagram.com/tuusuario"
+              href="https://www.instagram.com/accesorioskper"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: "white", fontSize: "1.5rem" }}
@@ -522,7 +522,7 @@ const LandingPage = () => {
               <FaInstagram />
             </a>
             <a
-              href="https://www.facebook.com/tuusuario"
+              href="https://www.facebook.com/Kpershop"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: "white", fontSize: "1.5rem" }}

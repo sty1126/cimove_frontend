@@ -15,7 +15,7 @@ import {
   Space,
   Tabs,
   message,
-  Alert
+  Alert,
 } from "antd";
 import {
   UserOutlined,
@@ -28,7 +28,7 @@ import {
   DollarOutlined,
   TeamOutlined,
   HomeOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 
@@ -62,13 +62,17 @@ function MiPerfil() {
         const idEmpleado = localStorage.getItem("idEmpleado");
 
         if (!idEmpleado) {
-          setError("No se ha encontrado información del usuario. Por favor, inicie sesión nuevamente.");
+          setError(
+            "No se ha encontrado información del usuario. Por favor, inicie sesión nuevamente."
+          );
           setLoading(false);
           return;
         }
 
         setLoading(true);
-        const response = await axios.get(`https://cimove-backend.onrender.com/api/empleados/${idEmpleado}`);
+        const response = await axios.get(
+          `https://cimove-backend.onrender.com/api/empleados/${idEmpleado}`
+        );
         setEmpleado(response.data);
       } catch (error) {
         console.error("Error al cargar datos del empleado:", error);
@@ -100,13 +104,15 @@ function MiPerfil() {
   // Componente de carga mientras se obtienen los datos
   if (loading) {
     return (
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        backgroundColor: colors.background
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          backgroundColor: colors.background,
+        }}
+      >
         <Spin size="large" />
       </div>
     );
@@ -115,14 +121,16 @@ function MiPerfil() {
   // Mostrar error si ocurrió uno
   if (error) {
     return (
-      <div style={{
-        padding: "24px",
-        backgroundColor: colors.background,
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center"
-      }}>
+      <div
+        style={{
+          padding: "24px",
+          backgroundColor: colors.background,
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <Alert
           message="Error"
           description={error}
@@ -130,11 +138,7 @@ function MiPerfil() {
           showIcon
           icon={<ExclamationCircleOutlined />}
           action={
-            <Button
-              type="primary"
-              onClick={() => navigate("/login")}
-              danger
-            >
+            <Button type="primary" onClick={() => navigate("/login")} danger>
               Volver al inicio de sesión
             </Button>
           }
@@ -146,11 +150,13 @@ function MiPerfil() {
   // Si no hay empleado después de cargar
   if (!empleado) {
     return (
-      <div style={{
-        padding: "24px",
-        backgroundColor: colors.background,
-        minHeight: "100vh"
-      }}>
+      <div
+        style={{
+          padding: "24px",
+          backgroundColor: colors.background,
+          minHeight: "100vh",
+        }}
+      >
         <Alert
           message="No se encontraron datos"
           description="No se pudo encontrar información del perfil"
@@ -162,11 +168,13 @@ function MiPerfil() {
   }
 
   return (
-    <div style={{
-      padding: "24px",
-      backgroundColor: colors.background,
-      minHeight: "100vh"
-    }}>
+    <div
+      style={{
+        padding: "24px",
+        backgroundColor: colors.background,
+        minHeight: "100vh",
+      }}
+    >
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         <Card
           bordered={false}
@@ -174,16 +182,18 @@ function MiPerfil() {
             marginBottom: "24px",
             borderRadius: "8px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-            overflow: "hidden"
+            overflow: "hidden",
           }}
         >
           {/* Encabezado del perfil */}
-          <div style={{
-            backgroundColor: colors.primary,
-            margin: "-24px -24px 0",
-            padding: "40px 24px 100px",
-            position: "relative"
-          }}>
+          <div
+            style={{
+              backgroundColor: colors.primary,
+              margin: "-24px -24px 0",
+              padding: "40px 24px 100px",
+              position: "relative",
+            }}
+          >
             <Title level={2} style={{ color: "white", margin: 0 }}>
               Mi Perfil
             </Title>
@@ -197,7 +207,7 @@ function MiPerfil() {
             style={{
               marginTop: "-80px",
               borderRadius: "8px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
             }}
           >
             <Row gutter={[24, 24]} align="middle">
@@ -207,7 +217,7 @@ function MiPerfil() {
                   style={{
                     backgroundColor: colors.secondary,
                     fontSize: "48px",
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
                   }}
                 >
                   {getInitials(empleado.nombre_empleado)}
@@ -237,32 +247,74 @@ function MiPerfil() {
                       column={2}
                       size="small"
                       labelStyle={{ width: "160px", whiteSpace: "nowrap" }}
-                      contentStyle={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                      contentStyle={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
                     >
-                      <Descriptions.Item label={<><IdcardOutlined /> ID</>}>
+                      <Descriptions.Item
+                        label={
+                          <>
+                            <IdcardOutlined /> ID
+                          </>
+                        }
+                      >
                         {empleado.id_empleado}
                       </Descriptions.Item>
-                      <Descriptions.Item label={<><PhoneOutlined /> Teléfono</>}>
+                      <Descriptions.Item
+                        label={
+                          <>
+                            <PhoneOutlined /> Teléfono
+                          </>
+                        }
+                      >
                         {empleado.telefono_empleado}
                       </Descriptions.Item>
-                      <Descriptions.Item label={<><MailOutlined /> Email</>}>
+                      <Descriptions.Item
+                        label={
+                          <>
+                            <MailOutlined /> Email
+                          </>
+                        }
+                      >
                         {empleado.email_empleado}
                       </Descriptions.Item>
-                      <Descriptions.Item label={<><HomeOutlined /> Sede</>}>
+                      <Descriptions.Item
+                        label={
+                          <>
+                            <HomeOutlined /> Sede
+                          </>
+                        }
+                      >
                         {empleado.nombre_sede}
                       </Descriptions.Item>
-                      <Descriptions.Item label={<><TeamOutlined /> Tipo de usuario</>}>
+                      <Descriptions.Item
+                        label={
+                          <>
+                            <TeamOutlined /> Tipo de usuario
+                          </>
+                        }
+                      >
                         {empleado.descripcion_tipousuario}
                       </Descriptions.Item>
                       <Descriptions.Item
-                        label={<><DollarOutlined /> Salario</>}
-                        contentStyle={{ whiteSpace: "normal", wordBreak: "break-word" }}
+                        label={
+                          <>
+                            <DollarOutlined /> Salario
+                          </>
+                        }
+                        contentStyle={{
+                          whiteSpace: "normal",
+                          wordBreak: "break-word",
+                        }}
                       >
-                        {empleado.monto_salario ?
-                          `$${empleado.monto_salario.toLocaleString()} - ${empleado.tipopago_salario}` :
-                          "No disponible"}
+                        {empleado.monto_salario
+                          ? `$${empleado.monto_salario.toLocaleString()} - ${
+                              empleado.tipopago_salario
+                            }`
+                          : "No disponible"}
                       </Descriptions.Item>
-
                     </Descriptions>
 
                     <div style={{ marginTop: "24px", textAlign: "right" }}>
@@ -283,14 +335,15 @@ function MiPerfil() {
                         message="Nota"
                         description={
                           <>
-                            Para recuperar tu contraseña, haz clic en <b>Olvidé mi contraseña</b> desde la pantalla de inicio de sesión e ingresa tu correo.
+                            Para recuperar tu contraseña, haz clic en{" "}
+                            <b>Olvidé mi contraseña</b> desde la pantalla de
+                            inicio de sesión e ingresa tu correo.
                           </>
                         }
                         type="info"
                         showIcon
                       />
                     </div>
-
                   </TabPane>
 
                   <TabPane
@@ -302,16 +355,42 @@ function MiPerfil() {
                     key="acceso"
                   >
                     <Descriptions bordered column={1} size="small">
-                      <Descriptions.Item label={<><MailOutlined /> Email de usuario</>}>
+                      <Descriptions.Item
+                        label={
+                          <>
+                            <MailOutlined /> Email de usuario
+                          </>
+                        }
+                      >
                         {empleado.email_usuario}
                       </Descriptions.Item>
-                      <Descriptions.Item label={<><PhoneOutlined /> Teléfono de usuario</>}>
+                      <Descriptions.Item
+                        label={
+                          <>
+                            <PhoneOutlined /> Teléfono de usuario
+                          </>
+                        }
+                      >
                         {empleado.telefono_usuario}
                       </Descriptions.Item>
-                      <Descriptions.Item label={<><TeamOutlined /> Tipo de acceso</>}>
-                        <Tag color={colors.success}>{empleado.descripcion_tipousuario}</Tag>
+                      <Descriptions.Item
+                        label={
+                          <>
+                            <TeamOutlined /> Tipo de acceso
+                          </>
+                        }
+                      >
+                        <Tag color={colors.success}>
+                          {empleado.descripcion_tipousuario}
+                        </Tag>
                       </Descriptions.Item>
-                      <Descriptions.Item label={<><SafetyCertificateOutlined /> Estado</>}>
+                      <Descriptions.Item
+                        label={
+                          <>
+                            <SafetyCertificateOutlined /> Estado
+                          </>
+                        }
+                      >
                         {empleado.estado_usuario === "A" ? (
                           <Tag color="green">Activo</Tag>
                         ) : (
